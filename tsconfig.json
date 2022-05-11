@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "allowJs": true,
+    "checkJs": false,
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationDir": "dist",
+    "sourceMap": true,
+    "removeComments": false,
+    "noUncheckedIndexedAccess": true,
+    "lib": ["esnext"]
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+}

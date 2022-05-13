@@ -1,4 +1,5 @@
 import * as trpc from '@trpc/server';
+import { Subscription } from '@trpc/server';
 import openAPISchemaValidator from 'openapi-schema-validator';
 import { z } from 'zod';
 
@@ -207,6 +208,26 @@ describe('generator', () => {
         baseUrl: 'http://localhost:3000/api',
       });
     }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
+  });
+
+  test('unsupported subscription', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().subscription('currentName', {
+      meta: { openapi: { enabled: true, path: '/current-name', method: 'PATCH' } },
+      input: z.object({ name: z.string() }),
+      resolve: ({ input }) =>
+        new Subscription((emit) => {
+          emit.data(input.name);
+          return () => undefined;
+        }),
+    });
+
+    expect(() => {
+      generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+    }).toThrowError('[subscription.currentName] - Subscriptions are not supported by OpenAPI v3');
   });
 
   test('with valid procedures', () => {

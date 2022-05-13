@@ -8,7 +8,7 @@ export const getOpenApiPathsObject = (
   appRouter: OpenApiRouter,
   pathsObject: OpenAPIV3.PathsObject,
 ): OpenAPIV3.PathsObject => {
-  const { queries, mutations } = appRouter._def;
+  const { queries, mutations, subscriptions } = appRouter._def;
 
   for (const queryPath of Object.keys(queries)) {
     try {
@@ -80,6 +80,21 @@ export const getOpenApiPathsObject = (
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       error.message = `[mutation.${mutationPath}] - ${error.message}`;
+      throw error;
+    }
+  }
+
+  for (const subscriptionPath of Object.keys(subscriptions)) {
+    try {
+      const subscription = subscriptions[subscriptionPath]!;
+      const { openapi } = subscription.meta || {};
+      if (!openapi?.enabled) {
+        continue;
+      }
+      throw new Error('Subscriptions are not supported by OpenAPI v3');
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      error.message = `[subscription.${subscriptionPath}] - ${error.message}`;
       throw error;
     }
   }

@@ -1,4 +1,4 @@
-import { createOpenApiHttpHandler } from './adapter';
+import { CreateOpenApiHttpHandlerOptions, createOpenApiHttpHandler } from './adapter';
 import {
   GenerateOpenApiDocumentOptions,
   generateOpenApiDocument,
@@ -18,6 +18,7 @@ export {
   generateOpenApiDocument,
   GenerateOpenApiDocumentOptions,
   createOpenApiHttpHandler,
+  CreateOpenApiHttpHandlerOptions,
   OpenApiRouter,
   OpenApiMeta,
   OpenApiMethod,

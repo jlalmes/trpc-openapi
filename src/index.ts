@@ -1,12 +1,27 @@
-import { createOpenAPIHTTPHandler } from './adapter';
-import { GenerateOpenAPISchemaOptions, generateOpenAPISchema, openAPIVersion } from './generator';
-import { OpenAPIMeta, OpenAPIRouter } from './types';
+import { createOpenApiHttpHandler } from './adapter';
+import {
+  GenerateOpenApiDocumentOptions,
+  generateOpenApiDocument,
+  openApiVersion,
+} from './generator';
+import {
+  OpenApiErrorResponse,
+  OpenApiMeta,
+  OpenApiMethod,
+  OpenApiResponse,
+  OpenApiRouter,
+  OpenApiSuccessResponse,
+} from './types';
 
 export {
-  openAPIVersion,
-  generateOpenAPISchema,
-  GenerateOpenAPISchemaOptions,
-  createOpenAPIHTTPHandler,
-  OpenAPIMeta,
-  OpenAPIRouter,
+  openApiVersion,
+  generateOpenApiDocument,
+  GenerateOpenApiDocumentOptions,
+  createOpenApiHttpHandler,
+  OpenApiRouter,
+  OpenApiMeta,
+  OpenApiMethod,
+  OpenApiResponse,
+  OpenApiSuccessResponse,
+  OpenApiErrorResponse,
 };

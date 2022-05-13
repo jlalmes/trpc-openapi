@@ -1,38 +1,40 @@
 import { ProcedureRecord } from '@trpc/server';
-// TODO: Import from @trpc/server after migrating to v10
 // eslint-disable-next-line import/no-unresolved
-import { Router } from '@trpc/server/dist/declarations/src/router';
+import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
 
-export type OpenAPIMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
-export type OpenAPIMeta<TMeta extends Record<string, any> = Record<string, any>> = TMeta & {
+export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
   openapi?: {
     enabled: boolean;
-    method?: OpenAPIMethod;
-    tags?: string[];
+    path: `/${string}`;
+    method: OpenApiMethod;
     description?: string;
-    isProtected?: boolean;
+    tags?: string[];
+    secure?: boolean;
   };
 };
 
-export type OpenAPIProcedureRecord = ProcedureRecord<
-  any,
-  any,
-  OpenAPIMeta | undefined,
-  any,
-  any,
-  any,
-  any
+export type OpenApiRouter<TContext = any, TMeta = Record<string, any>> = Router<
+  TContext,
+  TContext,
+  OpenApiMeta<TMeta>,
+  ProcedureRecord<any, any, OpenApiMeta<TMeta> | undefined>,
+  ProcedureRecord<any, any, OpenApiMeta<TMeta> | undefined>,
+  ProcedureRecord<any, any, TMeta | undefined>,
+  DefaultErrorShape
 >;
 
-export type OpenAPIProcedure = OpenAPIProcedureRecord[string];
+export type OpenApiSuccessResponse<D = any> = {
+  ok: true;
+  data: D;
+};
 
-export type OpenAPIRouter = Router<
-  any,
-  any,
-  OpenAPIMeta,
-  OpenAPIProcedureRecord,
-  OpenAPIProcedureRecord,
-  any,
-  any
->;
+export type OpenApiErrorResponse = {
+  ok: false;
+  error: {
+    message: string;
+  };
+};
+
+export type OpenApiResponse<D = any> = OpenApiSuccessResponse<D> | OpenApiErrorResponse;

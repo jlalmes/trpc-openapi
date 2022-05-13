@@ -1,19 +1,20 @@
 import * as trpc from '@trpc/server';
-import OpenAPISchemaValidator from 'openapi-schema-validator';
+import openAPISchemaValidator from 'openapi-schema-validator';
 import { z } from 'zod';
 
-import { generateOpenAPISchema, openAPIVersion } from '../src/generator';
-import type { OpenAPIMeta } from '../src/types';
+import { OpenApiMeta, generateOpenApiDocument, openApiVersion } from '../src';
 
-const openAPISchemaValidator = new OpenAPISchemaValidator({
-  version: openAPIVersion,
-});
+const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion });
 
-describe('OpenAPI schema generator', () => {
+describe('generator', () => {
+  test('open api version', () => {
+    expect(openApiVersion).toBe('3.0.3');
+  });
+
   test('empty router', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>();
+    const appRouter = trpc.router<any, OpenApiMeta>();
 
-    const openAPISchema = generateOpenAPISchema(appRouter, {
+    const openApiDocument = generateOpenApiDocument(appRouter, {
       title: 'tRPC OpenAPI',
       version: '1.0.0',
       description: 'This is the OpenAPI v3 documentation for the tRPC API',
@@ -21,8 +22,8 @@ describe('OpenAPI schema generator', () => {
       docsUrl: 'http://localhost:3000/docs',
     });
 
-    expect(openAPISchemaValidator.validate(openAPISchema).errors).toEqual([]);
-    expect(openAPISchema).toMatchInlineSnapshot(`
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument).toMatchInlineSnapshot(`
       Object {
         "components": Object {
           "securitySchemes": Object {
@@ -51,250 +52,199 @@ describe('OpenAPI schema generator', () => {
     `);
   });
 
-  test('procedure with missing input', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().query('noInput', {
-      meta: { openapi: { enabled: true } },
+  test('query with missing input', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('noInput', {
+      meta: { openapi: { enabled: true, path: '/no-input', method: 'GET' } },
       output: z.object({ name: z.string() }),
       resolve: () => ({ name: 'jlalmes' }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[queries.noInput] - Input parser is required and must be instance of ZodType');
+    }).toThrowError('[query.noInput] - Input parser expects ZodObject or ZodVoid');
   });
 
-  test('procedure with missing input', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().mutation('noInput', {
-      meta: { openapi: { enabled: true } },
+  test('mutation with missing input', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('noInput', {
+      meta: { openapi: { enabled: true, path: '/no-input', method: 'POST' } },
       output: z.object({ name: z.string() }),
       resolve: () => ({ name: 'jlalmes' }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError(
-      '[mutations.noInput] - Input parser is required and must be instance of ZodType',
-    );
+    }).toThrowError('[mutation.noInput] - Input parser expects ZodSchema');
   });
 
   test('query procedure with missing output', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().query('noOutput', {
-      meta: { openapi: { enabled: true } },
+    const appRouter = trpc.router<any, OpenApiMeta>().query('noOutput', {
+      meta: { openapi: { enabled: true, path: '/no-output', method: 'GET' } },
       input: z.object({ name: z.string() }),
       resolve: ({ input }) => ({ name: input.name }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError(
-      '[queries.noOutput] - Output parser is required and must be instance of ZodType',
-    );
+    }).toThrowError('[query.noOutput] - Output parser expects ZodSchema');
   });
 
   test('mutation procedure with missing output', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().mutation('noOutput', {
-      meta: { openapi: { enabled: true } },
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('noOutput', {
+      meta: { openapi: { enabled: true, path: '/no-output', method: 'POST' } },
       input: z.object({ name: z.string() }),
       resolve: ({ input }) => ({ name: input.name }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError(
-      '[mutations.noOutput] - Output parser is required and must be instance of ZodType',
-    );
+    }).toThrowError('[mutation.noOutput] - Output parser expects ZodSchema');
   });
 
   test('query procedure with non-object input', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().query('stringInput', {
-      meta: { openapi: { enabled: true } },
+    const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
+      meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
       input: z.string(),
       output: z.object({ name: z.string() }),
       resolve: () => ({ name: 'jlalmes' }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[queries.stringInput] - Query input parser must be instance of ZodObject');
+    }).toThrowError('[query.badInput] - Input parser expects ZodObject or ZodVoid');
   });
 
   test('query procedure with non-string-value-object input', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().query('objectNumberInput', {
-      meta: { openapi: { enabled: true } },
+    const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
+      meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
       input: z.object({ age: z.number() }),
       output: z.object({ age: z.number() }),
       resolve: ({ input }) => ({ age: input.age }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError(
-      '[queries.objectNumberInput] - Query input parser object values must be instance of ZodString',
-    );
+    }).toThrowError('[query.badInput] - Input parser expects ZodObject<{ [string]: ZodString }>');
   });
 
   test('query procedure with bad method', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().query('postQuery', {
-      meta: {
-        openapi: {
-          enabled: true,
-          method: 'POST',
-        },
-      },
+    const appRouter = trpc.router<any, OpenApiMeta>().query('postQuery', {
+      meta: { openapi: { enabled: true, path: '/post-query', method: 'POST' } },
       input: z.object({ name: z.string() }),
       output: z.object({ name: z.string() }),
       resolve: ({ input }) => ({ name: input.name }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[queries.postQuery] - Query procedures can only use GET or DELETE methods');
+    }).toThrowError('[query.postQuery] - Query method must be GET or DELETE');
   });
 
   test('mutation procedure with bad method', () => {
-    const appRouter = trpc.router<any, OpenAPIMeta>().mutation('deleteMutation', {
-      meta: {
-        openapi: {
-          enabled: true,
-          method: 'DELETE',
-        },
-      },
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('getMutation', {
+      meta: { openapi: { enabled: true, path: '/get-mutation', method: 'GET' } },
       input: z.object({ name: z.string() }),
       output: z.object({ name: z.string() }),
       resolve: ({ input }) => ({ name: input.name }),
     });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError(
-      '[mutations.deleteMutation] - Mutation procedures can only use POST, PATCH or PUT methods',
-    );
+    }).toThrowError('[mutation.getMutation] - Mutation method must be POST, PATCH or PUT');
   });
 
-  test('duplicate procedure for method & route', () => {
+  test('duplicate route', () => {
     const appRouter = trpc
-      .router<any, OpenAPIMeta>()
-      .query('get', {
-        meta: { openapi: { enabled: true } },
+      .router<any, OpenApiMeta>()
+      .query('procedure1', {
+        meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
         input: z.object({ name: z.string() }),
         output: z.object({ name: z.string() }),
         resolve: ({ input }) => ({ name: input.name }),
       })
-      .query('GET', {
-        meta: { openapi: { enabled: true } },
+      .query('procedure2', {
+        meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
         input: z.object({ name: z.string() }),
         output: z.object({ name: z.string() }),
         resolve: ({ input }) => ({ name: input.name }),
       });
 
     expect(() => {
-      generateOpenAPISchema(appRouter, {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[queries.GET] - Duplicate procedure definition for route GET /get');
+    }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
   });
 
-  test('big router', () => {
+  test('with valid procedures', () => {
     const appRouter = trpc
-      .router<any, OpenAPIMeta>()
-      .query('trpc-only', {
-        input: z.string(),
-        resolve: () => ({}),
-      })
-      .query('query', {
-        meta: { openapi: { enabled: true } },
-        input: z.object({ first: z.string(), last: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: `${input.first} ${input.last}` }),
-      })
-      .mutation('mutation', {
-        meta: { openapi: { enabled: true } },
-        input: z.object({ first: z.string(), last: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: `${input.first} ${input.last}` }),
-      })
-      .mutation('method-change', {
-        meta: { openapi: { enabled: true, method: 'PATCH' } },
+      .router<any, OpenApiMeta>()
+      .mutation('createUser', {
+        meta: { openapi: { enabled: true, path: '/users', method: 'POST' } },
         input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
+        output: z.object({ id: z.string(), name: z.string() }),
+        resolve: ({ input }) => ({ id: 'user-id', name: input.name }),
       })
-      .query('slash.separated', {
-        meta: { openapi: { enabled: true } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
+      .query('readUser', {
+        meta: { openapi: { enabled: true, path: '/users', method: 'GET' } },
+        input: z.object({ id: z.string() }),
+        output: z.object({ id: z.string(), name: z.string() }),
+        resolve: ({ input }) => ({ id: input.id, name: 'name' }),
       })
-      .query('voidInputOutput', {
-        meta: { openapi: { enabled: true } },
-        input: z.object({}),
+      .mutation('updateUser', {
+        meta: { openapi: { enabled: true, path: '/users', method: 'PATCH' } },
+        input: z.object({ id: z.string(), name: z.string().optional() }),
+        output: z.object({ id: z.string(), name: z.string() }),
+        resolve: ({ input }) => ({ id: input.id, name: input.name || 'name' }),
+      })
+      .query('deleteUser', {
+        meta: { openapi: { enabled: true, path: '/users', method: 'DELETE' } },
+        input: z.object({ id: z.string() }),
         output: z.void(),
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        resolve: ({ input }) => {},
-      })
-      .query('tags', {
-        meta: { openapi: { enabled: true, tags: ['some-tag'] } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      })
-      .query('description', {
-        meta: { openapi: { enabled: true, description: 'Description of endpoint' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      })
-      .query('isProtected', {
-        meta: { openapi: { enabled: true, isProtected: true } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
+        resolve: () => undefined,
       });
 
-    const openAPISchema = generateOpenAPISchema(appRouter, {
+    const openApiDocument = generateOpenApiDocument(appRouter, {
       title: 'tRPC OpenAPI',
       version: '1.0.0',
-      description: 'This is the OpenAPI v3 documentation for the tRPC API',
       baseUrl: 'http://localhost:3000/api',
-      docsUrl: 'http://localhost:3000/docs',
     });
 
-    expect(openAPISchemaValidator.validate(openAPISchema).errors).toEqual([]);
-    expect(openAPISchema).toMatchInlineSnapshot(`
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument).toMatchInlineSnapshot(`
       Object {
         "components": Object {
           "securitySchemes": Object {
@@ -304,24 +254,22 @@ describe('OpenAPI schema generator', () => {
             },
           },
         },
-        "externalDocs": Object {
-          "url": "http://localhost:3000/docs",
-        },
+        "externalDocs": undefined,
         "info": Object {
-          "description": "This is the OpenAPI v3 documentation for the tRPC API",
+          "description": undefined,
           "title": "tRPC OpenAPI",
           "version": "1.0.0",
         },
         "openapi": "3.0.3",
         "paths": Object {
-          "/description": Object {
-            "get": Object {
-              "description": "Description of endpoint",
+          "/users": Object {
+            "delete": Object {
+              "description": undefined,
               "parameters": Array [
                 Object {
                   "explode": true,
                   "in": "query",
-                  "name": "name",
+                  "name": "id",
                   "required": true,
                   "schema": Object {
                     "type": "string",
@@ -336,18 +284,6 @@ describe('OpenAPI schema generator', () => {
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "name",
-                            ],
-                            "type": "object",
-                          },
                           "ok": Object {
                             "enum": Array [
                               true,
@@ -357,7 +293,6 @@ describe('OpenAPI schema generator', () => {
                         },
                         "required": Array [
                           "ok",
-                          "data",
                         ],
                         "type": "object",
                       },
@@ -401,17 +336,16 @@ describe('OpenAPI schema generator', () => {
                   "description": "Error response",
                 },
               },
+              "security": undefined,
               "tags": undefined,
             },
-          },
-          "/isprotected": Object {
             "get": Object {
               "description": undefined,
               "parameters": Array [
                 Object {
                   "explode": true,
                   "in": "query",
-                  "name": "name",
+                  "name": "id",
                   "required": true,
                   "schema": Object {
                     "type": "string",
@@ -429,11 +363,15 @@ describe('OpenAPI schema generator', () => {
                           "data": Object {
                             "additionalProperties": false,
                             "properties": Object {
+                              "id": Object {
+                                "type": "string",
+                              },
                               "name": Object {
                                 "type": "string",
                               },
                             },
                             "required": Array [
+                              "id",
                               "name",
                             ],
                             "type": "object",
@@ -491,16 +429,113 @@ describe('OpenAPI schema generator', () => {
                   "description": "Error response",
                 },
               },
-              "security": Array [
-                Object {
-                  "Authorization": Array [],
-                },
-              ],
+              "security": undefined,
               "tags": undefined,
             },
-          },
-          "/method-change": Object {
             "patch": Object {
+              "description": undefined,
+              "requestBody": Object {
+                "content": Object {
+                  "application/json": Object {
+                    "schema": Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "id": Object {
+                          "type": "string",
+                        },
+                        "name": Object {
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "id",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                },
+                "required": true,
+              },
+              "responses": Object {
+                "200": Object {
+                  "content": Object {
+                    "application/json": Object {
+                      "schema": Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "data": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "id": Object {
+                                "type": "string",
+                              },
+                              "name": Object {
+                                "type": "string",
+                              },
+                            },
+                            "required": Array [
+                              "id",
+                              "name",
+                            ],
+                            "type": "object",
+                          },
+                          "ok": Object {
+                            "enum": Array [
+                              true,
+                            ],
+                            "type": "boolean",
+                          },
+                        },
+                        "required": Array [
+                          "ok",
+                          "data",
+                        ],
+                        "type": "object",
+                      },
+                    },
+                  },
+                  "description": "Successful response",
+                },
+                "default": Object {
+                  "content": Object {
+                    "application/json": Object {
+                      "schema": Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "error": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "message": Object {
+                                "type": "string",
+                              },
+                            },
+                            "required": Array [
+                              "message",
+                            ],
+                            "type": "object",
+                          },
+                          "ok": Object {
+                            "enum": Array [
+                              false,
+                            ],
+                            "type": "boolean",
+                          },
+                        },
+                        "required": Array [
+                          "ok",
+                          "error",
+                        ],
+                        "type": "object",
+                      },
+                    },
+                  },
+                  "description": "Error response",
+                },
+              },
+              "security": undefined,
+              "tags": undefined,
+            },
+            "post": Object {
               "description": undefined,
               "requestBody": Object {
                 "content": Object {
@@ -531,11 +566,15 @@ describe('OpenAPI schema generator', () => {
                           "data": Object {
                             "additionalProperties": false,
                             "properties": Object {
+                              "id": Object {
+                                "type": "string",
+                              },
                               "name": Object {
                                 "type": "string",
                               },
                             },
                             "required": Array [
+                              "id",
                               "name",
                             ],
                             "type": "object",
@@ -593,455 +632,7 @@ describe('OpenAPI schema generator', () => {
                   "description": "Error response",
                 },
               },
-              "tags": undefined,
-            },
-          },
-          "/mutation": Object {
-            "post": Object {
-              "description": undefined,
-              "requestBody": Object {
-                "content": Object {
-                  "application/json": Object {
-                    "schema": Object {
-                      "additionalProperties": false,
-                      "properties": Object {
-                        "first": Object {
-                          "type": "string",
-                        },
-                        "last": Object {
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "first",
-                        "last",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                },
-                "required": true,
-              },
-              "responses": Object {
-                "200": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "name",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "data",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Successful response",
-                },
-                "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
-                },
-              },
-              "tags": undefined,
-            },
-          },
-          "/query": Object {
-            "get": Object {
-              "description": undefined,
-              "parameters": Array [
-                Object {
-                  "explode": true,
-                  "in": "query",
-                  "name": "first",
-                  "required": true,
-                  "schema": Object {
-                    "type": "string",
-                  },
-                  "style": "form",
-                },
-                Object {
-                  "explode": true,
-                  "in": "query",
-                  "name": "last",
-                  "required": true,
-                  "schema": Object {
-                    "type": "string",
-                  },
-                  "style": "form",
-                },
-              ],
-              "responses": Object {
-                "200": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "name",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "data",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Successful response",
-                },
-                "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
-                },
-              },
-              "tags": undefined,
-            },
-          },
-          "/slash/separated": Object {
-            "get": Object {
-              "description": undefined,
-              "parameters": Array [
-                Object {
-                  "explode": true,
-                  "in": "query",
-                  "name": "name",
-                  "required": true,
-                  "schema": Object {
-                    "type": "string",
-                  },
-                  "style": "form",
-                },
-              ],
-              "responses": Object {
-                "200": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "name",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "data",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Successful response",
-                },
-                "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
-                },
-              },
-              "tags": undefined,
-            },
-          },
-          "/tags": Object {
-            "get": Object {
-              "description": undefined,
-              "parameters": Array [
-                Object {
-                  "explode": true,
-                  "in": "query",
-                  "name": "name",
-                  "required": true,
-                  "schema": Object {
-                    "type": "string",
-                  },
-                  "style": "form",
-                },
-              ],
-              "responses": Object {
-                "200": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "name",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "data",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Successful response",
-                },
-                "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
-                },
-              },
-              "tags": Array [
-                "some-tag",
-              ],
-            },
-          },
-          "/voidinputoutput": Object {
-            "get": Object {
-              "description": undefined,
-              "parameters": Array [],
-              "responses": Object {
-                "200": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Successful response",
-                },
-                "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
-                },
-              },
+              "security": undefined,
               "tags": undefined,
             },
           },
@@ -1053,5 +644,150 @@ describe('OpenAPI schema generator', () => {
         ],
       }
     `);
+  });
+
+  test('with disabled', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('getMe', {
+      meta: { openapi: { enabled: false, path: '/me', method: 'GET' } },
+      input: z.object({ id: z.string() }),
+      output: z.object({ id: z.string() }),
+      resolve: ({ input }) => ({ id: input.id }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(Object.keys(openApiDocument.paths).length).toBe(0);
+  });
+
+  test('with void', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('void', {
+      meta: { openapi: { enabled: true, path: '/void', method: 'GET' } },
+      input: z.void(),
+      output: z.void(),
+      resolve: () => undefined,
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/void']!.get!.parameters).toBe(undefined);
+    expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+  });
+
+  test('with transform', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('transform', {
+      meta: { openapi: { enabled: true, path: '/transform', method: 'GET' } },
+      input: z.object({ age: z.string().transform((input) => parseInt(input)) }),
+      output: z.object({ age: z.number() }),
+      resolve: ({ input }) => ({ age: input.age }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/transform']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "explode": true,
+          "in": "query",
+          "name": "age",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+          "style": "form",
+        },
+      ]
+    `);
+  });
+
+  test('with description & tags', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
+      meta: {
+        openapi: {
+          enabled: true,
+          path: '/metadata/all',
+          method: 'GET',
+          description: 'Some description',
+          tags: ['some-tag'],
+        },
+      },
+      input: z.object({ name: z.string() }),
+      output: z.object({ name: z.string() }),
+      resolve: ({ input }) => ({ name: input.name }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Some description');
+    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['some-tag']);
+  });
+
+  test('with security', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('protectedEndpoint', {
+      meta: {
+        openapi: {
+          enabled: true,
+          path: '/secure/endpoint',
+          method: 'POST',
+          secure: true,
+        },
+      },
+      input: z.object({ name: z.string() }),
+      output: z.object({ name: z.string() }),
+      resolve: ({ input }) => ({ name: input.name }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/secure/endpoint']!.post!.security).toEqual([
+      { Authorization: [] },
+    ]);
   });
 });

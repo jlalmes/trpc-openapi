@@ -1,3 +1,4 @@
+import { resolveHTTPResponse } from '@trpc/server';
 // eslint-disable-next-line import/no-unresolved
 import { NodeHTTPHandlerOptions } from '@trpc/server/dist/declarations/src/adapters/node-http';
 import http from 'http';
@@ -61,12 +62,31 @@ export const createOpenApiHttpHandler = <TRouter extends OpenApiRouter>(
   const openApiProcedures = getOpenApiProcedures(router);
 
   return async (req: http.IncomingMessage, res: http.ServerResponse) => {
-    // if no hostname, set a dummy one
     const url = new URL(req.url!.startsWith('/') ? `http://127.0.0.1${req.url!}` : req.url!);
     const path = removeLeadingTrailingSlash(url.pathname);
     const method = req.method as OpenApiMethod;
     const procedure = openApiProcedures[method]?.[path];
     if (procedure) {
+      const body = await getPostBody();
+      const query = req.query
+        ? new URLSearchParams(req.query as any)
+        : new URLSearchParams(req.url!.split('?')[1]);
+
+      const result = await resolveHTTPResponse({
+        req,
+        createContext: async () => {
+          return createContext?.(opts);
+        },
+        path,
+        router,
+        batching: {
+          enabled: false,
+        },
+        responseMeta,
+        onError: (o) => {
+          onError?.({ ...o, req });
+        },
+      });
     }
     // const method = req.method as string;
     // const path = url.pathname;

@@ -91,6 +91,7 @@ export const getOpenApiPathsObject = (
       if (!openapi?.enabled) {
         continue;
       }
+
       throw new Error('Subscriptions are not supported by OpenAPI v3');
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

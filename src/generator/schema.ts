@@ -94,6 +94,8 @@ export const getResponsesObject = (zodSchema: any): OpenAPIV3.ResponsesObject =>
             ok: z.literal(false),
             error: z.object({
               message: z.string(),
+              code: z.string(),
+              issues: z.array(z.object({})).optional(),
             }),
           }),
         ),

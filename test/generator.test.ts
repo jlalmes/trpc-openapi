@@ -210,6 +210,31 @@ describe('generator', () => {
     }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
   });
 
+  test('duplicate route with trailing slash', () => {
+    const appRouter = trpc
+      .router<any, OpenApiMeta>()
+      .query('procedure1', {
+        meta: { openapi: { enabled: true, path: '/procedure/', method: 'GET' } },
+        input: z.object({ name: z.string() }),
+        output: z.object({ name: z.string() }),
+        resolve: ({ input }) => ({ name: input.name }),
+      })
+      .query('procedure2', {
+        meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+        input: z.object({ name: z.string() }),
+        output: z.object({ name: z.string() }),
+        resolve: ({ input }) => ({ name: input.name }),
+      });
+
+    expect(() => {
+      generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+    }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
+  });
+
   test('unsupported subscription', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().subscription('currentName', {
       meta: { openapi: { enabled: true, path: '/current-name', method: 'PATCH' } },

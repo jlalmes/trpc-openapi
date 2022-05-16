@@ -34,6 +34,8 @@ export type OpenApiErrorResponse = {
   ok: false;
   error: {
     message: string;
+    code: string;
+    issues?: any[];
   };
 };
 

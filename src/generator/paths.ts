@@ -1,7 +1,7 @@
 import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
-import { getInputOutputParsers } from '../utils';
+import { getInputOutputParsers, removeLeadingTrailingSlash } from '../utils';
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from './schema';
 
 export const getOpenApiPathsObject = (
@@ -18,11 +18,12 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      const { path, method, description, tags, secure } = openapi;
+      const { method, description, tags, secure } = openapi;
       if (method !== 'GET' && method !== 'DELETE') {
         throw new Error('Query method must be GET or DELETE');
       }
 
+      const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
         throw new Error(`Duplicate procedure defined for route ${method} ${path}`);
@@ -55,11 +56,12 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      const { path, method, description, tags, secure } = openapi;
+      const { method, description, tags, secure } = openapi;
       if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
         throw new Error('Mutation method must be POST, PATCH or PUT');
       }
 
+      const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
         throw new Error(`Duplicate procedure defined for route ${method} ${path}`);

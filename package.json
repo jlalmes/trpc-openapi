@@ -22,7 +22,9 @@
   },
   "peerDependencies": {
     "@trpc/server": "^9.23.2",
+    "body-parser": "^1.20.0",
     "openapi-types": "^11.0.0",
+    "uuid": "^8.3.2",
     "zod": "^3.15.1",
     "zod-to-json-schema": "^3.14.1"
   },
@@ -50,8 +52,5 @@
     "ts-jest": "^28.0.2",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"
-  },
-  "dependencies": {
-    "uuid": "^8.3.2"
   }
 }

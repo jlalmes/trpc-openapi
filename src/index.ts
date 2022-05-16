@@ -3,12 +3,7 @@ import {
   generateOpenApiDocument,
   openApiVersion,
 } from './generator';
-import {
-  CreateOpenApiExpressHandlerOptions,
-  CreateOpenApiNextHandlerOptions,
-  createOpenApiExpressHandler,
-  createOpenApiNextHandler,
-} from './handlers';
+import { CreateOpenApiHttpHandlerOptions, createOpenApiHttpHandler } from './handlers';
 import {
   OpenApiErrorResponse,
   OpenApiMeta,
@@ -22,10 +17,8 @@ export {
   openApiVersion,
   generateOpenApiDocument,
   GenerateOpenApiDocumentOptions,
-  CreateOpenApiExpressHandlerOptions,
-  createOpenApiExpressHandler,
-  CreateOpenApiNextHandlerOptions,
-  createOpenApiNextHandler,
+  CreateOpenApiHttpHandlerOptions,
+  createOpenApiHttpHandler,
   OpenApiRouter,
   OpenApiMeta,
   OpenApiMethod,

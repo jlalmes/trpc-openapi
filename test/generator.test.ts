@@ -355,12 +355,24 @@ describe('generator', () => {
                           "error": Object {
                             "additionalProperties": false,
                             "properties": Object {
+                              "code": Object {
+                                "type": "string",
+                              },
+                              "issues": Object {
+                                "items": Object {
+                                  "additionalProperties": false,
+                                  "properties": Object {},
+                                  "type": "object",
+                                },
+                                "type": "array",
+                              },
                               "message": Object {
                                 "type": "string",
                               },
                             },
                             "required": Array [
                               "message",
+                              "code",
                             ],
                             "type": "object",
                           },
@@ -448,12 +460,24 @@ describe('generator', () => {
                           "error": Object {
                             "additionalProperties": false,
                             "properties": Object {
+                              "code": Object {
+                                "type": "string",
+                              },
+                              "issues": Object {
+                                "items": Object {
+                                  "additionalProperties": false,
+                                  "properties": Object {},
+                                  "type": "object",
+                                },
+                                "type": "array",
+                              },
                               "message": Object {
                                 "type": "string",
                               },
                             },
                             "required": Array [
                               "message",
+                              "code",
                             ],
                             "type": "object",
                           },
@@ -551,12 +575,24 @@ describe('generator', () => {
                           "error": Object {
                             "additionalProperties": false,
                             "properties": Object {
+                              "code": Object {
+                                "type": "string",
+                              },
+                              "issues": Object {
+                                "items": Object {
+                                  "additionalProperties": false,
+                                  "properties": Object {},
+                                  "type": "object",
+                                },
+                                "type": "array",
+                              },
                               "message": Object {
                                 "type": "string",
                               },
                             },
                             "required": Array [
                               "message",
+                              "code",
                             ],
                             "type": "object",
                           },
@@ -651,12 +687,24 @@ describe('generator', () => {
                           "error": Object {
                             "additionalProperties": false,
                             "properties": Object {
+                              "code": Object {
+                                "type": "string",
+                              },
+                              "issues": Object {
+                                "items": Object {
+                                  "additionalProperties": false,
+                                  "properties": Object {},
+                                  "type": "object",
+                                },
+                                "type": "array",
+                              },
                               "message": Object {
                                 "type": "string",
                               },
                             },
                             "required": Array [
                               "message",
+                              "code",
                             ],
                             "type": "object",
                           },

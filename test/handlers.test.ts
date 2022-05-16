@@ -1,137 +1,141 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';
-import express from 'express';
+import express, { Request, Response } from 'express';
+import { ServerResponse } from 'http';
 import fetch from 'node-fetch';
 import { z } from 'zod';
 
 import {
+  CreateOpenApiHttpHandlerOptions,
   OpenApiErrorResponse,
   OpenApiMeta,
+  OpenApiRouter,
   OpenApiSuccessResponse,
-  createOpenApiExpressHandler,
-  createOpenApiNextHandler,
+  createOpenApiHttpHandler,
 } from '../src';
 
-describe('adapter', () => {
-  test('throws error with invalid router', () => {
+const createContextMock = jest.fn();
+const responseMetaMock = jest.fn();
+const onErrorMock = jest.fn();
+const teardownMock = jest.fn();
+
+const re: ServerResponse = {} as Response;
+const er: Response = {} as ServerResponse;
+
+const createExpressServerWithRouter = (
+  appRouter: OpenApiRouter,
+  opts: Partial<CreateOpenApiHttpHandlerOptions<OpenApiRouter, Request, Response>> = {},
+) => {
+  const openApiHandler = createOpenApiHttpHandler({
+    router: appRouter,
+    createContext: opts.createContext,
+    responseMeta: opts.responseMeta ?? responseMetaMock,
+    onError: opts.onError ?? onErrorMock,
+    teardown: opts.teardown ?? teardownMock,
+  });
+
+  const app = express();
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  app.use('/oas', openApiHandler);
+
+  const server = app.listen(0);
+  const port = (server.address() as any).port as number;
+  const url = `http://localhost:${port}`;
+
+  return {
+    url,
+    close: () => server.close(),
+  };
+};
+
+describe('express handler', () => {
+  afterEach(() => {
+    createContextMock.mockClear();
+    responseMetaMock.mockClear();
+    onErrorMock.mockClear();
+    teardownMock.mockClear();
+  });
+
+  test('with invalid router', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('invalidRoute', {
       meta: { openapi: { enabled: true, path: '/invalid-route', method: 'POST' } },
       input: z.number(),
       resolve: ({ input }) => input,
     });
 
-    expect(() => {
-      createOpenApiExpressHandler({ router: appRouter });
-    }).toThrowError('[mutation.invalidRoute] - Output parser expects ZodSchema');
-    expect(() => {
-      createOpenApiNextHandler({ router: appRouter });
-    }).toThrowError('[mutation.invalidRoute] - Output parser expects ZodSchema');
+    expect(() => createOpenApiHttpHandler({ router: appRouter })).toThrowError(
+      '[mutation.invalidRoute] - Output parser expects ZodSchema',
+    );
   });
 
-  test('createOpenApiExpressHandler', async () => {
-    const createContextMock = jest.fn();
-    const responseMetaMock = jest.fn();
-    const onErrorMock = jest.fn();
-    const teardownMock = jest.fn();
+  test('with not found path', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().mutation('ping', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+        input: z.object({}),
+        output: z.literal('pong'),
+        resolve: () => 'pong' as const,
+      }),
+    );
 
-    const appRouter = trpc
-      .router<any, OpenApiMeta>()
-      .query('sayHelloQuery', {
-        meta: { openapi: { enabled: true, path: '/say-hello', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ greeting: z.string() }),
-        resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-      })
-      .mutation('sayHelloPost', {
-        meta: { openapi: { enabled: true, path: '/say-hello', method: 'POST' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ greeting: z.string() }),
-        resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-      })
-      .query('sayHelloBadOutput', {
-        meta: { openapi: { enabled: true, path: '/say-hello/bad-output', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ greeting: z.string() }),
-        // @ts-expect-error - send bad output
-        resolve: ({ input }) => ({ hello: input.name }),
-      })
-      .query('sayHelloUnauthorized', {
-        meta: { openapi: { enabled: true, path: '/say-hello/unauthorized', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ greeting: z.string() }),
-        resolve: () => {
-          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Custom auth error' });
-        },
-      });
+    const res = await fetch(`${url}/oas/pingg`, { method: 'POST' });
+    const body = (await res.json()) as OpenApiErrorResponse;
 
-    const openApiHandler = createOpenApiExpressHandler({
-      router: appRouter,
-      createContext: createContextMock,
-      responseMeta: responseMetaMock,
-      onError: onErrorMock,
-      teardown: teardownMock,
+    expect(res.status).toBe(404);
+    expect(body).toEqual({ ok: false, error: { message: 'Not found', code: 'NOT_FOUND' } });
+    expect(createContextMock).toHaveBeenCalledTimes(0);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with not found method', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().mutation('ping', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+        input: z.object({}),
+        output: z.literal('pong'),
+        resolve: () => 'pong' as const,
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/ping`, { method: 'PATCH' });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(404);
+    expect(body).toEqual({ ok: false, error: { message: 'Not found', code: 'NOT_FOUND' } });
+    expect(createContextMock).toHaveBeenCalledTimes(0);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with invalid mimetype', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().mutation('echo', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        resolve: ({ input }) => ({ payload: input.payload }),
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/echo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'non-json-string',
     });
+    const body = (await res.json()) as OpenApiErrorResponse;
 
-    const app = express();
-    app.use(express.json());
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    app.use('/open-api', openApiHandler);
-    app.all('*', (_, res) => res.status(501).send('Unimplemented'));
-
-    const server = app.listen(0);
-    const port = (server.address() as any).port as number;
-    const url = `http://localhost:${port}`;
-
-    {
-      // success query
-      const res = await fetch(`${url}/open-api/say-hello?name=James`, { method: 'GET' });
-      expect(res.status).toBe(200);
-      const body = (await res.json()) as OpenApiSuccessResponse;
-      expect(body.ok).toBe(true);
-      expect(body.data).toEqual({ greeting: 'Hello James!' });
-    }
-    {
-      // success mutation
-      const res = await fetch(`${url}/open-api/say-hello`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name: 'James' }),
-      });
-      expect(res.status).toBe(200);
-      const body = (await res.json()) as OpenApiSuccessResponse;
-      expect(body.ok).toBe(true);
-      expect(body.data).toEqual({ greeting: 'Hello James!' });
-    }
-    {
-      // missing handler path
-      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' });
-      expect(res.status).toBe(501);
-      const body = await res.text();
-      expect(body).toBe('Unimplemented');
-    }
-    {
-      // bad path
-      const res = await fetch(`${url}/open-api/say-goodbye?name=James`, { method: 'GET' });
-      expect(res.status).toBe(404);
-      const body = (await res.json()) as OpenApiErrorResponse;
-      expect(body.ok).toBe(false);
-      expect(body.error).toEqual({ message: 'Not found', code: 'NOT_FOUND' });
-    }
-    {
-      // bad method
-      const res = await fetch(`${url}/open-api/say-hello?name=James`, { method: 'DELETE' });
-      expect(res.status).toBe(404);
-      const body = (await res.json()) as OpenApiErrorResponse;
-      expect(body.ok).toBe(false);
-      expect(body.error).toEqual({ message: 'Not found', code: 'NOT_FOUND' });
-    }
-    {
-      // bad input
-      const res = await fetch(`${url}/open-api/say-hello?age=26`, { method: 'GET' });
-      expect(res.status).toBe(400);
-      const body = (await res.json()) as OpenApiErrorResponse;
-      expect(body.ok).toBe(false);
-      expect(body.error).toEqual({
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      ok: false,
+      error: {
         message: 'Input validation failed',
         code: 'BAD_REQUEST',
         issues: [
@@ -139,26 +143,333 @@ describe('adapter', () => {
             code: 'invalid_type',
             expected: 'string',
             message: 'Required',
-            path: ['name'],
+            path: ['payload'],
             received: 'undefined',
           },
         ],
-      });
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with missing input', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().query('echo', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        resolve: ({ input }) => ({ payload: input.payload }),
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/echo`, { method: 'GET' });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      ok: false,
+      error: {
+        message: 'Input validation failed',
+        code: 'BAD_REQUEST',
+        issues: [
+          {
+            code: 'invalid_type',
+            expected: 'string',
+            message: 'Required',
+            path: ['payload'],
+            received: 'undefined',
+          },
+        ],
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with wrong input type', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().mutation('echo', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        resolve: ({ input }) => ({ payload: input.payload }),
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/echo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: 123 }),
+    });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      ok: false,
+      error: {
+        message: 'Input validation failed',
+        code: 'BAD_REQUEST',
+        issues: [
+          {
+            code: 'invalid_type',
+            expected: 'string',
+            message: 'Expected string, received number',
+            path: ['payload'],
+            received: 'number',
+          },
+        ],
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with bad output', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().mutation('echo', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        // @ts-expect-error - fail on purpose
+        resolve: () => 'fail',
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/echo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: '@jlalmes' }),
+    });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(500);
+    expect(body).toEqual({
+      ok: false,
+      error: {
+        message: 'Output validation failed',
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with thrown error', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().mutation('echo', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        resolve: () => {
+          throw new TRPCError({
+            message: 'Custom thrown error',
+            code: 'UNAUTHORIZED',
+          });
+        },
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/echo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: '@jlalmes' }),
+    });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(401);
+    expect(body).toEqual({
+      ok: false,
+      error: {
+        message: 'Custom thrown error',
+        code: 'UNAUTHORIZED',
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with valid routes', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc
+        .router<any, OpenApiMeta>()
+        .query('sayHello', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+        })
+        .mutation('sayHello', {
+          meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+        }),
+    );
+
+    {
+      const res = await fetch(`${url}/oas/say-hello?name=James`, { method: 'GET' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+
+      createContextMock.mockClear();
+      responseMetaMock.mockClear();
+      onErrorMock.mockClear();
+      teardownMock.mockClear();
     }
     {
-      // user thrown error
-      const res = await fetch(`${url}/open-api/say-hello/unauthorized?name=James`, {
-        method: 'GET',
+      const res = await fetch(`${url}/oas/say-hello`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'James' }),
       });
-      expect(res.status).toBe(401);
-      const body = (await res.json()) as OpenApiErrorResponse;
-      expect(body.ok).toBe(false);
-      expect(body.error).toEqual({
-        message: 'Custom auth error',
-        code: 'UNAUTHORIZED',
-      });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
-    server.close();
+    close();
+  });
+
+  test('with no input', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().query('ping', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+        input: z.object({}),
+        output: z.literal('pong'),
+        resolve: () => 'pong' as const,
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/ping`, { method: 'GET' });
+    const body = (await res.json()) as OpenApiSuccessResponse;
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ ok: true, data: 'pong' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with no output', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().query('ping', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+        input: z.object({ ping: z.string() }),
+        output: z.void(),
+        resolve: () => undefined,
+      }),
+    );
+
+    const res = await fetch(`${url}/oas/ping?ping=ping`, { method: 'GET' });
+    const body = (await res.json()) as OpenApiSuccessResponse;
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ ok: true });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with createContext', async () => {
+    type Context = { id: 1234567890 };
+
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<Context, OpenApiMeta>().query('echo', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string(), context: z.object({ id: z.number() }) }),
+        resolve: ({ input, ctx }) => ({ payload: input.payload, context: ctx }),
+      }),
+      {
+        createContext: (): Context => ({ id: 1234567890 }),
+      },
+    );
+
+    const res = await fetch(`${url}/oas/echo?payload=jlalmes`, { method: 'GET' });
+    const body = (await res.json()) as OpenApiSuccessResponse;
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({
+      ok: true,
+      data: {
+        payload: 'jlalmes',
+        context: { id: 1234567890 },
+      },
+    });
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with responseMeta', async () => {
+    const { url, close } = createExpressServerWithRouter(
+      trpc.router<any, OpenApiMeta>().query('echo', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string(), context: z.undefined() }),
+        resolve: ({ input, ctx }) => ({ payload: input.payload, context: ctx }),
+      }),
+      {
+        responseMeta: () => ({ status: 201, headers: { 'x-custom': 'custom header' } }),
+      },
+    );
+
+    const res = await fetch(`${url}/oas/echo?payload=jlalmes`, { method: 'GET' });
+    const body = (await res.json()) as OpenApiSuccessResponse;
+
+    expect(res.status).toBe(201);
+    expect(res.headers.get('x-custom')).toBe('custom header');
+    expect(body).toEqual({
+      ok: true,
+      data: {
+        payload: 'jlalmes',
+        context: undefined,
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
   });
 });

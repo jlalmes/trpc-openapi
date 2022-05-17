@@ -17,8 +17,7 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",
-    "build": "rimraf dist && tsc",
-    "release": "npm run test && npm run build && npm publish --dry-run"
+    "build": "rimraf dist && tsc"
   },
   "peerDependencies": {
     "@trpc/server": "^9.23.2",

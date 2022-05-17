@@ -4,58 +4,19 @@ import {
   NodeHTTPRequest,
   NodeHTTPResponse, // eslint-disable-next-line import/no-unresolved
 } from '@trpc/server/dist/declarations/src/adapters/node-http';
-import { v4 as uuid } from 'uuid';
 import { ZodError } from 'zod';
 
 import { generateOpenApiDocument } from '../../generator';
-import { OpenApiResponse, OpenApiRouter } from '../../types';
+import {
+  OpenApiErrorResponse,
+  OpenApiResponse,
+  OpenApiRouter,
+  OpenApiSuccessResponse,
+} from '../../types';
 import { removeLeadingTrailingSlash } from '../../utils';
 import { getBody } from './body';
 import { TRPC_ERROR_CODE_HTTP_STATUS } from './errors';
-
-type Procedure = { type: 'query' | 'mutation'; path: string };
-
-export const getProcedures = (appRouter: OpenApiRouter) => {
-  const procedures: Record<string, Record<string, Procedure>> = {};
-
-  const { queries, mutations } = appRouter._def;
-
-  for (const queryPath of Object.keys(queries)) {
-    const query = queries[queryPath]!;
-    const { openapi } = query.meta || {};
-    if (!openapi?.enabled) {
-      continue;
-    }
-    const { method } = openapi;
-    if (!procedures[method]) {
-      procedures[method] = {};
-    }
-    const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
-    procedures[method]![path] = {
-      type: 'query',
-      path: queryPath,
-    };
-  }
-
-  for (const mutationPath of Object.keys(mutations)) {
-    const query = mutations[mutationPath]!;
-    const { openapi } = query.meta || {};
-    if (!openapi?.enabled) {
-      continue;
-    }
-    const { method } = openapi;
-    if (!procedures[method]) {
-      procedures[method] = {};
-    }
-    const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
-    procedures[method]![path] = {
-      type: 'mutation',
-      path: mutationPath,
-    };
-  }
-
-  return procedures;
-};
+import { getProcedures } from './procedures';
 
 export type CreateOpenApiHttpHandlerOptions<
   TRouter extends OpenApiRouter,
@@ -66,6 +27,8 @@ export type CreateOpenApiHttpHandlerOptions<
   'router' | 'createContext' | 'responseMeta' | 'onError' | 'teardown'
 >;
 
+export type OpenApiNextFunction = () => void;
+
 export const createOpenApiHttpHandler = <
   TRouter extends OpenApiRouter,
   TRequest extends NodeHTTPRequest,
@@ -73,6 +36,7 @@ export const createOpenApiHttpHandler = <
 >(
   opts: CreateOpenApiHttpHandlerOptions<TRouter, TRequest, TResponse>,
 ) => {
+  // validate router
   generateOpenApiDocument(opts.router, {
     title: '-',
     description: '-',
@@ -83,23 +47,21 @@ export const createOpenApiHttpHandler = <
   const { router, createContext, responseMeta, onError, teardown } = opts;
   const procedures = getProcedures(router);
 
-  return async (req: TRequest, res: TResponse) => {
-    const requestId = uuid();
-
+  return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
     const sendResponse = (
       statusCode: number,
       headers: Record<string, string>,
       body: OpenApiResponse,
     ) => {
       res.statusCode = statusCode;
-      res.setHeader('X-Request-Id', requestId);
       res.setHeader('Content-Type', 'application/json');
       Object.keys(headers).forEach((key) => res.setHeader(key, headers[key]!));
       res.end(JSON.stringify(body));
     };
 
     const method = req.method!;
-    const url = new URL(req.url!.startsWith('/') ? `http://127.0.0.1${req.url!}` : req.url!);
+    const reqUrl = req.url!;
+    const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
     const path = `/${removeLeadingTrailingSlash(url.pathname)}`;
     const procedure = procedures[method]?.[path];
     let input: any;
@@ -108,6 +70,9 @@ export const createOpenApiHttpHandler = <
 
     try {
       if (!procedure) {
+        if (next) {
+          return next();
+        }
         throw new TRPCError({
           message: 'Not found',
           code: 'NOT_FOUND',
@@ -129,7 +94,10 @@ export const createOpenApiHttpHandler = <
 
       const statusCode = meta?.status ?? 200;
       const headers = meta?.headers ?? {};
-      const body = { ok: true as const, data };
+      const body: OpenApiSuccessResponse = {
+        ok: true as const,
+        data,
+      };
       sendResponse(statusCode, headers, body);
     } catch (cause) {
       const error =
@@ -162,8 +130,8 @@ export const createOpenApiHttpHandler = <
 
       const statusCode = meta?.status ?? TRPC_ERROR_CODE_HTTP_STATUS[error.code] ?? 500;
       const headers = meta?.headers ?? {};
-      const body = {
-        ok: false as const,
+      const body: OpenApiErrorResponse = {
+        ok: false,
         error: {
           message: isInputValidationError ? 'Input validation failed' : error.message,
           code: error.code,

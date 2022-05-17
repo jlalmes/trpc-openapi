@@ -20,9 +20,6 @@ const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
 const teardownMock = jest.fn();
 
-const re: ServerResponse = {} as Response;
-const er: Response = {} as ServerResponse;
-
 const createExpressServerWithRouter = (
   appRouter: OpenApiRouter,
   opts: Partial<CreateOpenApiHttpHandlerOptions<OpenApiRouter, Request, Response>> = {},

@@ -1,5 +1,6 @@
 import { TRPCError } from '@trpc/server';
 
+// TODO: Open PR to export this this from @trpc/server
 export const TRPC_ERROR_CODE_HTTP_STATUS: Record<TRPCError['code'], number> = {
   PARSE_ERROR: 400,
   BAD_REQUEST: 400,

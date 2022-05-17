@@ -1,9 +1,16 @@
 import {
+  CreateOpenApiExpressMiddlewareOptions,
+  CreateOpenApiHttpHandlerOptions,
+  CreateOpenApiNextHandlerOptions,
+  createOpenApiExpressMiddleware,
+  createOpenApiHttpHandler,
+  createOpenApiNextHandler,
+} from './adapters';
+import {
   GenerateOpenApiDocumentOptions,
   generateOpenApiDocument,
   openApiVersion,
 } from './generator';
-import { CreateOpenApiHttpHandlerOptions, createOpenApiHttpHandler } from './handlers';
 import {
   OpenApiErrorResponse,
   OpenApiMeta,
@@ -14,11 +21,15 @@ import {
 } from './types';
 
 export {
+  CreateOpenApiExpressMiddlewareOptions,
+  CreateOpenApiHttpHandlerOptions,
+  CreateOpenApiNextHandlerOptions,
+  createOpenApiExpressMiddleware,
+  createOpenApiHttpHandler,
+  createOpenApiNextHandler,
   openApiVersion,
   generateOpenApiDocument,
   GenerateOpenApiDocumentOptions,
-  CreateOpenApiHttpHandlerOptions,
-  createOpenApiHttpHandler,
   OpenApiRouter,
   OpenApiMeta,
   OpenApiMethod,

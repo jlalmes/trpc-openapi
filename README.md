@@ -4,7 +4,7 @@ Incremental adoption.
 
 ## Getting started
 
-1. Install `trpc-openapi`.
+1. **Install `trpc-openapi`.**
 
 ```bash
 # npm
@@ -13,7 +13,7 @@ npm install trpc-openapi
 yarn add trpc-openapi
 ```
 
-2. Add `OpenApiMeta` to your tRPC router.
+2. **Add `OpenApiMeta` to your tRPC router.**
 
 ```typescript
 import * as trpc from '@trpc/server';
@@ -22,7 +22,7 @@ import { OpenApiMeta } from 'trpc-openapi';
 export const appRouter = trpc.router<any, OpenApiMeta /* 👈 */>();
 ```
 
-3. Enable `openapi` support for a procedure.
+3. **Enable `openapi` support for a procedure.**
 
 ```typescript
 import * as trpc from '@trpc/server';
@@ -38,7 +38,7 @@ export const appRouter = trpc.router<any, OpenApiMeta>().query('sayHello', {
 });
 ```
 
-4. Generate OpenAPI v3 document
+4. **Generate OpenAPI v3 document.**
 
 ```typescript
 import { generateOpenApiDocument } from 'trpc-openapi';
@@ -53,7 +53,7 @@ const openApiDocument = generateOpenApiDocument(appRouter, {
 });
 ```
 
-5. Add an `trpc-openapi` adapter to your app
+5. **Add an `trpc-openapi` adapter to your app.**
 
 We currently support for `Express`, `Next.js` & `node:http`.
 
@@ -72,7 +72,7 @@ app.use('/api', createOpenApiExpressMiddleware({ router: appRouter })); /* 👈 
 app.listen(3000);
 ```
 
-6. Profit 🤑
+6. **Profit 🤑**
 
 ```typescript
 // client.ts

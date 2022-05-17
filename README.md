@@ -29,13 +29,11 @@ import * as trpc from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
 export const appRouter = trpc.router<any, OpenApiMeta>().query('sayHello', {
-  meta: {
-    openapi: { enabled: true, method: 'GET', path: '/say-hello' } /* 👈 */,
-    input: z.object({ name: z.string() }),
-    output: z.object({ greeting: z.string() }),
-    resolve: ({ input }) => {
-      return { greeting: `Hello ${input.name}!` };
-    },
+  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } /* 👈 */ },
+  input: z.object({ name: z.string() }),
+  output: z.object({ greeting: z.string() }),
+  resolve: ({ input }) => {
+    return { greeting: `Hello ${input.name}!` };
   },
 });
 ```

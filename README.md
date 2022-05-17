@@ -80,9 +80,23 @@ const res = await fetch('http://localhost:3000/api/say-hello?name=James', { meth
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
+## Authorization
+
+To create protected endpoints, just add `secure: true` to the `meta.openapi` object of each tRPC procedure.
+
+## Examples
+
+#### With Express
+
+Please see example project [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-express).
+
+#### With Next.js
+
+Please see example project [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-next).
+
 ## Types
 
-### OpenApiMeta
+#### OpenApiMeta
 
 Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/types.ts).
 
@@ -95,7 +109,7 @@ Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/sr
 | `description` | `string`     | Route description included in OpenAPI document.                                                                     | `false`  | `undefined` |
 | `tags`        | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
 
-### GenerateOpenApiDocumentOptions
+#### GenerateOpenApiDocumentOptions
 
 Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/generator/index.ts).
 
@@ -107,6 +121,6 @@ Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/sr
 | `baseUrl`     | `string` | The base URL of the target server.   | `true`   | `undefined` |
 | `docsUrl`     | `string` | A URL to any external documentation. | `false`  | `undefined` |
 
-### CreateOpenApiHttpHandlerOptions
+#### CreateOpenApiHttpHandlerOptions
 
 Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/adapters/node-http/core.ts).

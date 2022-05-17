@@ -84,6 +84,8 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ### OpenApiMeta
 
+Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/types.ts).
+
 | Property      | Type         | Description                                                                                                         | Required | Default     |
 | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
 | `enabled`     | `boolean`    | Exposes procedure on `trpc-openapi` adapters and in OpenAPI documents                                               | `true`   | `false`     |
@@ -95,6 +97,8 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ### GenerateOpenApiDocumentOptions
 
+Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/generator/index.ts).
+
 | Property      | Type     | Description                          | Required | Default     |
 | ------------- | -------- | ------------------------------------ | -------- | ----------- |
 | `title`       | `string` | The title of the API.                | `true`   | `undefined` |
@@ -103,6 +107,6 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 | `baseUrl`     | `string` | The base URL of the target server.   | `true`   | `undefined` |
 | `docsUrl`     | `string` | A URL to any external documentation. | `false`  | `undefined` |
 
-### CreateOpenApiExpressMiddlewareOptions/CreateOpenApiNextHandlerOptions/CreateOpenApiHttpHandlerOptions
+### CreateOpenApiHttpHandlerOptions
 
-Please see [`CreateOpenApiHttpHandlerOptions`](https://github.com/jlalmes/trpc-openapi/blob/master/src/adapters/node-http/core.ts)
+Please see typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/adapters/node-http/core.ts).

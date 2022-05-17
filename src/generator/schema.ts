@@ -6,16 +6,27 @@ const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodSchema): OpenAPIV3.Schem
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
 };
 
+const instanceofZod = <Z extends z.ZodFirstPartyTypeKind>(
+  schema: any,
+  ZodSchema: Z,
+): schema is InstanceType<typeof z[Z]> => {
+  return schema?._def?.typeName === (ZodSchema as any).name;
+};
+
 const getRootZodSchema = (zodSchema: z.ZodSchema): z.ZodSchema => {
-  if (zodSchema instanceof z.ZodOptional || zodSchema instanceof z.ZodNullable) {
+  if (
+    instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodOptional) ||
+    instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodNullable)
+  ) {
     return getRootZodSchema(zodSchema.unwrap());
   }
-  if (zodSchema instanceof z.ZodDefault) {
+  if (instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodDefault)) {
     return getRootZodSchema(zodSchema.removeDefault());
   }
-  if (zodSchema instanceof z.ZodEffects) {
+  if (instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodEffects)) {
     return getRootZodSchema(zodSchema.innerType());
   }
+  // TODO: ZodLazy
   return zodSchema;
 };
 

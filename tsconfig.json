@@ -1,24 +1,20 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "dist",
-    "allowJs": true,
-    "checkJs": false,
-    "target": "es2019",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "target": "ES2017",
+    "module": "commonjs",
     "strict": true,
-    "skipLibCheck": true,
     "declaration": true,
-    "declarationDir": "dist",
     "declarationMap": true,
     "sourceMap": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "removeComments": false,
     "noUncheckedIndexedAccess": true,
-    "importHelpers": true,
+    "importHelpers": true
   },
-  "include": [
-    "src",
-  ],
+  "include": ["src"]
 }

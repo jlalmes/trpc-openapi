@@ -56,7 +56,7 @@ const createSecureRouter = () => {
 
 const authRouter = createRouter()
   .mutation('register', {
-    meta: { openapi: { enabled: true, method: 'POST', path: '/auth/register', tags: ['auth'] } },
+    meta: { openapi: { enabled: true, method: 'POST', path: '/register', tags: ['auth'] } },
     input: z.object({
       email: z.string(),
       pass: z.string(),
@@ -83,7 +83,7 @@ const authRouter = createRouter()
     },
   })
   .mutation('login', {
-    meta: { openapi: { enabled: true, method: 'POST', path: '/auth/login', tags: ['auth'] } },
+    meta: { openapi: { enabled: true, method: 'POST', path: '/login', tags: ['auth'] } },
     input: z.object({
       email: z.string(),
       pass: z.string(),

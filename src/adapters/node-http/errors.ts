@@ -1,6 +1,5 @@
 import { TRPCError } from '@trpc/server';
 
-// TODO: Open PR to export this this from @trpc/server
 export const TRPC_ERROR_CODE_HTTP_STATUS: Record<TRPCError['code'], number> = {
   PARSE_ERROR: 400,
   BAD_REQUEST: 400,
@@ -15,3 +14,20 @@ export const TRPC_ERROR_CODE_HTTP_STATUS: Record<TRPCError['code'], number> = {
   PAYLOAD_TOO_LARGE: 413,
   METHOD_NOT_SUPPORTED: 405,
 };
+
+export function getErrorFromUnknown(cause: unknown): TRPCError {
+  if (cause instanceof Error && cause.name === 'TRPCError') {
+    return cause as TRPCError;
+  }
+  const err = new TRPCError({
+    code: 'INTERNAL_SERVER_ERROR',
+    message: 'Internal server error',
+    cause,
+  });
+
+  // take stack trace from cause
+  if (cause instanceof Error) {
+    err.stack = cause.stack;
+  }
+  return err;
+}

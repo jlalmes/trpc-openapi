@@ -12,9 +12,9 @@ const zodInstanceofZodType = (schema: any): schema is z.ZodType => {
 
 const zodInstanceof = <Z extends z.ZodFirstPartyTypeKind>(
   schema: any,
-  ZodType: Z,
+  zodTypeKind: Z,
 ): schema is InstanceType<typeof z[Z]> => {
-  return schema?._def?.typeName === (ZodType as any).name;
+  return schema?._def?.typeName === zodTypeKind;
 };
 
 const getBaseZodType = (schema: z.ZodType): z.ZodType => {

@@ -15,7 +15,7 @@ import {
 } from '../../types';
 import { removeLeadingTrailingSlash } from '../../utils';
 import { getBody } from './body';
-import { TRPC_ERROR_CODE_HTTP_STATUS } from './errors';
+import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getProcedures } from './procedures';
 
 export type CreateOpenApiHttpHandlerOptions<
@@ -100,13 +100,7 @@ export const createOpenApiHttpHandler = <
       };
       sendResponse(statusCode, headers, body);
     } catch (cause) {
-      const error =
-        cause instanceof TRPCError
-          ? cause
-          : new TRPCError({
-              message: 'Internal server error',
-              code: 'INTERNAL_SERVER_ERROR',
-            });
+      const error = getErrorFromUnknown(cause);
 
       onError?.({
         error,
@@ -126,7 +120,9 @@ export const createOpenApiHttpHandler = <
       });
 
       const isInputValidationError =
-        error.code === 'BAD_REQUEST' && error.cause instanceof ZodError;
+        error.code === 'BAD_REQUEST' &&
+        error.cause instanceof Error &&
+        error.cause.name === 'ZodError';
 
       const statusCode = meta?.status ?? TRPC_ERROR_CODE_HTTP_STATUS[error.code] ?? 500;
       const headers = meta?.headers ?? {};
@@ -135,7 +131,7 @@ export const createOpenApiHttpHandler = <
         error: {
           message: isInputValidationError ? 'Input validation failed' : error.message,
           code: error.code,
-          issues: isInputValidationError ? error.cause.errors : undefined,
+          issues: isInputValidationError ? (error.cause as ZodError).errors : undefined,
         },
       };
       sendResponse(statusCode, headers, body);

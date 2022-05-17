@@ -1,6 +1,10 @@
 # trpc-openapi
 
-Incremental adoption. Version 3.0.3
+### **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)**
+
+- Support REST protocol while moving fast.
+- Perfect for incremental adoption.
+- OpenAPI version 3.0.3.
 
 ## Usage
 
@@ -78,7 +82,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ## Requirements
 
-_For every OpenAPI enabled procedure the following must be true_:
+For every OpenAPI enabled procedure the following _must_ be true:
 
 - `meta.openapi.enabled` is `true`.
 - `meta.openapi.method` is `GET` or `DELETE` if query procedure OR `POST`, `PUT` or `PATCH` if mutation procedure.

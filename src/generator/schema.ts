@@ -2,84 +2,95 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodSchema): OpenAPIV3.SchemaObject => {
+const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
 };
 
-const instanceofZod = <Z extends z.ZodFirstPartyTypeKind>(
+const zodInstanceofZodType = (schema: any): schema is z.ZodType => {
+  return !!schema?._def?.typeName;
+};
+
+const zodInstanceof = <Z extends z.ZodFirstPartyTypeKind>(
   schema: any,
-  ZodSchema: Z,
+  ZodType: Z,
 ): schema is InstanceType<typeof z[Z]> => {
-  return schema?._def?.typeName === (ZodSchema as any).name;
+  return schema?._def?.typeName === (ZodType as any).name;
 };
 
-const getRootZodSchema = (zodSchema: z.ZodSchema): z.ZodSchema => {
+const getBaseZodType = (schema: z.ZodType): z.ZodType => {
   if (
-    instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodNullable)
+    zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodOptional) ||
+    zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodNullable)
   ) {
-    return getRootZodSchema(zodSchema.unwrap());
+    return getBaseZodType(schema.unwrap());
   }
-  if (instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return getRootZodSchema(zodSchema.removeDefault());
+  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodDefault)) {
+    return getBaseZodType(schema.removeDefault());
   }
-  if (instanceofZod(zodSchema, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return getRootZodSchema(zodSchema.innerType());
+  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodEffects)) {
+    return getBaseZodType(schema.innerType());
   }
-  // TODO: ZodLazy
-  return zodSchema;
+  // TODO: ZodLazy?
+  return schema;
 };
 
-export const getParameterObjects = (zodSchema: any): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!(zodSchema instanceof z.ZodObject) && !(zodSchema instanceof z.ZodVoid)) {
+export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[] | undefined => {
+  if (!zodInstanceofZodType(schema)) {
+    throw new Error('Input parser expects ZodType');
+  }
+
+  if (
+    !zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodObject) &&
+    !zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodVoid)
+  ) {
     throw new Error('Input parser expects ZodObject or ZodVoid');
   }
 
-  if (zodSchema instanceof z.ZodVoid) {
+  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodVoid)) {
     return undefined;
   }
 
-  const zodShape = zodSchema.shape as z.ZodRawShape;
-  return Object.keys(zodShape).map((zodShapeKey) => {
-    const zodShapeValue = zodShape[zodShapeKey]!;
+  const shape = schema.shape;
+  return Object.keys(shape).map((key) => {
+    const value = shape[key]!;
 
-    if (!(getRootZodSchema(zodShapeValue) instanceof z.ZodString)) {
+    if (!zodInstanceof(getBaseZodType(value), z.ZodFirstPartyTypeKind.ZodString)) {
       throw new Error('Input parser expects ZodObject<{ [string]: ZodString }>');
     }
 
     return {
-      name: zodShapeKey,
+      name: key,
       in: 'query',
-      required: !zodShapeValue.isOptional(),
-      schema: zodSchemaToOpenApiSchemaObject(zodShapeValue),
+      required: !value.isOptional(),
+      schema: zodSchemaToOpenApiSchemaObject(value),
       style: 'form',
       explode: true,
     };
   });
 };
 
-export const getRequestBodyObject = (zodSchema: any): OpenAPIV3.RequestBodyObject | undefined => {
-  if (!(zodSchema instanceof z.ZodSchema)) {
-    throw new Error('Input parser expects ZodSchema');
+export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObject | undefined => {
+  if (!zodInstanceofZodType(schema)) {
+    throw new Error('Input parser expects ZodType');
   }
 
-  if (zodSchema instanceof z.ZodVoid) {
+  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodVoid)) {
     return undefined;
   }
 
   return {
-    required: !zodSchema.isOptional(),
+    required: !schema.isOptional(),
     content: {
       'application/json': {
-        schema: zodSchemaToOpenApiSchemaObject(zodSchema),
+        schema: zodSchemaToOpenApiSchemaObject(schema),
       },
     },
   };
 };
 
-export const getResponsesObject = (zodSchema: any): OpenAPIV3.ResponsesObject => {
-  if (!(zodSchema instanceof z.ZodSchema)) {
-    throw new Error('Output parser expects ZodSchema');
+export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
+  if (!zodInstanceofZodType(schema)) {
+    throw new Error('Output parser expects ZodType');
   }
 
   const successResponse = {
@@ -89,7 +100,7 @@ export const getResponsesObject = (zodSchema: any): OpenAPIV3.ResponsesObject =>
         schema: zodSchemaToOpenApiSchemaObject(
           z.object({
             ok: z.literal(true),
-            data: zodSchema,
+            data: schema,
           }),
         ),
       },

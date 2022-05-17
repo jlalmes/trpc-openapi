@@ -2,13 +2,13 @@
 
 ### **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)**
 
-- Support REST protocol while moving fast.
+- Easy REST endpoints for your tRPC procedures.
 - Perfect for incremental adoption.
 - OpenAPI version 3.0.3.
 
 ## Usage
 
-1. **Install `trpc-openapi`.**
+**1. Install `trpc-openapi`.**
 
 ```bash
 # npm
@@ -17,7 +17,7 @@ npm install trpc-openapi
 yarn add trpc-openapi
 ```
 
-2. **Add `OpenApiMeta` to your tRPC router.**
+**2. Add `OpenApiMeta` to your tRPC router.**
 
 ```typescript
 import * as trpc from '@trpc/server';
@@ -26,7 +26,7 @@ import { OpenApiMeta } from 'trpc-openapi';
 export const appRouter = trpc.router<any, OpenApiMeta /* 👈 */>();
 ```
 
-3. **Enable `openapi` support for a procedure.**
+**3. Enable `openapi` support for a procedure.**
 
 ```typescript
 import * as trpc from '@trpc/server';
@@ -42,7 +42,7 @@ export const appRouter = trpc.router<any, OpenApiMeta>().query('sayHello', {
 });
 ```
 
-4. **Generate OpenAPI v3 document.**
+**4. Generate OpenAPI v3 document.**
 
 ```typescript
 import { generateOpenApiDocument } from 'trpc-openapi';
@@ -57,7 +57,7 @@ const openApiDocument = generateOpenApiDocument(appRouter, {
 });
 ```
 
-5. **Add an `trpc-openapi` adapter to your app.**
+**5. Add an `trpc-openapi` adapter to your app.**
 
 Current support for `Express`, `Next.js` & `node:http`.
 
@@ -72,7 +72,7 @@ const server = http.createServer(createOpenApiHttpHandler({ router: appRouter })
 server.listen(3000);
 ```
 
-6. **Profit 🤑**
+**6. Profit 🤑**
 
 ```typescript
 // client.ts
@@ -88,7 +88,7 @@ For every OpenAPI enabled procedure the following _must_ be true:
 - `meta.openapi.method` is `GET` or `DELETE` if query procedure OR `POST`, `PUT` or `PATCH` if mutation procedure.
 - `meta.openapi.path` is a string starting with `/`.
 - Both `input` and `output` parsers are present.
-- Parsers use `zod` validators.
+- Parsers use [`zod`](https://github.com/colinhacks/zod) validators.
 - `input` parsers extend `Record<string, string>`.
 
 ## Authorization

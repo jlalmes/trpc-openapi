@@ -24,7 +24,7 @@ export type CreateOpenApiHttpHandlerOptions<
   TResponse extends NodeHTTPResponse,
 > = Pick<
   NodeHTTPHandlerOptions<TRouter, TRequest, TResponse>,
-  'router' | 'createContext' | 'responseMeta' | 'onError' | 'teardown'
+  'router' | 'createContext' | 'responseMeta' | 'onError' | 'teardown' | 'maxBodySize'
 >;
 
 export type OpenApiNextFunction = () => void;
@@ -44,7 +44,7 @@ export const createOpenApiHttpHandler = <
     baseUrl: '-',
   });
 
-  const { router, createContext, responseMeta, onError, teardown } = opts;
+  const { router, createContext, responseMeta, onError, teardown, maxBodySize } = opts;
   const procedures = getProcedures(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
@@ -79,7 +79,7 @@ export const createOpenApiHttpHandler = <
         });
       }
 
-      input = procedure.type === 'query' ? req.query : await getBody(req);
+      input = procedure.type === 'query' ? req.query : await getBody(req, maxBodySize);
       ctx = await createContext?.({ ...opts, req, res });
       const caller = router.createCaller(ctx);
       data = await caller[procedure.type](procedure.path, input);

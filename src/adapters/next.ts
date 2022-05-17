@@ -5,8 +5,10 @@ import { OpenApiErrorResponse, OpenApiRouter } from '../types';
 import { removeLeadingTrailingSlash } from '../utils';
 import { CreateOpenApiHttpHandlerOptions, createOpenApiHttpHandler } from './node-http/core';
 
-export type CreateOpenApiNextHandlerOptions<TRouter extends OpenApiRouter> =
-  CreateOpenApiHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>;
+export type CreateOpenApiNextHandlerOptions<TRouter extends OpenApiRouter> = Omit<
+  CreateOpenApiHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>,
+  'maxBodySize'
+>;
 
 export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
   opts: CreateOpenApiNextHandlerOptions<TRouter>,

@@ -1,8 +1,8 @@
 # trpc-openapi
 
-Incremental adoption.
+Incremental adoption. Version 3.0.3
 
-## Getting started
+## Usage
 
 1. **Install `trpc-openapi`.**
 
@@ -80,14 +80,29 @@ const res = await fetch('http://localhost:3000/api/say-hello?name=James', { meth
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
-## Considerations
+## Types
 
-1. For a procedure to be valid for OpenAPI support it must have:
+### OpenApiMeta
 
-- OpenApiMeta (`openapi: {...}`)
-  - `enabled: true`
-  - `method: 'GET' | 'DELETE'` // query
-  - `method: 'POST' | 'PUT' | 'PATCH'` // mutation
-  - `path: starts with '/'`
-- Zod input parser (`input:`)
-- Zod output parser (`output:`)
+| Property      | Type         | Description                                                                                                         | Required | Default     |
+| ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| `enabled`     | `boolean`    | Exposes procedure on `trpc-openapi` adapters and in OpenAPI documents                                               | `true`   | `false`     |
+| `method`      | `HttpMethod` | Method this route is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
+| `path`        | `string`     | Path this route is exposed on. Value must start with `/`.                                                           | `true`   | `undefined` |
+| `secure`      | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme.                         | `false`  | `false`     |
+| `description` | `string`     | Route description included in OpenAPI document.                                                                     | `false`  | `undefined` |
+| `tags`        | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
+
+### GenerateOpenApiDocumentOptions
+
+| Property      | Type     | Description                          | Required | Default     |
+| ------------- | -------- | ------------------------------------ | -------- | ----------- |
+| `title`       | `string` | The title of the API.                | `true`   | `undefined` |
+| `description` | `string` | A short description of the API.      | `false`  | `undefined` |
+| `version`     | `string` | The version of the OpenAPI document. | `true`   | `undefined` |
+| `baseUrl`     | `string` | The base URL of the target server.   | `true`   | `undefined` |
+| `docsUrl`     | `string` | A URL to any external documentation. | `false`  | `undefined` |
+
+### CreateOpenApiExpressMiddlewareOptions/CreateOpenApiNextHandlerOptions/CreateOpenApiHttpHandlerOptions
+
+Please see [`CreateOpenApiHttpHandlerOptions`](https://github.com/jlalmes/trpc-openapi/blob/master/src/adapters/node-http/core.ts)

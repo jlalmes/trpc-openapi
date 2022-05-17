@@ -167,7 +167,7 @@ app.listen(3000);
 
 #### With Next.js
 
-Please see full example project [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-next).
+Please see full example project [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-nextjs).
 
 ```typescript
 // pages/api/[trpc].ts

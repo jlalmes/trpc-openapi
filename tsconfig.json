@@ -17,8 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "lib": ["esnext"]
   },
-  "exclude": [
-    "node_modules",
-    "dist"
+  "include": [
+    "src",
   ],
 }

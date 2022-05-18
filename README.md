@@ -50,7 +50,7 @@ import { generateOpenApiDocument } from 'trpc-openapi';
 import { appRouter } from '../appRouter';
 
 /* 👇 */
-const openApiDocument = generateOpenApiDocument(appRouter, {
+export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: 'tRPC OpenAPI',
   version: '1.0.0',
   baseUrl: 'http://localhost:3000/api',
@@ -97,8 +97,9 @@ To create protected endpoints, just add `protected: true` to the `meta.openapi` 
 
 Please explore a [complete example here](https://github.com/jlalmes/trpc-openapi/blob/master/examples/with-nextjs/server/router.ts).
 
+#### Server
+
 ```typescript
-// server.js
 import * as trpc from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
@@ -135,8 +136,9 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
 });
 ```
 
+#### Client
+
 ```typescript
-// client.ts
 const res = await fetch('http://localhost:3000/say-hello', {
   method: 'GET',
   headers: { 'Authorization': 'Bearer usr_123' }, /* 👈 */

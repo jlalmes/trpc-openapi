@@ -144,6 +144,27 @@ const res = await fetch('http://localhost:3000/say-hello', {
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
+## API Responses
+
+Inspired by [Slack Web API](https://api.slack.com/web).
+
+```jsonc
+{
+  "ok": true,
+  "data": "This is good" /* Output from procedure */
+}
+```
+
+```jsonc
+{
+  "ok": false,
+  "error": {
+    "message": "This is bad" /* error.message */,
+    "code": "BAD_REQUEST" /* TRPCError code */
+  }
+}
+```
+
 ## Examples
 
 #### With Express
@@ -178,32 +199,6 @@ import { appRouter } from '../../server/appRouter';
 export default createOpenApiNextHandler({ router: appRouter });
 ```
 
-## API Responses
-
-Inspired by [Slack Web API](https://api.slack.com/web).
-
-#### Success
-
-```typescript
-export type OpenApiSuccessResponse = {
-  ok: true;
-  data: TOutput;
-};
-```
-
-#### Failure
-
-```typescript
-export type OpenApiErrorResponse = {
-  ok: false;
-  error: {
-    message: string;
-    code: TRPC_ERROR_CODE_KEY;
-    issues?: ZodIssue[];
-  };
-};
-```
-
 ## Types
 
 #### OpenApiMeta
@@ -212,7 +207,7 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 
 | Property  | Type         | Description                                                                                                         | Required | Default     |
 | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
-| `enabled` | `boolean`    | Exposes procedure on `trpc-openapi` adapters and in OpenAPI documents                                               | `true`   | `false`     |
+| `enabled` | `boolean`    | Exposes procedure to `trpc-openapi` adapters and in OpenAPI document                                                | `true`   | `false`     |
 | `method`  | `HttpMethod` | Method this route is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
 | `path`    | `string`     | Path this route is exposed on. Value must start with `/`.                                                           | `true`   | `undefined` |
 | `protect` | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.     | `false`  | `false`     |

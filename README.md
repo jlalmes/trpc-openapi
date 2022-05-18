@@ -88,14 +88,14 @@ For every OpenAPI enabled procedure the following _must_ be true:
 - `meta.openapi.method` is `GET` or `DELETE` if query procedure OR `POST`, `PUT` or `PATCH` if mutation procedure.
 - `meta.openapi.path` is a string starting with `/`.
 - Both `input` and `output` parsers are present.
-- Parsers use [`zod`](https://github.com/colinhacks/zod) validators.
+- Parsers use [`zod`](https://github.com/colinhacks/zod) validation.
 - `input` parsers extend `Record<string, string>`.
 
 ## Authorization
 
-To create protected endpoints, just add `secure: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header.
+To create protected endpoints, just add `protected: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header.
 
-Please explore a more complete example [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-express).
+Please explore a [complete example here](https://github.com/jlalmes/trpc-openapi/blob/master/examples/with-nextjs/server/router.ts).
 
 ```typescript
 // server.js
@@ -123,7 +123,7 @@ export const createContext = async ({ req, res }): Promise<Context> => {
 };
 
 export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello', secure: true /* 👈 */ } },
+  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello', protected: true /* 👈 */ } },
   input: z.object({}), // no input expected
   output: z.object({ greeting: z.string() }),
   resolve: ({ input, ctx }) => {
@@ -148,7 +148,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 #### With Express
 
-Please see full example project [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-express).
+Please see [full example here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-express).
 
 ```typescript
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
@@ -167,7 +167,7 @@ app.listen(3000);
 
 #### With Next.js
 
-Please see full example project [here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-nextjs).
+Please see [full example here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-nextjs).
 
 ```typescript
 // pages/api/[trpc].ts
@@ -178,7 +178,45 @@ import { appRouter } from '../../server/appRouter';
 export default createOpenApiNextHandler({ router: appRouter });
 ```
 
+## API Responses
+
+Inspired by [Slack Web API](https://api.slack.com/web).
+
+#### Success
+
+```typescript
+export type OpenApiSuccessResponse = {
+  ok: true;
+  data: TOutput;
+};
+```
+
+#### Failure
+
+```typescript
+export type OpenApiErrorResponse = {
+  ok: false;
+  error: {
+    message: string;
+    code: TRPC_ERROR_CODE_KEY;
+    issues?: ZodIssue[];
+  };
+};
+```
+
 ## Types
+
+#### GenerateOpenApiDocumentOptions
+
+Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/generator/index.ts).
+
+| Property      | Type     | Description                          | Required |
+| ------------- | -------- | ------------------------------------ | -------- |
+| `title`       | `string` | The title of the API.                | `true`   |
+| `description` | `string` | A short description of the API.      | `false`  |
+| `version`     | `string` | The version of the OpenAPI document. | `true`   |
+| `baseUrl`     | `string` | The base URL of the target server.   | `true`   |
+| `docsUrl`     | `string` | A URL to any external documentation. | `false`  |
 
 #### OpenApiMeta
 
@@ -193,18 +231,6 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 | `summary` | `string`     | Route summary included in OpenAPI document.                                                                         | `false`  | `undefined` |
 | `tags`    | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
 
-#### GenerateOpenApiDocumentOptions
-
-Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/generator/index.ts).
-
-| Property      | Type     | Description                          | Required |
-| ------------- | -------- | ------------------------------------ | -------- |
-| `title`       | `string` | The title of the API.                | `true`   |
-| `description` | `string` | A short description of the API.      | `false`  |
-| `version`     | `string` | The version of the OpenAPI document. | `true`   |
-| `baseUrl`     | `string` | The base URL of the target server.   | `true`   |
-| `docsUrl`     | `string` | A URL to any external documentation. | `false`  |
-
 #### CreateOpenApiHttpHandlerOptions
 
 Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/adapters/node-http/core.ts).
@@ -217,3 +243,8 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 | `onError`       | `Function` | Function called if error occurs inside handler.                               | `false`  |
 | `teardown`      | `Function` | Function called after each request is completed.                              | `false`  |
 | `maxBodySize`   | `number`   | Controls the maximum request body size in bytes.                              | `false`  |
+
+---
+
+Follow me on Twitter! [@jlalmes](https://twitter.com/jlalmes)
+Follow tRPC on Twitter [@trpcio](https://twitter.com/trpcio)

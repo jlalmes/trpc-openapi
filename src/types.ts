@@ -1,6 +1,8 @@
-import { ProcedureRecord } from '@trpc/server';
+import { ProcedureRecord, TRPCError } from '@trpc/server';
 // eslint-disable-next-line import/no-unresolved
 import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
+// eslint-disable-next-line import/no-unresolved
+import { TRPC_ERROR_CODE_KEY } from '@trpc/server/dist/declarations/src/rpc';
 import { ZodIssue } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -35,7 +37,7 @@ export type OpenApiErrorResponse = {
   ok: false;
   error: {
     message: string;
-    code: string;
+    code: TRPC_ERROR_CODE_KEY;
     issues?: ZodIssue[];
   };
 };

@@ -244,4 +244,4 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 
 ---
 
-Contact me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💙
+Follow me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💙

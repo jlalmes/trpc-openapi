@@ -18,7 +18,7 @@ describe('generator', () => {
     const openApiDocument = generateOpenApiDocument(appRouter, {
       title: 'tRPC OpenAPI',
       version: '1.0.0',
-      description: 'This is the OpenAPI v3 documentation for the tRPC API',
+      description: 'API documentation',
       baseUrl: 'http://localhost:3000/api',
       docsUrl: 'http://localhost:3000/docs',
     });
@@ -27,6 +27,62 @@ describe('generator', () => {
     expect(openApiDocument).toMatchInlineSnapshot(`
       Object {
         "components": Object {
+          "responses": Object {
+            "error": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "error": Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "code": Object {
+                            "type": "string",
+                          },
+                          "issues": Object {
+                            "items": Object {
+                              "additionalProperties": false,
+                              "properties": Object {
+                                "message": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "required": Array [
+                                "message",
+                              ],
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "message": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "message",
+                          "code",
+                        ],
+                        "type": "object",
+                      },
+                      "ok": Object {
+                        "enum": Array [
+                          false,
+                        ],
+                        "type": "boolean",
+                      },
+                    },
+                    "required": Array [
+                      "ok",
+                      "error",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "Error response",
+            },
+          },
           "securitySchemes": Object {
             "Authorization": Object {
               "scheme": "bearer",
@@ -38,7 +94,7 @@ describe('generator', () => {
           "url": "http://localhost:3000/docs",
         },
         "info": Object {
-          "description": "This is the OpenAPI v3 documentation for the tRPC API",
+          "description": "API documentation",
           "title": "tRPC OpenAPI",
           "version": "1.0.0",
         },
@@ -66,7 +122,7 @@ describe('generator', () => {
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[query.noInput] - Input parser expects ZodObject or ZodVoid');
+    }).toThrowError('[query.noInput] - Input parser expects ZodType');
   });
 
   test('mutation with missing input', () => {
@@ -82,7 +138,7 @@ describe('generator', () => {
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[mutation.noInput] - Input parser expects ZodSchema');
+    }).toThrowError('[mutation.noInput] - Input parser expects ZodType');
   });
 
   test('query procedure with missing output', () => {
@@ -98,7 +154,7 @@ describe('generator', () => {
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[query.noOutput] - Output parser expects ZodSchema');
+    }).toThrowError('[query.noOutput] - Output parser expects ZodType');
   });
 
   test('mutation procedure with missing output', () => {
@@ -114,7 +170,7 @@ describe('generator', () => {
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[mutation.noOutput] - Output parser expects ZodSchema');
+    }).toThrowError('[mutation.noOutput] - Output parser expects ZodType');
   });
 
   test('query procedure with non-object input', () => {
@@ -131,7 +187,7 @@ describe('generator', () => {
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[query.badInput] - Input parser expects ZodObject or ZodVoid');
+    }).toThrowError('[query.badInput] - Input parser expects ZodObject');
   });
 
   test('query procedure with non-string-value-object input', () => {
@@ -310,7 +366,6 @@ describe('generator', () => {
         "paths": Object {
           "/users": Object {
             "delete": Object {
-              "description": undefined,
               "parameters": Array [
                 Object {
                   "explode": true,
@@ -395,10 +450,10 @@ describe('generator', () => {
                 },
               },
               "security": undefined,
+              "summary": undefined,
               "tags": undefined,
             },
             "get": Object {
-              "description": undefined,
               "parameters": Array [
                 Object {
                   "explode": true,
@@ -500,10 +555,10 @@ describe('generator', () => {
                 },
               },
               "security": undefined,
+              "summary": undefined,
               "tags": undefined,
             },
             "patch": Object {
-              "description": undefined,
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
@@ -615,10 +670,10 @@ describe('generator', () => {
                 },
               },
               "security": undefined,
+              "summary": undefined,
               "tags": undefined,
             },
             "post": Object {
-              "description": undefined,
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
@@ -727,6 +782,7 @@ describe('generator', () => {
                 },
               },
               "security": undefined,
+              "summary": undefined,
               "tags": undefined,
             },
           },
@@ -838,7 +894,7 @@ describe('generator', () => {
           enabled: true,
           path: '/metadata/all',
           method: 'GET',
-          description: 'Some description',
+          summary: 'Some summary',
           tags: ['some-tag'],
         },
       },
@@ -854,7 +910,7 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Some description');
+    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Some summary');
     expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['some-tag']);
   });
 
@@ -865,7 +921,7 @@ describe('generator', () => {
           enabled: true,
           path: '/secure/endpoint',
           method: 'POST',
-          secure: true,
+          protect: true,
         },
       },
       input: z.object({ name: z.string() }),

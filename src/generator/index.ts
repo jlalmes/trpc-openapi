@@ -2,6 +2,7 @@ import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
 import { getOpenApiPathsObject } from './paths';
+import { errorResponseObject } from './schema';
 
 export const openApiVersion = '3.0.3' as const;
 
@@ -36,6 +37,9 @@ export const generateOpenApiDocument = (
           type: 'http',
           scheme: 'bearer',
         },
+      },
+      responses: {
+        error: errorResponseObject,
       },
     },
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,

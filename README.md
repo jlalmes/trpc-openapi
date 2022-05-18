@@ -53,7 +53,7 @@ import { appRouter } from '../appRouter';
 export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: 'tRPC OpenAPI',
   version: '1.0.0',
-  baseUrl: 'http://localhost:3000/api',
+  baseUrl: 'http://localhost:3000',
 });
 ```
 
@@ -243,5 +243,4 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 
 ---
 
-Follow me on Twitter! [@jlalmes](https://twitter.com/jlalmes)
-Follow tRPC on Twitter [@trpcio](https://twitter.com/trpcio)
+Contact me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💙

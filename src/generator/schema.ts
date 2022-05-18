@@ -19,8 +19,8 @@ const zodInstanceof = <Z extends z.ZodFirstPartyTypeKind>(
 
 const getBaseZodType = (schema: z.ZodType): z.ZodType => {
   if (
-    zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodNullable)
+    zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodOptional)
+    // zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodNullable) // nullable not valid in getParameterObjects
   ) {
     return getBaseZodType(schema.unwrap());
   }
@@ -77,12 +77,30 @@ export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObje
   };
 };
 
+export const errorResponseObject = {
+  description: 'Error response',
+  content: {
+    'application/json': {
+      schema: zodSchemaToOpenApiSchemaObject(
+        z.object({
+          ok: z.literal(false),
+          error: z.object({
+            message: z.string(),
+            code: z.string(),
+            issues: z.array(z.object({ message: z.string() })).optional(),
+          }),
+        }),
+      ),
+    },
+  },
+};
+
 export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
   if (!zodInstanceofZodType(schema)) {
     throw new Error('Output parser expects ZodType');
   }
 
-  const successResponse = {
+  const successResponseObject = {
     description: 'Successful response',
     content: {
       'application/json': {
@@ -96,26 +114,8 @@ export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject =
     },
   };
 
-  const errorResponse = {
-    description: 'Error response',
-    content: {
-      'application/json': {
-        schema: zodSchemaToOpenApiSchemaObject(
-          z.object({
-            ok: z.literal(false),
-            error: z.object({
-              message: z.string(),
-              code: z.string(),
-              issues: z.array(z.object({ message: z.string() })).optional(),
-            }),
-          }),
-        ),
-      },
-    },
-  };
-
   return {
-    200: successResponse,
-    default: errorResponse,
+    200: successResponseObject,
+    default: { $ref: '#/components/responses/error' },
   };
 };

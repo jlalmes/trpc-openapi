@@ -178,7 +178,7 @@ import { appRouter } from '../../server/appRouter';
 export default createOpenApiNextHandler({ router: appRouter });
 ```
 
-## API Response Shape
+## API Responses
 
 Inspired by [Slack Web API](https://api.slack.com/web).
 
@@ -217,19 +217,19 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 | `path`    | `string`     | Path this route is exposed on. Value must start with `/`.                                                           | `true`   | `undefined` |
 | `protect` | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.     | `false`  | `false`     |
 | `summary` | `string`     | Route summary included in OpenAPI document.                                                                         | `false`  | `undefined` |
-| `tags`    | `string[]`   | Route tags included in OpenAPI document.                                                                            |
+| `tags`    | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
 
 #### GenerateOpenApiDocumentOptions
 
 Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/generator/index.ts).
 
 | Property      | Type     | Description                          | Required |
-| ------------- | -------- | ------------------------------------ | -------- | --- | ------- | ---- |
+| ------------- | -------- | ------------------------------------ | -------- |
 | `title`       | `string` | The title of the API.                | `true`   |
 | `description` | `string` | A short description of the API.      | `false`  |
 | `version`     | `string` | The version of the OpenAPI document. | `true`   |
 | `baseUrl`     | `string` | The base URL of the target server.   | `true`   |
-| `docsUrl`     | `string` | A URL to any external documentation. | `false`  |     | `false` | `[]` |
+| `docsUrl`     | `string` | A URL to any external documentation. | `false`  |
 
 #### CreateOpenApiHttpHandlerOptions
 

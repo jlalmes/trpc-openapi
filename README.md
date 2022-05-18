@@ -84,6 +84,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 For every OpenAPI enabled procedure the following _must_ be true:
 
+- tRPC version 9 (`>=9.23.0`) is installed.
 - `meta.openapi.enabled` is `true`.
 - `meta.openapi.method` is `GET` or `DELETE` if query procedure OR `POST`, `PUT` or `PATCH` if mutation procedure.
 - `meta.openapi.path` is a string starting with `/`.

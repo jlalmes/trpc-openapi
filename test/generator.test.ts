@@ -109,71 +109,75 @@ describe('generator', () => {
     `);
   });
 
-  test('query with missing input', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('noInput', {
-      meta: { openapi: { enabled: true, path: '/no-input', method: 'GET' } },
-      output: z.object({ name: z.string() }),
-      resolve: () => ({ name: 'jlalmes' }),
+  describe('with missing input', () => {
+    test('query', () => {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('noInput', {
+        meta: { openapi: { enabled: true, path: '/no-input', method: 'GET' } },
+        output: z.object({ name: z.string() }),
+        resolve: () => ({ name: 'jlalmes' }),
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.noInput] - Input parser expects ZodType');
     });
 
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
+    test('mutation', () => {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('noInput', {
+        meta: { openapi: { enabled: true, path: '/no-input', method: 'POST' } },
+        output: z.object({ name: z.string() }),
+        resolve: () => ({ name: 'jlalmes' }),
       });
-    }).toThrowError('[query.noInput] - Input parser expects ZodType');
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[mutation.noInput] - Input parser expects ZodType');
+    });
   });
 
-  test('mutation with missing input', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().mutation('noInput', {
-      meta: { openapi: { enabled: true, path: '/no-input', method: 'POST' } },
-      output: z.object({ name: z.string() }),
-      resolve: () => ({ name: 'jlalmes' }),
+  describe('with missing output', () => {
+    test('query', () => {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('noOutput', {
+        meta: { openapi: { enabled: true, path: '/no-output', method: 'GET' } },
+        input: z.object({ name: z.string() }),
+        resolve: ({ input }) => ({ name: input.name }),
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.noOutput] - Output parser expects ZodType');
     });
 
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
+    test('mutation', () => {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('noOutput', {
+        meta: { openapi: { enabled: true, path: '/no-output', method: 'POST' } },
+        input: z.object({ name: z.string() }),
+        resolve: ({ input }) => ({ name: input.name }),
       });
-    }).toThrowError('[mutation.noInput] - Input parser expects ZodType');
-  });
 
-  test('query procedure with missing output', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('noOutput', {
-      meta: { openapi: { enabled: true, path: '/no-output', method: 'GET' } },
-      input: z.object({ name: z.string() }),
-      resolve: ({ input }) => ({ name: input.name }),
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[mutation.noOutput] - Output parser expects ZodType');
     });
-
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-    }).toThrowError('[query.noOutput] - Output parser expects ZodType');
   });
 
-  test('mutation procedure with missing output', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().mutation('noOutput', {
-      meta: { openapi: { enabled: true, path: '/no-output', method: 'POST' } },
-      input: z.object({ name: z.string() }),
-      resolve: ({ input }) => ({ name: input.name }),
-    });
-
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-    }).toThrowError('[mutation.noOutput] - Output parser expects ZodType');
-  });
-
-  test('query procedure with non-object input', () => {
+  test('with query non-object input', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
       meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
       input: z.string(),
@@ -190,12 +194,12 @@ describe('generator', () => {
     }).toThrowError('[query.badInput] - Input parser expects ZodObject');
   });
 
-  test('query procedure with non-string-value-object input', () => {
+  test('with query non-object-string-value input', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
       meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
       input: z.object({ age: z.number() }),
-      output: z.object({ age: z.number() }),
-      resolve: ({ input }) => ({ age: input.age }),
+      output: z.object({ name: z.string() }),
+      resolve: () => ({ name: 'jlalmes' }),
     });
 
     expect(() => {
@@ -207,88 +211,92 @@ describe('generator', () => {
     }).toThrowError('[query.badInput] - Input parser expects ZodObject<{ [string]: ZodString }>');
   });
 
-  test('query procedure with bad method', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('postQuery', {
-      meta: { openapi: { enabled: true, path: '/post-query', method: 'POST' } },
-      input: z.object({ name: z.string() }),
-      output: z.object({ name: z.string() }),
-      resolve: ({ input }) => ({ name: input.name }),
+  describe('with bad method', () => {
+    test('query', () => {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('postQuery', {
+        meta: { openapi: { enabled: true, path: '/post-query', method: 'POST' } },
+        input: z.object({ name: z.string() }),
+        output: z.object({ name: z.string() }),
+        resolve: ({ input }) => ({ name: input.name }),
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.postQuery] - Query method must be GET or DELETE');
     });
 
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
+    test('mutation', () => {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('getMutation', {
+        meta: { openapi: { enabled: true, path: '/get-mutation', method: 'GET' } },
+        input: z.object({ name: z.string() }),
+        output: z.object({ name: z.string() }),
+        resolve: ({ input }) => ({ name: input.name }),
       });
-    }).toThrowError('[query.postQuery] - Query method must be GET or DELETE');
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[mutation.getMutation] - Mutation method must be POST, PATCH or PUT');
+    });
   });
 
-  test('mutation procedure with bad method', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().mutation('getMutation', {
-      meta: { openapi: { enabled: true, path: '/get-mutation', method: 'GET' } },
-      input: z.object({ name: z.string() }),
-      output: z.object({ name: z.string() }),
-      resolve: ({ input }) => ({ name: input.name }),
+  describe('duplicate routes', () => {
+    test('matching', () => {
+      const appRouter = trpc
+        .router<any, OpenApiMeta>()
+        .query('procedure1', {
+          meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ name: z.string() }),
+          resolve: ({ input }) => ({ name: input.name }),
+        })
+        .query('procedure2', {
+          meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ name: z.string() }),
+          resolve: ({ input }) => ({ name: input.name }),
+        });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
     });
 
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-    }).toThrowError('[mutation.getMutation] - Mutation method must be POST, PATCH or PUT');
-  });
+    test('trailing slash', () => {
+      const appRouter = trpc
+        .router<any, OpenApiMeta>()
+        .query('procedure1', {
+          meta: { openapi: { enabled: true, path: '/procedure/', method: 'GET' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ name: z.string() }),
+          resolve: ({ input }) => ({ name: input.name }),
+        })
+        .query('procedure2', {
+          meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ name: z.string() }),
+          resolve: ({ input }) => ({ name: input.name }),
+        });
 
-  test('duplicate route', () => {
-    const appRouter = trpc
-      .router<any, OpenApiMeta>()
-      .query('procedure1', {
-        meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      })
-      .query('procedure2', {
-        meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      });
-
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-    }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
-  });
-
-  test('duplicate route with trailing slash', () => {
-    const appRouter = trpc
-      .router<any, OpenApiMeta>()
-      .query('procedure1', {
-        meta: { openapi: { enabled: true, path: '/procedure/', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      })
-      .query('procedure2', {
-        meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      });
-
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-    }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
+    });
   });
 
   test('unsupported subscription', () => {
@@ -349,6 +357,62 @@ describe('generator', () => {
     expect(openApiDocument).toMatchInlineSnapshot(`
       Object {
         "components": Object {
+          "responses": Object {
+            "error": Object {
+              "content": Object {
+                "application/json": Object {
+                  "schema": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "error": Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "code": Object {
+                            "type": "string",
+                          },
+                          "issues": Object {
+                            "items": Object {
+                              "additionalProperties": false,
+                              "properties": Object {
+                                "message": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "required": Array [
+                                "message",
+                              ],
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "message": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "message",
+                          "code",
+                        ],
+                        "type": "object",
+                      },
+                      "ok": Object {
+                        "enum": Array [
+                          false,
+                        ],
+                        "type": "boolean",
+                      },
+                    },
+                    "required": Array [
+                      "ok",
+                      "error",
+                    ],
+                    "type": "object",
+                  },
+                },
+              },
+              "description": "Error response",
+            },
+          },
           "securitySchemes": Object {
             "Authorization": Object {
               "scheme": "bearer",
@@ -402,51 +466,7 @@ describe('generator', () => {
                   "description": "Successful response",
                 },
                 "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "code": Object {
-                                "type": "string",
-                              },
-                              "issues": Object {
-                                "items": Object {
-                                  "additionalProperties": false,
-                                  "properties": Object {},
-                                  "type": "object",
-                                },
-                                "type": "array",
-                              },
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                              "code",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
+                  "$ref": "#/components/responses/error",
                 },
               },
               "security": undefined,
@@ -507,51 +527,7 @@ describe('generator', () => {
                   "description": "Successful response",
                 },
                 "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "code": Object {
-                                "type": "string",
-                              },
-                              "issues": Object {
-                                "items": Object {
-                                  "additionalProperties": false,
-                                  "properties": Object {},
-                                  "type": "object",
-                                },
-                                "type": "array",
-                              },
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                              "code",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
+                  "$ref": "#/components/responses/error",
                 },
               },
               "security": undefined,
@@ -622,51 +598,7 @@ describe('generator', () => {
                   "description": "Successful response",
                 },
                 "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "code": Object {
-                                "type": "string",
-                              },
-                              "issues": Object {
-                                "items": Object {
-                                  "additionalProperties": false,
-                                  "properties": Object {},
-                                  "type": "object",
-                                },
-                                "type": "array",
-                              },
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                              "code",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
+                  "$ref": "#/components/responses/error",
                 },
               },
               "security": undefined,
@@ -734,51 +666,7 @@ describe('generator', () => {
                   "description": "Successful response",
                 },
                 "default": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "error": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "code": Object {
-                                "type": "string",
-                              },
-                              "issues": Object {
-                                "items": Object {
-                                  "additionalProperties": false,
-                                  "properties": Object {},
-                                  "type": "object",
-                                },
-                                "type": "array",
-                              },
-                              "message": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "message",
-                              "code",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              false,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "error",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Error response",
+                  "$ref": "#/components/responses/error",
                 },
               },
               "security": undefined,
@@ -814,11 +702,56 @@ describe('generator', () => {
     expect(Object.keys(openApiDocument.paths).length).toBe(0);
   });
 
-  test('with void', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('void', {
-      meta: { openapi: { enabled: true, path: '/void', method: 'GET' } },
-      input: z.void(),
-      output: z.void(),
+  describe('with falsey outputs', () => {
+    const appRouter = trpc
+      .router<any, OpenApiMeta>()
+      .mutation('void', {
+        meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
+        input: z.void(),
+        output: z.void(),
+        resolve: () => undefined,
+      })
+      .mutation('null', {
+        meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
+        input: z.null(),
+        output: z.null(),
+        resolve: () => undefined,
+      })
+      .mutation('undefined', {
+        meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
+        input: z.undefined(),
+        output: z.undefined(),
+        resolve: () => undefined,
+      })
+      .mutation('optional', {
+        meta: { openapi: { enabled: true, path: '/optional', method: 'POST' } },
+        input: z.string().optional(),
+        output: z.string().optional(),
+        resolve: () => undefined,
+      })
+      .mutation('nullish', {
+        meta: { openapi: { enabled: true, path: '/nullish', method: 'POST' } },
+        input: z.string().nullish(),
+        output: z.string().nullish(),
+        resolve: () => undefined,
+      });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/void']!.get!.parameters).toMatchInlineSnapshot(``);
+    expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(``);
+  });
+
+  describe('with null', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('null', {
+      meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
+      input: z.null(),
+      output: z.null(),
       resolve: () => undefined,
     });
 
@@ -829,31 +762,27 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/void']!.get!.parameters).toBe(undefined);
-    expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-              ],
-              "type": "object",
-            },
-          },
-        },
-        "description": "Successful response",
-      }
-    `);
+    expect(openApiDocument.paths['/null']!.get!.parameters).toMatchInlineSnapshot(``);
+    expect(openApiDocument.paths['/null']!.get!.responses[200]).toMatchInlineSnapshot(``);
+  });
+
+  describe('with undefined', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('undefined', {
+      meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
+      input: z.undefined(),
+      output: z.undefined(),
+      resolve: () => undefined,
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/undefined']!.get!.parameters).toMatchInlineSnapshot(``);
+    expect(openApiDocument.paths['/undefined']!.get!.responses[200]).toMatchInlineSnapshot(``);
   });
 
   test('with transform', () => {
@@ -887,7 +816,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with description & tags', () => {
+  test('with summary & tags', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
         openapi: {
@@ -910,7 +839,7 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Some summary');
+    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Some summary');
     expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['some-tag']);
   });
 

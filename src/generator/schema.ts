@@ -39,15 +39,8 @@ export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[
     throw new Error('Input parser expects ZodType');
   }
 
-  if (
-    !zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodObject) &&
-    !zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodVoid)
-  ) {
-    throw new Error('Input parser expects ZodObject or ZodVoid');
-  }
-
-  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodVoid)) {
-    return undefined;
+  if (!zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
+    throw new Error('Input parser expects ZodObject');
   }
 
   const shape = schema.shape;
@@ -72,10 +65,6 @@ export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[
 export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObject | undefined => {
   if (!zodInstanceofZodType(schema)) {
     throw new Error('Input parser expects ZodType');
-  }
-
-  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodVoid)) {
-    return undefined;
   }
 
   return {
@@ -117,7 +106,7 @@ export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject =
             error: z.object({
               message: z.string(),
               code: z.string(),
-              issues: z.array(z.object({})).optional(),
+              issues: z.array(z.object({ message: z.string() })).optional(),
             }),
           }),
         ),

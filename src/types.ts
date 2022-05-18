@@ -1,6 +1,7 @@
 import { ProcedureRecord } from '@trpc/server';
 // eslint-disable-next-line import/no-unresolved
 import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
+import { ZodIssue } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
@@ -9,9 +10,9 @@ export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
     enabled: boolean;
     path: `/${string}`;
     method: OpenApiMethod;
-    description?: string;
+    summary?: string;
     tags?: string[];
-    secure?: boolean;
+    protect?: boolean;
   };
 };
 
@@ -35,7 +36,7 @@ export type OpenApiErrorResponse = {
   error: {
     message: string;
     code: string;
-    issues?: any[];
+    issues?: ZodIssue[];
   };
 };
 

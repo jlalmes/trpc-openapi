@@ -1,4 +1,4 @@
-# trpc-openapi (with-nextjs)
+# trpc-openapi (with-express)
 
 ### Getting started
 

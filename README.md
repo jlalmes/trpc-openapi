@@ -184,14 +184,14 @@ export default createOpenApiNextHandler({ router: appRouter });
 
 Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/types.ts).
 
-| Property      | Type         | Description                                                                                                         | Required | Default     |
-| ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
-| `enabled`     | `boolean`    | Exposes procedure on `trpc-openapi` adapters and in OpenAPI documents                                               | `true`   | `false`     |
-| `method`      | `HttpMethod` | Method this route is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
-| `path`        | `string`     | Path this route is exposed on. Value must start with `/`.                                                           | `true`   | `undefined` |
-| `secure`      | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.     | `false`  | `false`     |
-| `description` | `string`     | Route description included in OpenAPI document.                                                                     | `false`  | `undefined` |
-| `tags`        | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
+| Property  | Type         | Description                                                                                                         | Required | Default     |
+| --------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| `enabled` | `boolean`    | Exposes procedure on `trpc-openapi` adapters and in OpenAPI documents                                               | `true`   | `false`     |
+| `method`  | `HttpMethod` | Method this route is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
+| `path`    | `string`     | Path this route is exposed on. Value must start with `/`.                                                           | `true`   | `undefined` |
+| `protect` | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.     | `false`  | `false`     |
+| `summary` | `string`     | Route summary included in OpenAPI document.                                                                         | `false`  | `undefined` |
+| `tags`    | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
 
 #### GenerateOpenApiDocumentOptions
 

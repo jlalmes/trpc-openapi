@@ -18,7 +18,7 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      const { method, description, tags, secure } = openapi;
+      const { method, summary, tags, protect } = openapi;
       if (method !== 'GET' && method !== 'DELETE') {
         throw new Error('Query method must be GET or DELETE');
       }
@@ -34,9 +34,9 @@ export const getOpenApiPathsObject = (
       pathsObject[path] = {
         ...pathsObject[path],
         [httpMethod]: {
-          description,
+          summary,
           tags,
-          security: secure ? [{ Authorization: [] }] : undefined,
+          security: protect ? [{ Authorization: [] }] : undefined,
           parameters: getParameterObjects(inputParser),
           responses: getResponsesObject(outputParser),
         },
@@ -56,7 +56,7 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      const { method, description, tags, secure } = openapi;
+      const { method, summary, tags, protect } = openapi;
       if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
         throw new Error('Mutation method must be POST, PATCH or PUT');
       }
@@ -72,9 +72,9 @@ export const getOpenApiPathsObject = (
       pathsObject[path] = {
         ...pathsObject[path],
         [httpMethod]: {
-          description,
+          summary,
           tags,
-          security: secure ? [{ Authorization: [] }] : undefined,
+          security: protect ? [{ Authorization: [] }] : undefined,
           requestBody: getRequestBodyObject(inputParser),
           responses: getResponsesObject(outputParser),
         },

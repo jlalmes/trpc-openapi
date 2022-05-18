@@ -1,6 +1,6 @@
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';
-import { CreateNextContextOptions } from '@trpc/server/adapters/next';
+import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import jwt from 'jsonwebtoken';
 import { OpenApiMeta } from 'trpc-openapi';
 import { v4 as uuid } from 'uuid';
@@ -15,8 +15,11 @@ export type Context = {
   requestId: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/require-await
-export const createContext = async ({ req, res }: CreateNextContextOptions): Promise<Context> => {
+export const createContext = async ({
+  req,
+  res,
+}: // eslint-disable-next-line @typescript-eslint/require-await
+CreateExpressContextOptions): Promise<Context> => {
   const requestId = uuid();
   res.setHeader('x-request-id', requestId);
 

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import cors from 'cors';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
@@ -11,9 +12,8 @@ const app = express();
 
 app.use(cors());
 
-// Respond with our OpenAPI schema
-app.get('/api/openapi.json', (req, res) => res.status(200).json(openApiDocument));
-
+// Handle incoming tRPC requests
+app.use('/api/trpc', createExpressMiddleware({ router: appRouter, createContext }));
 // Handle incoming OpenAPI requests
 app.use('/api', createOpenApiExpressMiddleware({ router: appRouter, createContext }));
 

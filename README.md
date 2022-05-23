@@ -94,7 +94,7 @@ For every OpenAPI enabled procedure the following _must_ be true:
 
 ## Authorization
 
-To create protected endpoints, just add `protected: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header with the `Bearer` scheme.
+To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header with the `Bearer` scheme.
 
 Please explore a [complete example here](https://github.com/jlalmes/trpc-openapi/blob/master/examples/with-nextjs/server/router.ts).
 
@@ -125,7 +125,7 @@ export const createContext = async ({ req, res }): Promise<Context> => {
 };
 
 export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello', protected: true /* 👈 */ } },
+  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello', protect: true /* 👈 */ } },
   input: z.object({}), // no input expected
   output: z.object({ greeting: z.string() }),
   resolve: ({ input, ctx }) => {

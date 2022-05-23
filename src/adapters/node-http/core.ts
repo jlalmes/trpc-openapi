@@ -14,11 +14,11 @@ import {
   OpenApiSuccessResponse,
 } from '../../types';
 import { removeLeadingTrailingSlash } from '../../utils';
-import { getBody } from './body';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
+import { getBody, getQuery } from './input';
 import { getProcedures } from './procedures';
 
-export type CreateOpenApiHttpHandlerOptions<
+export type CreateOpenApiNodeHttpHandlerOptions<
   TRouter extends OpenApiRouter,
   TRequest extends NodeHTTPRequest,
   TResponse extends NodeHTTPResponse,
@@ -29,12 +29,12 @@ export type CreateOpenApiHttpHandlerOptions<
 
 export type OpenApiNextFunction = () => void;
 
-export const createOpenApiHttpHandler = <
+export const createOpenApiNodeHttpHandler = <
   TRouter extends OpenApiRouter,
   TRequest extends NodeHTTPRequest,
   TResponse extends NodeHTTPResponse,
 >(
-  opts: CreateOpenApiHttpHandlerOptions<TRouter, TRequest, TResponse>,
+  opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>,
 ) => {
   // validate router
   generateOpenApiDocument(opts.router, {
@@ -79,7 +79,7 @@ export const createOpenApiHttpHandler = <
         });
       }
 
-      input = procedure.type === 'query' ? req.query : await getBody(req, maxBodySize);
+      input = procedure.type === 'query' ? getQuery(req, url) : await getBody(req, maxBodySize);
       ctx = await createContext?.({ ...opts, req, res });
       const caller = router.createCaller(ctx);
       data = await caller[procedure.type](procedure.path, input);

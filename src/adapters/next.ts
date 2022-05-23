@@ -3,17 +3,20 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
 import { removeLeadingTrailingSlash } from '../utils';
-import { CreateOpenApiHttpHandlerOptions, createOpenApiHttpHandler } from './node-http/core';
+import {
+  CreateOpenApiNodeHttpHandlerOptions,
+  createOpenApiNodeHttpHandler,
+} from './node-http/core';
 
 export type CreateOpenApiNextHandlerOptions<TRouter extends OpenApiRouter> = Omit<
-  CreateOpenApiHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>,
+  CreateOpenApiNodeHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>,
   'maxBodySize'
 >;
 
 export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
   opts: CreateOpenApiNextHandlerOptions<TRouter>,
 ) => {
-  const openApiHttpHandler = createOpenApiHttpHandler(opts);
+  const openApiHttpHandler = createOpenApiNodeHttpHandler(opts);
 
   return async (req: NextApiRequest, res: NextApiResponse) => {
     let path: string | null = null;

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import * as trpc from '@trpc/server';
-import { TRPCError } from '@trpc/server';
-import express, { Request, Response } from 'express';
-import { ServerResponse } from 'http';
+import { AnyRouter, InferLast, TRPCError } from '@trpc/server';
+import { Server } from 'http';
 import fetch from 'node-fetch';
 import { z } from 'zod';
 
@@ -20,23 +19,21 @@ const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
 const teardownMock = jest.fn();
 
-const createExpressServerWithRouter = (
-  appRouter: OpenApiRouter,
-  opts: Partial<CreateOpenApiHttpHandlerOptions<OpenApiRouter, Request, Response>> = {},
+const createServerWithRouter = <TRouter extends OpenApiRouter>(
+  opts: CreateOpenApiHttpHandlerOptions<TRouter>,
 ) => {
-  const openApiHandler = createOpenApiHttpHandler({
-    router: appRouter,
-    createContext: opts.createContext,
-    responseMeta: opts.responseMeta ?? responseMetaMock,
-    onError: opts.onError ?? onErrorMock,
-    teardown: opts.teardown ?? teardownMock,
+  const openApiHttpHandler = createOpenApiHttpHandler({
+    router: opts.router,
+    createContext: opts.createContext ?? (createContextMock as any),
+    responseMeta: opts.responseMeta ?? (responseMetaMock as any),
+    onError: opts.onError ?? (onErrorMock as any),
+    teardown: opts.teardown ?? (teardownMock as any),
   });
 
-  const app = express();
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  app.use('/oas', openApiHandler);
+  const server = new Server(openApiHttpHandler);
 
-  const server = app.listen(0);
+  server.listen(0);
   const port = (server.address() as any).port as number;
   const url = `http://localhost:${port}`;
 
@@ -46,7 +43,7 @@ const createExpressServerWithRouter = (
   };
 };
 
-describe('express handler', () => {
+describe('core http adapter', () => {
   afterEach(() => {
     createContextMock.mockClear();
     responseMetaMock.mockClear();
@@ -62,21 +59,21 @@ describe('express handler', () => {
     });
 
     expect(() => createOpenApiHttpHandler({ router: appRouter })).toThrowError(
-      '[mutation.invalidRoute] - Output parser expects ZodSchema',
+      '[mutation.invalidRoute] - Output parser expects ZodType',
     );
   });
 
   test('with not found path', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().mutation('ping', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('ping', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
         input: z.object({}),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/pingg`, { method: 'POST' });
+    const res = await fetch(`${url}/pingg`, { method: 'POST' });
     const body = (await res.json()) as OpenApiErrorResponse;
 
     expect(res.status).toBe(404);
@@ -90,16 +87,16 @@ describe('express handler', () => {
   });
 
   test('with not found method', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().mutation('ping', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('ping', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
         input: z.object({}),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/ping`, { method: 'PATCH' });
+    const res = await fetch(`${url}/ping`, { method: 'PATCH' });
     const body = (await res.json()) as OpenApiErrorResponse;
 
     expect(res.status).toBe(404);
@@ -113,16 +110,16 @@ describe('express handler', () => {
   });
 
   test('with invalid mimetype', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().mutation('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/echo`, {
+    const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: 'non-json-string',
@@ -155,16 +152,16 @@ describe('express handler', () => {
   });
 
   test('with missing input', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().query('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().query('echo', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/echo`, { method: 'GET' });
+    const res = await fetch(`${url}/echo`, { method: 'GET' });
     const body = (await res.json()) as OpenApiErrorResponse;
 
     expect(res.status).toBe(400);
@@ -193,16 +190,16 @@ describe('express handler', () => {
   });
 
   test('with wrong input type', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().mutation('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/echo`, {
+    const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: 123 }),
@@ -235,17 +232,17 @@ describe('express handler', () => {
   });
 
   test('with bad output', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().mutation('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         // @ts-expect-error - fail on purpose
         resolve: () => 'fail',
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/echo`, {
+    const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: '@jlalmes' }),
@@ -269,8 +266,8 @@ describe('express handler', () => {
   });
 
   test('with thrown error', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().mutation('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
@@ -281,9 +278,9 @@ describe('express handler', () => {
           });
         },
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/echo`, {
+    const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: '@jlalmes' }),
@@ -307,8 +304,8 @@ describe('express handler', () => {
   });
 
   test('with valid routes', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc
+    const { url, close } = createServerWithRouter({
+      router: trpc
         .router<any, OpenApiMeta>()
         .query('sayHello', {
           meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
@@ -322,10 +319,10 @@ describe('express handler', () => {
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         }),
-    );
+    });
 
     {
-      const res = await fetch(`${url}/oas/say-hello?name=James`, { method: 'GET' });
+      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' });
       const body = (await res.json()) as OpenApiSuccessResponse;
 
       expect(res.status).toBe(200);
@@ -341,7 +338,7 @@ describe('express handler', () => {
       teardownMock.mockClear();
     }
     {
-      const res = await fetch(`${url}/oas/say-hello`, {
+      const res = await fetch(`${url}/say-hello`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'James' }),
@@ -360,16 +357,16 @@ describe('express handler', () => {
   });
 
   test('with no input', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().query('ping', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().query('ping', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
         input: z.object({}),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/ping`, { method: 'GET' });
+    const res = await fetch(`${url}/ping`, { method: 'GET' });
     const body = (await res.json()) as OpenApiSuccessResponse;
 
     expect(res.status).toBe(200);
@@ -383,16 +380,16 @@ describe('express handler', () => {
   });
 
   test('with no output', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().query('ping', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().query('ping', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
         input: z.object({ ping: z.string() }),
         output: z.void(),
         resolve: () => undefined,
       }),
-    );
+    });
 
-    const res = await fetch(`${url}/oas/ping?ping=ping`, { method: 'GET' });
+    const res = await fetch(`${url}/ping?ping=ping`, { method: 'GET' });
     const body = (await res.json()) as OpenApiSuccessResponse;
 
     expect(res.status).toBe(200);
@@ -408,19 +405,17 @@ describe('express handler', () => {
   test('with createContext', async () => {
     type Context = { id: 1234567890 };
 
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<Context, OpenApiMeta>().query('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<Context, OpenApiMeta>().query('echo', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string(), context: z.object({ id: z.number() }) }),
         resolve: ({ input, ctx }) => ({ payload: input.payload, context: ctx }),
       }),
-      {
-        createContext: (): Context => ({ id: 1234567890 }),
-      },
-    );
+      createContext: (): Context => ({ id: 1234567890 }),
+    });
 
-    const res = await fetch(`${url}/oas/echo?payload=jlalmes`, { method: 'GET' });
+    const res = await fetch(`${url}/echo?payload=jlalmes`, { method: 'GET' });
     const body = (await res.json()) as OpenApiSuccessResponse;
 
     expect(res.status).toBe(200);
@@ -439,19 +434,17 @@ describe('express handler', () => {
   });
 
   test('with responseMeta', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      trpc.router<any, OpenApiMeta>().query('echo', {
+    const { url, close } = createServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().query('echo', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string(), context: z.undefined() }),
         resolve: ({ input, ctx }) => ({ payload: input.payload, context: ctx }),
       }),
-      {
-        responseMeta: () => ({ status: 201, headers: { 'x-custom': 'custom header' } }),
-      },
-    );
+      responseMeta: () => ({ status: 201, headers: { 'x-custom': 'custom header' } }),
+    });
 
-    const res = await fetch(`${url}/oas/echo?payload=jlalmes`, { method: 'GET' });
+    const res = await fetch(`${url}/echo?payload=jlalmes`, { method: 'GET' });
     const body = (await res.json()) as OpenApiSuccessResponse;
 
     expect(res.status).toBe(201);

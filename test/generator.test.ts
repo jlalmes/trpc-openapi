@@ -702,56 +702,11 @@ describe('generator', () => {
     expect(Object.keys(openApiDocument.paths).length).toBe(0);
   });
 
-  describe('with falsey outputs', () => {
-    const appRouter = trpc
-      .router<any, OpenApiMeta>()
-      .mutation('void', {
-        meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
-        input: z.void(),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .mutation('null', {
-        meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
-        input: z.null(),
-        output: z.null(),
-        resolve: () => undefined,
-      })
-      .mutation('undefined', {
-        meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
-        input: z.undefined(),
-        output: z.undefined(),
-        resolve: () => undefined,
-      })
-      .mutation('optional', {
-        meta: { openapi: { enabled: true, path: '/optional', method: 'POST' } },
-        input: z.string().optional(),
-        output: z.string().optional(),
-        resolve: () => undefined,
-      })
-      .mutation('nullish', {
-        meta: { openapi: { enabled: true, path: '/nullish', method: 'POST' } },
-        input: z.string().nullish(),
-        output: z.string().nullish(),
-        resolve: () => undefined,
-      });
-
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
-    });
-
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/void']!.get!.parameters).toMatchInlineSnapshot(``);
-    expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(``);
-  });
-
-  describe('with null', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().mutation('null', {
-      meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
-      input: z.null(),
-      output: z.null(),
+  test('with void', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('void', {
+      meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
+      input: z.void(),
+      output: z.void(),
       resolve: () => undefined,
     });
 
@@ -762,11 +717,106 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/null']!.get!.parameters).toMatchInlineSnapshot(``);
-    expect(openApiDocument.paths['/null']!.get!.responses[200]).toMatchInlineSnapshot(``);
+    expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": undefined,
+          },
+        },
+        "required": false,
+      }
+    `);
+    expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
   });
 
-  describe('with undefined', () => {
+  test('with null', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('null', {
+      meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
+      input: z.null(),
+      output: z.null(),
+      resolve: () => null,
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/null']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "enum": Array [
+                "null",
+              ],
+              "nullable": true,
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
+    expect(openApiDocument.paths['/null']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "enum": Array [
+                    "null",
+                  ],
+                  "nullable": true,
+                },
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+                "data",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+  });
+
+  test('with undefined', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('undefined', {
       meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
       input: z.undefined(),
@@ -781,8 +831,117 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/undefined']!.get!.parameters).toMatchInlineSnapshot(``);
-    expect(openApiDocument.paths['/undefined']!.get!.responses[200]).toMatchInlineSnapshot(``);
+    expect(openApiDocument.paths['/undefined']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "not": Object {},
+            },
+          },
+        },
+        "required": false,
+      }
+    `);
+    expect(openApiDocument.paths['/undefined']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "not": Object {},
+                },
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+  });
+
+  test('with nullish', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('nullish', {
+      meta: { openapi: { enabled: true, path: '/nullish', method: 'POST' } },
+      input: z.string().nullish(),
+      output: z.string().nullish(),
+      resolve: () => null,
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/nullish']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "anyOf": Array [
+                Object {
+                  "not": Object {},
+                },
+                Object {
+                  "type": "string",
+                },
+              ],
+              "nullable": true,
+            },
+          },
+        },
+        "required": false,
+      }
+    `);
+    expect(openApiDocument.paths['/nullish']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "anyOf": Array [
+                    Object {
+                      "not": Object {},
+                    },
+                    Object {
+                      "type": "string",
+                    },
+                  ],
+                  "nullable": true,
+                },
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
   });
 
   test('with transform', () => {

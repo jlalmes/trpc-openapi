@@ -89,7 +89,7 @@ For every OpenAPI enabled procedure the following _must_ be true:
 - `meta.openapi.method` is `GET` or `DELETE` if query procedure OR `POST`, `PUT` or `PATCH` if mutation procedure.
 - `meta.openapi.path` is a string starting with `/`.
 - Both `input` and `output` parsers are present.
-- Parsers use [`zod`](https://github.com/colinhacks/zod) validation.
+- Parsers use [`Zod`](https://github.com/colinhacks/zod) validation.
 - `input` parsers extend `Record<string, string>`.
 
 ## Authorization

@@ -96,7 +96,7 @@ For every OpenAPI enabled procedure the following _must_ be true:
 
 To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header with the `Bearer` scheme.
 
-Please explore a [complete example here](https://github.com/jlalmes/trpc-openapi/blob/master/examples/with-nextjs/server/router.ts).
+Please explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 
 #### Server
 
@@ -172,7 +172,7 @@ Inspired by [Slack Web API](https://api.slack.com/web).
 
 #### With Express
 
-Please see [full example here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-express).
+Please see [full example here](examples/with-express).
 
 ```typescript
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
@@ -191,7 +191,7 @@ app.listen(3000);
 
 #### With Next.js
 
-Please see [full example here](https://github.com/jlalmes/trpc-openapi/tree/master/examples/with-nextjs).
+Please see [full example here](examples/with-nextjs).
 
 ```typescript
 // pages/api/[trpc].ts
@@ -206,7 +206,7 @@ export default createOpenApiNextHandler({ router: appRouter });
 
 #### OpenApiMeta
 
-Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/types.ts).
+Please see full typings [here](src/types.ts).
 
 | Property  | Type         | Description                                                                                                         | Required | Default     |
 | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
@@ -219,7 +219,7 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 
 #### GenerateOpenApiDocumentOptions
 
-Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/generator/index.ts).
+Please see full typings [here](src/generator/index.ts).
 
 | Property      | Type     | Description                          | Required |
 | ------------- | -------- | ------------------------------------ | -------- |
@@ -229,9 +229,9 @@ Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/mast
 | `baseUrl`     | `string` | The base URL of the target server.   | `true`   |
 | `docsUrl`     | `string` | A URL to any external documentation. | `false`  |
 
-#### CreateOpenApiHttpHandlerOptions
+#### CreateOpenApiNodeHttpHandlerOptions
 
-Please see full typings [here](https://github.com/jlalmes/trpc-openapi/blob/master/src/adapters/node-http/core.ts).
+Please see full typings [here](src/adapters/node-http/core.ts).
 
 | Property        | Type       | Description                                                                   | Required |
 | --------------- | ---------- | ----------------------------------------------------------------------------- | -------- |

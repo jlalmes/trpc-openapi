@@ -1,4 +1,4 @@
-import { ProcedureRecord, TRPCError } from '@trpc/server';
+import { ProcedureRecord } from '@trpc/server';
 // eslint-disable-next-line import/no-unresolved
 import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
 // eslint-disable-next-line import/no-unresolved

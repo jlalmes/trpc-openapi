@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -36,11 +37,17 @@ const getBaseZodType = (schema: z.ZodType): z.ZodType => {
 
 export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[] | undefined => {
   if (!zodInstanceofZodType(schema)) {
-    throw new Error('Input parser expects ZodType');
+    throw new TRPCError({
+      message: 'Input parser expects ZodType',
+      code: 'INTERNAL_SERVER_ERROR',
+    });
   }
 
   if (!zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
-    throw new Error('Input parser expects ZodObject');
+    throw new TRPCError({
+      message: 'Input parser expects ZodObject',
+      code: 'INTERNAL_SERVER_ERROR',
+    });
   }
 
   const shape = schema.shape;
@@ -48,7 +55,10 @@ export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[
     const value = shape[key]!;
 
     if (!zodInstanceof(getBaseZodType(value), z.ZodFirstPartyTypeKind.ZodString)) {
-      throw new Error('Input parser expects ZodObject<{ [string]: ZodString }>');
+      throw new TRPCError({
+        message: 'Input parser expects ZodObject<{ [string]: ZodString }>',
+        code: 'INTERNAL_SERVER_ERROR',
+      });
     }
 
     return {
@@ -64,7 +74,10 @@ export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[
 
 export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObject | undefined => {
   if (!zodInstanceofZodType(schema)) {
-    throw new Error('Input parser expects ZodType');
+    throw new TRPCError({
+      message: 'Input parser expects ZodType',
+      code: 'INTERNAL_SERVER_ERROR',
+    });
   }
 
   return {
@@ -97,7 +110,10 @@ export const errorResponseObject = {
 
 export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
   if (!zodInstanceofZodType(schema)) {
-    throw new Error('Output parser expects ZodType');
+    throw new TRPCError({
+      message: 'Output parser expects ZodType',
+      code: 'INTERNAL_SERVER_ERROR',
+    });
   }
 
   const successResponseObject = {

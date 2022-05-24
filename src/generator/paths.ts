@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
@@ -20,13 +21,19 @@ export const getOpenApiPathsObject = (
 
       const { method, summary, tags, protect } = openapi;
       if (method !== 'GET' && method !== 'DELETE') {
-        throw new Error('Query method must be GET or DELETE');
+        throw new TRPCError({
+          message: 'Query method must be GET or DELETE',
+          code: 'INTERNAL_SERVER_ERROR',
+        });
       }
 
       const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
-        throw new Error(`Duplicate procedure defined for route ${method} ${path}`);
+        throw new TRPCError({
+          message: `Duplicate procedure defined for route ${method} ${path}`,
+          code: 'INTERNAL_SERVER_ERROR',
+        });
       }
 
       const { inputParser, outputParser } = getInputOutputParsers(query);
@@ -58,13 +65,19 @@ export const getOpenApiPathsObject = (
 
       const { method, summary, tags, protect } = openapi;
       if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
-        throw new Error('Mutation method must be POST, PATCH or PUT');
+        throw new TRPCError({
+          message: 'Mutation method must be POST, PATCH or PUT',
+          code: 'INTERNAL_SERVER_ERROR',
+        });
       }
 
       const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
-        throw new Error(`Duplicate procedure defined for route ${method} ${path}`);
+        throw new TRPCError({
+          message: `Duplicate procedure defined for route ${method} ${path}`,
+          code: 'INTERNAL_SERVER_ERROR',
+        });
       }
 
       const { inputParser, outputParser } = getInputOutputParsers(mutation);
@@ -94,7 +107,10 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      throw new Error('Subscriptions are not supported by OpenAPI v3');
+      throw new TRPCError({
+        message: 'Subscriptions are not supported by OpenAPI v3',
+        code: 'INTERNAL_SERVER_ERROR',
+      });
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       error.message = `[subscription.${subscriptionPath}] - ${error.message}`;

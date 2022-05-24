@@ -15,7 +15,6 @@
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "swagger-ui-react": "^4.11.1",
-    "trpc-openapi": "^0.1.0-alpha.12",
     "uuid": "^8.3.2",
     "zod": "^3.16.0"
   },

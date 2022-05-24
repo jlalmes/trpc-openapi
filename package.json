@@ -15,6 +15,10 @@
   "bugs": "https://github.com/jlalmes/trpc-openapi/issues",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "workspaces": [
+    ".",
+    "examples/*"
+  ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",
     "build": "rimraf dist && tsc"

@@ -51,11 +51,15 @@ export const createOpenApiNodeHttpHandler = <
     const sendResponse = (
       statusCode: number,
       headers: Record<string, string>,
-      body: OpenApiResponse,
+      body: OpenApiResponse | undefined,
     ) => {
       res.statusCode = statusCode;
       res.setHeader('Content-Type', 'application/json');
-      Object.keys(headers).forEach((key) => res.setHeader(key, headers[key]!));
+      for (const [key, value] of Object.entries(headers)) {
+        if (typeof value !== 'undefined') {
+          res.setHeader(key, value);
+        }
+      }
       res.end(JSON.stringify(body));
     };
 
@@ -73,6 +77,13 @@ export const createOpenApiNodeHttpHandler = <
         if (next) {
           return next();
         }
+
+        // Can be used for warmup
+        if (method === 'HEAD') {
+          sendResponse(204, {}, undefined);
+          return await teardown?.();
+        }
+
         throw new TRPCError({
           message: 'Not found',
           code: 'NOT_FOUND',

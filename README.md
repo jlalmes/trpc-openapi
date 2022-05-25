@@ -86,11 +86,13 @@ For every OpenAPI enabled procedure the following _must_ be true:
 
 - tRPC version 9 (`>=9.23.0`) is installed.
 - `meta.openapi.enabled` is `true`.
-- `meta.openapi.method` is `GET` or `DELETE` if query procedure OR `POST`, `PUT` or `PATCH` if mutation procedure.
+- `meta.openapi.method` is `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation procedures.
 - `meta.openapi.path` is a string starting with `/`.
 - Both `input` and `output` parsers are present.
 - Parsers use [`Zod`](https://github.com/colinhacks/zod) validation.
 - `input` parsers extend `Record<string, string>`.
+
+Please note that data [`transformer`](https://trpc.io/docs/data-transformers)s attached to your router are ignored by `trpc-openapi`.
 
 ## Authorization
 
@@ -240,7 +242,7 @@ Please see full typings [here](src/adapters/node-http/core.ts).
 | `responseMeta`  | `Function` | Function that returns modifications to statusCode & headers on each response. | `false`  |
 | `onError`       | `Function` | Function called if error occurs inside handler.                               | `false`  |
 | `teardown`      | `Function` | Function called after each request is completed.                              | `false`  |
-| `maxBodySize`   | `number`   | Controls the maximum request body size in bytes.                              | `false`  |
+| `maxBodySize`   | `number`   | Controls the maximum request body size in bytes (default: 10kb).              | `false`  |
 
 ---
 

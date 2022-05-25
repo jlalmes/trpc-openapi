@@ -20,8 +20,8 @@ export function getErrorFromUnknown(cause: unknown): TRPCError {
     return cause as TRPCError;
   }
   const err = new TRPCError({
-    code: 'INTERNAL_SERVER_ERROR',
     message: 'Internal server error',
+    code: 'INTERNAL_SERVER_ERROR',
     cause,
   });
 

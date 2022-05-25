@@ -109,8 +109,8 @@ describe('generator', () => {
     `);
   });
 
-  describe('with missing input', () => {
-    test('query', () => {
+  test('with missing input', () => {
+    {
       const appRouter = trpc.router<any, OpenApiMeta>().query('noInput', {
         meta: { openapi: { enabled: true, path: '/no-input', method: 'GET' } },
         output: z.object({ name: z.string() }),
@@ -124,9 +124,8 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[query.noInput] - Input parser expects ZodType');
-    });
-
-    test('mutation', () => {
+    }
+    {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('noInput', {
         meta: { openapi: { enabled: true, path: '/no-input', method: 'POST' } },
         output: z.object({ name: z.string() }),
@@ -140,11 +139,11 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[mutation.noInput] - Input parser expects ZodType');
-    });
+    }
   });
 
-  describe('with missing output', () => {
-    test('query', () => {
+  test('with missing output', () => {
+    {
       const appRouter = trpc.router<any, OpenApiMeta>().query('noOutput', {
         meta: { openapi: { enabled: true, path: '/no-output', method: 'GET' } },
         input: z.object({ name: z.string() }),
@@ -158,9 +157,8 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[query.noOutput] - Output parser expects ZodType');
-    });
-
-    test('mutation', () => {
+    }
+    {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('noOutput', {
         meta: { openapi: { enabled: true, path: '/no-output', method: 'POST' } },
         input: z.object({ name: z.string() }),
@@ -174,7 +172,7 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[mutation.noOutput] - Output parser expects ZodType');
-    });
+    }
   });
 
   test('with query non-object input', () => {
@@ -211,8 +209,8 @@ describe('generator', () => {
     }).toThrowError('[query.badInput] - Input parser expects ZodObject<{ [string]: ZodString }>');
   });
 
-  describe('with bad method', () => {
-    test('query', () => {
+  test('with bad method', () => {
+    {
       const appRouter = trpc.router<any, OpenApiMeta>().query('postQuery', {
         meta: { openapi: { enabled: true, path: '/post-query', method: 'POST' } },
         input: z.object({ name: z.string() }),
@@ -227,9 +225,8 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[query.postQuery] - Query method must be GET or DELETE');
-    });
-
-    test('mutation', () => {
+    }
+    {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('getMutation', {
         meta: { openapi: { enabled: true, path: '/get-mutation', method: 'GET' } },
         input: z.object({ name: z.string() }),
@@ -244,11 +241,11 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[mutation.getMutation] - Mutation method must be POST, PATCH or PUT');
-    });
+    }
   });
 
-  describe('duplicate routes', () => {
-    test('matching', () => {
+  test('duplicate routes', () => {
+    {
       const appRouter = trpc
         .router<any, OpenApiMeta>()
         .query('procedure1', {
@@ -271,9 +268,8 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
-    });
-
-    test('trailing slash', () => {
+    }
+    {
       const appRouter = trpc
         .router<any, OpenApiMeta>()
         .query('procedure1', {
@@ -296,7 +292,7 @@ describe('generator', () => {
           baseUrl: 'http://localhost:3000/api',
         });
       }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
-    });
+    }
   });
 
   test('unsupported subscription', () => {

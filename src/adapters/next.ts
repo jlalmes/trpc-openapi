@@ -48,6 +48,9 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
         error: { message: error.message, code: error.code },
       };
       res.end(JSON.stringify(body));
+
+      await opts.teardown?.();
+
       return;
     }
 

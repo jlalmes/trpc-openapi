@@ -101,8 +101,6 @@ describe('next adapter', () => {
         query: { trpc: 'say-hello', name: 'James' },
       });
 
-      console.log(JSON.stringify(res, null, 2));
-
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
       expect(createContextMock).toHaveBeenCalledTimes(1);
@@ -139,8 +137,6 @@ describe('next adapter', () => {
         method: 'GET',
         query: { trpc: ['say', 'hello'], name: 'James' },
       });
-
-      console.log(JSON.stringify(res, null, 2));
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });

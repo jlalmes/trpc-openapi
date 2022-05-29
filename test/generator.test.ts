@@ -428,6 +428,7 @@ describe('generator', () => {
             "delete": Object {
               "parameters": Array [
                 Object {
+                  "description": undefined,
                   "explode": true,
                   "in": "query",
                   "name": "id",
@@ -472,6 +473,7 @@ describe('generator', () => {
             "get": Object {
               "parameters": Array [
                 Object {
+                  "description": undefined,
                   "explode": true,
                   "in": "query",
                   "name": "id",
@@ -958,6 +960,7 @@ describe('generator', () => {
     expect(openApiDocument.paths['/transform']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
+          "description": undefined,
           "explode": true,
           "in": "query",
           "name": "age",
@@ -1023,5 +1026,199 @@ describe('generator', () => {
     expect(openApiDocument.paths['/secure/endpoint']!.post!.security).toEqual([
       { Authorization: [] },
     ]);
+  });
+
+  test('with schema descriptions', () => {
+    const appRouter = trpc
+      .router<any, OpenApiMeta>()
+      .mutation('createUser', {
+        meta: { openapi: { enabled: true, path: '/user', method: 'POST' } },
+        input: z
+          .object({
+            id: z.string().uuid().describe('User ID'),
+            name: z.string().describe('User name'),
+          })
+          .describe('Request body input'),
+        output: z
+          .object({
+            id: z.string().uuid().describe('User ID'),
+            name: z.string().describe('User name'),
+          })
+          .describe('User data'),
+        resolve: ({ input }) => ({ id: input.id, name: 'James' }),
+      })
+      .query('getUser', {
+        meta: { openapi: { enabled: true, path: '/user', method: 'GET' } },
+        input: z
+          .object({ id: z.string().uuid().describe('User ID') })
+          .describe('Query string inputs'),
+        output: z
+          .object({
+            id: z.string().uuid().describe('User ID'),
+            name: z.string().describe('User name'),
+          })
+          .describe('User data'),
+        resolve: ({ input }) => ({ id: input.id, name: 'James' }),
+      });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
+      Object {
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "description": "Request body input",
+                "properties": Object {
+                  "id": Object {
+                    "description": "User ID",
+                    "format": "uuid",
+                    "type": "string",
+                  },
+                  "name": Object {
+                    "description": "User name",
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "id",
+                  "name",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "additionalProperties": false,
+                  "properties": Object {
+                    "data": Object {
+                      "additionalProperties": false,
+                      "description": "User data",
+                      "properties": Object {
+                        "id": Object {
+                          "description": "User ID",
+                          "format": "uuid",
+                          "type": "string",
+                        },
+                        "name": Object {
+                          "description": "User name",
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "id",
+                        "name",
+                      ],
+                      "type": "object",
+                    },
+                    "ok": Object {
+                      "enum": Array [
+                        true,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": Array [
+                    "ok",
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+          "default": Object {
+            "$ref": "#/components/responses/error",
+          },
+        },
+        "security": undefined,
+        "summary": undefined,
+        "tags": undefined,
+      }
+    `);
+    expect(openApiDocument.paths['/user']!.get!).toMatchInlineSnapshot(`
+      Object {
+        "parameters": Array [
+          Object {
+            "description": "User ID",
+            "explode": true,
+            "in": "query",
+            "name": "id",
+            "required": true,
+            "schema": Object {
+              "description": "User ID",
+              "format": "uuid",
+              "type": "string",
+            },
+            "style": "form",
+          },
+        ],
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "additionalProperties": false,
+                  "properties": Object {
+                    "data": Object {
+                      "additionalProperties": false,
+                      "description": "User data",
+                      "properties": Object {
+                        "id": Object {
+                          "description": "User ID",
+                          "format": "uuid",
+                          "type": "string",
+                        },
+                        "name": Object {
+                          "description": "User name",
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "id",
+                        "name",
+                      ],
+                      "type": "object",
+                    },
+                    "ok": Object {
+                      "enum": Array [
+                        true,
+                      ],
+                      "type": "boolean",
+                    },
+                  },
+                  "required": Array [
+                    "ok",
+                    "data",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Successful response",
+          },
+          "default": Object {
+            "$ref": "#/components/responses/error",
+          },
+        },
+        "security": undefined,
+        "summary": undefined,
+        "tags": undefined,
+      }
+    `);
   });
 });

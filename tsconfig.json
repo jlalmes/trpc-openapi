@@ -16,5 +16,5 @@
     "noUncheckedIndexedAccess": true,
     "importHelpers": true
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }

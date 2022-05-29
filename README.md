@@ -1,6 +1,4 @@
-<div align="center">
-  <img src="./assets/trpc-openapi.svg" alt="tRPC" height="120"/>
-</div>
+<img src="./assets/trpc-openapi.svg" alt="tRPC" height="100"/>
 
 # trpc-openapi
 

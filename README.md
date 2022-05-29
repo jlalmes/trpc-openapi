@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="./assets/trpc-openapi.svg" alt="tRPC" height="120"/>
+</div>
+
 # trpc-openapi
 
 ### **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)**

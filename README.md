@@ -1,8 +1,12 @@
-<img src="./assets/trpc-openapi.svg" alt="tRPC" height="100"/>
+<p align="left">
+  <a href="/">
+    <img src="./assets/trpc-openapi.svg" alt="tRPC-OpenAPI" height="100"/>
+  </a>
+</p>
 
 # trpc-openapi
 
-### **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)**
+### **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
 
 - Easy REST endpoints for your tRPC procedures.
 - Perfect for incremental adoption.
@@ -248,4 +252,4 @@ Please see full typings [here](src/adapters/node-http/core.ts).
 
 ---
 
-Follow me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💙
+Follow me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💚

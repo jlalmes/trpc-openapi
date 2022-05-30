@@ -1,5 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
@@ -7,5 +8,8 @@
   "workbench.colorCustomizations": {
     "titleBar.activeBackground": "#82b90d",
     "titleBar.inactiveBackground": "#709a22"
-  }
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
 }

@@ -6,13 +6,13 @@
     "source.fixAll.eslint": true
   },
   "workbench.colorCustomizations": {
-    "titleBar.activeBackground": "#82b90d",
-    "titleBar.inactiveBackground": "#709a22"
+    "titleBar.activeBackground": "#8FCE0B",
+    "titleBar.inactiveBackground": "#4B5A30"
   },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
+  }
 }

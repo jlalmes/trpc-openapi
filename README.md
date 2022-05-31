@@ -160,7 +160,17 @@ const res = await fetch('http://localhost:3000/say-hello', {
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
-## API Responses
+## HTTP Requests
+
+### Path parameters
+
+You can add path parameters to any OpenAPI enabled procedure by using curly
+
+### Query parameters
+
+### Request body
+
+## HTTP Responses
 
 Inspired by [Slack Web API](https://api.slack.com/web).
 

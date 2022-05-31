@@ -61,12 +61,14 @@ export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[
       });
     }
 
+    const { description, ...schema } = zodSchemaToOpenApiSchemaObject(value);
+
     return {
       name: key,
       in: 'query',
       required: !value.isOptional(),
-      schema: zodSchemaToOpenApiSchemaObject(value),
-      description: value.description,
+      schema: schema,
+      description: description,
       style: 'form',
       explode: true,
     };

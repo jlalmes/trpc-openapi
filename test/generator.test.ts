@@ -1160,7 +1160,6 @@ describe('generator', () => {
             "name": "id",
             "required": true,
             "schema": Object {
-              "description": "User ID",
               "format": "uuid",
               "type": "string",
             },

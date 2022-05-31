@@ -95,13 +95,16 @@ For every OpenAPI enabled procedure the following _must_ be true:
 - Parsers use [`Zod`](https://github.com/colinhacks/zod) validation.
 - Query `input` parsers extend `ZodObject<{ [string]: ZodString }>`.
 - Mutation `input` parsers extend `ZodObject<{ [string]: ZodType }>`.
-- `meta.openapi.enabled` is set to `true`.
-- `meta.openapi.method` is `GET` or `DELETE` for queries OR `POST`, `PUT` or `PATCH` for mutations.
-- `meta.openapi.path` is a string starting with `/`.
-- `meta.openapi.path` parameters are specified using `{}`.
-- `meta.openapi.path` parameters are present in `input` parser as `ZodString`
+- `meta.openapi` object has the following keys.
+  - `.enabled` is set to `true`.
+  - `.method` is `GET` or `DELETE` for queries OR `POST`, `PUT` or `PATCH` for mutations.
+  - `.path` is a string starting with `/`.
+  - `.path` parameters exist in `input` parser as `ZodString`
 
-Note that data [`transformers`](https://trpc.io/docs/data-transformers) are ignored by `trpc-openapi`.
+Note:
+
+- Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
+- Trailing slashes are ignored.
 
 ## Authorization
 

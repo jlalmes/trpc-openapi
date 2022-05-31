@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 import superjson from 'superjson';
 import { z } from 'zod';
 
+// TODO: multiple query params string[]
 import {
   CreateOpenApiHttpHandlerOptions,
   OpenApiErrorResponse,

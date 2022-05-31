@@ -252,4 +252,10 @@ Please see full typings [here](src/adapters/node-http/core.ts).
 
 ---
 
-Follow me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💚
+## License
+
+Distributed under the MIT License. See LICENSE for more information.
+
+## Contact
+
+James Berry - Follow me on Twitter [@jlalmes](https://twitter.com/jlalmes) 💚

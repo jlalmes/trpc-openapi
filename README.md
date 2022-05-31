@@ -91,20 +91,23 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 For every OpenAPI enabled procedure the following _must_ be true:
 
 - [`tRPC`](https://github.com/trpc/trpc) version 9 (`@trpc/server@^9.23.0`) is installed.
-- `meta.openapi.enabled` is set to `true`.
-- `meta.openapi.method` is `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation procedures.
-- `meta.openapi.path` is a string starting with `/`.
 - Both `input` and `output` parsers are present.
 - Parsers use [`Zod`](https://github.com/colinhacks/zod) validation.
-- `input` parsers extend `Record<string, string>`.
+- Query `input` parsers extend `ZodObject<{ [string]: ZodString }>`.
+- Mutation `input` parsers extend `ZodObject<{ [string]: ZodType }>`.
+- `meta.openapi.enabled` is set to `true`.
+- `meta.openapi.method` is `GET` or `DELETE` for queries OR `POST`, `PUT` or `PATCH` for mutations.
+- `meta.openapi.path` is a string starting with `/`.
+- `meta.openapi.path` parameters are specified using `{}`.
+- `meta.openapi.path` parameters are present in `input` parser as `ZodString`
 
-Please note that data [`transformer`](https://trpc.io/docs/data-transformers)s attached to your router are ignored by `trpc-openapi`.
+Note that data [`transformers`](https://trpc.io/docs/data-transformers) are ignored by `trpc-openapi`.
 
 ## Authorization
 
 To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header with the `Bearer` scheme.
 
-Please explore a [complete example here](examples/with-nextjs/src/server/router.ts).
+Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 
 #### Server
 
@@ -170,7 +173,7 @@ Inspired by [Slack Web API](https://api.slack.com/web).
 {
   "ok": false,
   "error": {
-    "message": "This is bad" /* error.message */,
+    "message": "This is bad" /* TRPCError message */,
     "code": "BAD_REQUEST" /* TRPCError code */
   }
 }
@@ -220,7 +223,7 @@ Please see full typings [here](src/types.ts).
 | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
 | `enabled` | `boolean`    | Exposes procedure to `trpc-openapi` adapters and in OpenAPI document                                                | `true`   | `false`     |
 | `method`  | `HttpMethod` | Method this route is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
-| `path`    | `string`     | Path this route is exposed on. Value must start with `/`.                                                           | `true`   | `undefined` |
+| `path`    | `string`     | Route this endpoint is exposed on. Value must start with `/`. Specify parameters using `{}`.                        | `true`   | `undefined` |
 | `protect` | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.     | `false`  | `false`     |
 | `summary` | `string`     | Route summary included in OpenAPI document.                                                                         | `false`  | `undefined` |
 | `tags`    | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |

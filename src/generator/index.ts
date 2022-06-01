@@ -15,7 +15,7 @@ export type GenerateOpenApiDocumentOptions = {
 };
 
 export const generateOpenApiDocument = (
-  appRouter: OpenApiRouter<any>,
+  appRouter: OpenApiRouter,
   opts: GenerateOpenApiDocumentOptions,
 ): OpenAPIV3.Document => {
   return {

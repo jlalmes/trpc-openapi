@@ -15,6 +15,10 @@ import {
   createOpenApiHttpHandler,
 } from '../../src';
 
+// TODO: test for case sensitivity
+// TODO: test for path parameters
+// TODO: test for duplicate paths (using getPathRegExp)
+
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
@@ -650,7 +654,7 @@ describe('standalone adapter', () => {
     close();
   });
 
-  test.only('with multiple input query string params', async () => {
+  test('with multiple input query string params', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('sayHello', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },

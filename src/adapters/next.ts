@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
-import { getPath } from '../utils';
+import { normalizePath } from '../utils';
 import {
   CreateOpenApiNodeHttpHandlerOptions,
   createOpenApiNodeHttpHandler,
@@ -54,8 +54,7 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
       return;
     }
 
-    const { path } = getPath(pathname);
-    req.url = path;
+    req.url = normalizePath(pathname);
     return openApiHttpHandler(req, res);
   };
 };

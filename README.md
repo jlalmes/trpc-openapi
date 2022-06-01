@@ -104,6 +104,7 @@ Please note:
 
 - Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
 - Trailing slashes are ignored.
+- Routing is case-insensitive.
 
 ## Authorization
 
@@ -164,11 +165,16 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ### Path parameters
 
+TODO:
 You can add path parameters to any OpenAPI enabled procedure by using curly
 
 ### Query parameters
 
+TODO:
+
 ### Request body
+
+TODO:
 
 ## HTTP Responses
 

@@ -13,10 +13,10 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
-import { getPath } from '../../utils';
+import { normalizePath } from '../../utils';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
-import { getProcedures } from './procedures';
+import { createMatchProcedureFn } from './procedures';
 
 export type CreateOpenApiNodeHttpHandlerOptions<
   TRouter extends OpenApiRouter,
@@ -36,16 +36,15 @@ export const createOpenApiNodeHttpHandler = <
 >(
   opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>,
 ) => {
-  // validate router
+  // Validate router
   generateOpenApiDocument(opts.router, {
     title: '-',
-    description: '-',
     version: '-',
     baseUrl: '-',
   });
 
   const { router, createContext, responseMeta, onError, teardown, maxBodySize } = opts;
-  const procedures = getProcedures(router);
+  const matchProcedure = createMatchProcedureFn(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
     const sendResponse = (
@@ -66,8 +65,9 @@ export const createOpenApiNodeHttpHandler = <
     const method = req.method!;
     const reqUrl = req.url!;
     const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
-    const { path } = getPath(url.pathname);
-    const procedure = procedures[method]?.[path];
+    const path = normalizePath(url.pathname);
+    const { procedure, pathInput } = matchProcedure(method, path) ?? {};
+
     let input: any;
     let ctx: any;
     let data: any;
@@ -90,7 +90,10 @@ export const createOpenApiNodeHttpHandler = <
         });
       }
 
-      input = procedure.type === 'query' ? getQuery(req, url) : await getBody(req, maxBodySize);
+      input = {
+        ...(procedure.type === 'query' ? getQuery(req, url) : await getBody(req, maxBodySize)),
+        ...pathInput,
+      };
       ctx = await createContext?.({ ...opts, req, res });
       const caller = router.createCaller(ctx);
       data = await caller[procedure.type](procedure.path, input);

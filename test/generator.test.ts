@@ -393,7 +393,7 @@ describe('generator', () => {
         meta: { openapi: { enabled: true, path: '/users', method: 'PATCH' } },
         input: z.object({ id: z.string(), name: z.string().optional() }),
         output: z.object({ id: z.string(), name: z.string() }),
-        resolve: ({ input }) => ({ id: input.id, name: input.name || 'name' }),
+        resolve: ({ input }) => ({ id: input.id, name: input.name ?? 'name' }),
       })
       .query('deleteUser', {
         meta: { openapi: { enabled: true, path: '/users', method: 'DELETE' } },

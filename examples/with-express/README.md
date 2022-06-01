@@ -6,3 +6,7 @@
 npm install
 npm run dev
 ```
+
+### Learn more
+
+[**`trpc-openapi`**](README.md)

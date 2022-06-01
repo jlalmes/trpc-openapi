@@ -485,6 +485,7 @@ describe('generator', () => {
         "paths": Object {
           "/users": Object {
             "delete": Object {
+              "description": undefined,
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -528,6 +529,7 @@ describe('generator', () => {
               "tags": undefined,
             },
             "get": Object {
+              "description": undefined,
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -588,6 +590,7 @@ describe('generator', () => {
               "tags": undefined,
             },
             "patch": Object {
+              "description": undefined,
               "parameters": Array [],
               "requestBody": Object {
                 "content": Object {
@@ -660,6 +663,7 @@ describe('generator', () => {
               "tags": undefined,
             },
             "post": Object {
+              "description": undefined,
               "parameters": Array [],
               "requestBody": Object {
                 "content": Object {
@@ -972,15 +976,16 @@ describe('generator', () => {
     `);
   });
 
-  test('with summary & tags', () => {
+  test('with summary, description & tags', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
         openapi: {
           enabled: true,
           path: '/metadata/all',
           method: 'GET',
-          summary: 'Some summary',
-          tags: ['some-tag'],
+          summary: 'Short summary',
+          description: 'Verbose description',
+          tags: ['tag'],
         },
       },
       input: z.object({ name: z.string() }),
@@ -995,8 +1000,9 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Some summary');
-    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['some-tag']);
+    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary');
+    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description');
+    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tag']);
   });
 
   test('with security', () => {
@@ -1068,6 +1074,7 @@ describe('generator', () => {
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
     expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
       Object {
+        "description": undefined,
         "parameters": Array [],
         "requestBody": Object {
           "content": Object {
@@ -1151,6 +1158,7 @@ describe('generator', () => {
     `);
     expect(openApiDocument.paths['/user']!.get!).toMatchInlineSnapshot(`
       Object {
+        "description": undefined,
         "parameters": Array [
           Object {
             "description": "User ID",

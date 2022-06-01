@@ -7,11 +7,11 @@ const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaO
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
 };
 
-const zodInstanceofZodType = (schema: any): schema is z.ZodType => {
+const instanceofZod = (schema: any): schema is z.ZodType => {
   return !!schema?._def?.typeName;
 };
 
-const zodInstanceof = <Z extends z.ZodFirstPartyTypeKind>(
+const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
   schema: any,
   zodTypeKind: Z,
 ): schema is InstanceType<typeof z[Z]> => {
@@ -19,66 +19,86 @@ const zodInstanceof = <Z extends z.ZodFirstPartyTypeKind>(
 };
 
 const getBaseZodType = (schema: z.ZodType): z.ZodType => {
-  if (
-    zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodOptional)
-    // zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodNullable) // nullable not valid in getParameterObjects
-  ) {
+  if (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodOptional)) {
     return getBaseZodType(schema.unwrap());
   }
-  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodDefault)) {
+  if (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodDefault)) {
     return getBaseZodType(schema.removeDefault());
   }
-  if (zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodEffects)) {
+  if (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodEffects)) {
     return getBaseZodType(schema.innerType());
   }
-  // TODO: ZodLazy?
   return schema;
 };
 
-export const getParameterObjects = (schema: unknown): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!zodInstanceofZodType(schema)) {
+export const getParameterObjects = (
+  schema: unknown,
+  pathParameters: string[],
+  inType: 'all' | 'path' | 'query',
+): OpenAPIV3.ParameterObject[] => {
+  if (!instanceofZod(schema)) {
     throw new TRPCError({
-      message: 'Input parser expects ZodType',
+      message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  if (!zodInstanceof(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
+  if (!instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
     throw new TRPCError({
-      message: 'Input parser expects ZodObject',
+      message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
   const shape = schema.shape;
-  return Object.keys(shape).map((key) => {
-    const value = shape[key]!;
+  const keys = Object.keys(shape);
 
-    if (!zodInstanceof(getBaseZodType(value), z.ZodFirstPartyTypeKind.ZodString)) {
+  for (const pathParameter of pathParameters) {
+    if (!keys.includes(pathParameter)) {
       throw new TRPCError({
-        message: 'Input parser expects ZodObject<{ [string]: ZodString }>',
+        message: `Input parser expects key from path: "${pathParameter}"`,
         code: 'INTERNAL_SERVER_ERROR',
       });
     }
+  }
 
-    const { description, ...schema } = zodSchemaToOpenApiSchemaObject(value);
+  return keys
+    .filter((key) => {
+      const isPathParameter = pathParameters.includes(key);
+      if (inType === 'path') {
+        return isPathParameter;
+      } else if (inType === 'query') {
+        return !isPathParameter;
+      }
+      return true;
+    })
+    .map((key) => {
+      const value = shape[key]!;
 
-    return {
-      name: key,
-      in: 'query',
-      required: !value.isOptional(),
-      schema: schema,
-      description: description,
-      style: 'form',
-      explode: true,
-    };
-  });
+      if (!instanceofZodTypeKind(getBaseZodType(value), z.ZodFirstPartyTypeKind.ZodString)) {
+        throw new TRPCError({
+          message: `Input parser key: "${key}" must be a ZodString`,
+          code: 'INTERNAL_SERVER_ERROR',
+        });
+      }
+
+      const isPathParameter = pathParameters.includes(key);
+      const { description, ...schema } = zodSchemaToOpenApiSchemaObject(value);
+
+      return {
+        name: key,
+        in: isPathParameter ? 'path' : 'query',
+        required: isPathParameter || !value.isOptional(),
+        schema: schema,
+        description: description,
+      };
+    });
 };
 
 export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObject | undefined => {
-  if (!zodInstanceofZodType(schema)) {
+  if (!instanceofZod(schema)) {
     throw new TRPCError({
-      message: 'Input parser expects ZodType',
+      message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
@@ -112,9 +132,9 @@ export const errorResponseObject = {
 };
 
 export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
-  if (!zodInstanceofZodType(schema)) {
+  if (!instanceofZod(schema)) {
     throw new TRPCError({
-      message: 'Output parser expects ZodType',
+      message: 'Output parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
@@ -135,6 +155,8 @@ export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject =
 
   return {
     200: successResponseObject,
-    default: { $ref: '#/components/responses/error' },
+    default: {
+      $ref: '#/components/responses/error',
+    },
   };
 };

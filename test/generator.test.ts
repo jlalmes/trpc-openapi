@@ -12,7 +12,7 @@ describe('generator', () => {
     expect(openApiVersion).toBe('3.0.3');
   });
 
-  test('empty router', () => {
+  test('with empty router', () => {
     const appRouter = trpc.router<any, OpenApiMeta>();
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
@@ -123,7 +123,7 @@ describe('generator', () => {
           version: '1.0.0',
           baseUrl: 'http://localhost:3000/api',
         });
-      }).toThrowError('[query.noInput] - Input parser expects ZodType');
+      }).toThrowError('[query.noInput] - Input parser expects a Zod validator');
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('noInput', {
@@ -138,7 +138,7 @@ describe('generator', () => {
           version: '1.0.0',
           baseUrl: 'http://localhost:3000/api',
         });
-      }).toThrowError('[mutation.noInput] - Input parser expects ZodType');
+      }).toThrowError('[mutation.noInput] - Input parser expects a Zod validator');
     }
   });
 
@@ -156,7 +156,7 @@ describe('generator', () => {
           version: '1.0.0',
           baseUrl: 'http://localhost:3000/api',
         });
-      }).toThrowError('[query.noOutput] - Output parser expects ZodType');
+      }).toThrowError('[query.noOutput] - Output parser expects a Zod validator');
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('noOutput', {
@@ -171,42 +171,101 @@ describe('generator', () => {
           version: '1.0.0',
           baseUrl: 'http://localhost:3000/api',
         });
-      }).toThrowError('[mutation.noOutput] - Output parser expects ZodType');
+      }).toThrowError('[mutation.noOutput] - Output parser expects a Zod validator');
     }
   });
 
-  test('with query non-object input', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
-      meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
-      input: z.string(),
-      output: z.object({ name: z.string() }),
-      resolve: () => ({ name: 'jlalmes' }),
-    });
-
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
+  test('with non-object input', () => {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
+        meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
+        input: z.string(),
+        output: z.object({ name: z.string() }),
+        resolve: () => ({ name: 'jlalmes' }),
       });
-    }).toThrowError('[query.badInput] - Input parser expects ZodObject');
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.badInput] - Input parser must be a ZodObject');
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('badInput', {
+        meta: { openapi: { enabled: true, path: '/bad-input', method: 'POST' } },
+        input: z.string(),
+        output: z.object({ name: z.string() }),
+        resolve: () => ({ name: 'jlalmes' }),
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[mutation.badInput] - Input parser must be a ZodObject');
+    }
   });
 
-  test('with query non-object-string-value input', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
-      meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
-      input: z.object({ age: z.number() }),
-      output: z.object({ name: z.string() }),
-      resolve: () => ({ name: 'jlalmes' }),
-    });
+  test('with non-object-string-value input', () => {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
+        meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
+        input: z.object({ age: z.number() }),
+        output: z.object({ name: z.string() }),
+        resolve: () => ({ name: 'jlalmes' }),
+      });
 
-    expect(() => {
-      generateOpenApiDocument(appRouter, {
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.badInput] - Input parser key: "age" must be a ZodString');
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('okInput', {
+        meta: { openapi: { enabled: true, path: '/ok-input', method: 'POST' } },
+        input: z.object({ age: z.number().min(0).max(122) }), // RIP Jeanne Calment
+        output: z.object({ name: z.string() }),
+        resolve: () => ({ name: 'jlalmes' }),
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-    }).toThrowError('[query.badInput] - Input parser expects ZodObject<{ [string]: ZodString }>');
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/ok-input']!.post!.requestBody).toMatchInlineSnapshot(`
+        Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "age": Object {
+                    "maximum": 122,
+                    "minimum": 0,
+                    "type": "number",
+                  },
+                },
+                "required": Array [
+                  "age",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        }
+      `);
+    }
   });
 
   test('with bad method', () => {
@@ -244,7 +303,7 @@ describe('generator', () => {
     }
   });
 
-  test('duplicate routes', () => {
+  test('with duplicate routes', () => {
     {
       const appRouter = trpc
         .router<any, OpenApiMeta>()
@@ -295,7 +354,7 @@ describe('generator', () => {
     }
   });
 
-  test('unsupported subscription', () => {
+  test('with unsupported subscription', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().subscription('currentName', {
       meta: { openapi: { enabled: true, path: '/current-name', method: 'PATCH' } },
       input: z.object({ name: z.string() }),
@@ -429,14 +488,12 @@ describe('generator', () => {
               "parameters": Array [
                 Object {
                   "description": undefined,
-                  "explode": true,
                   "in": "query",
                   "name": "id",
                   "required": true,
                   "schema": Object {
                     "type": "string",
                   },
-                  "style": "form",
                 },
               ],
               "responses": Object {
@@ -474,14 +531,12 @@ describe('generator', () => {
               "parameters": Array [
                 Object {
                   "description": undefined,
-                  "explode": true,
                   "in": "query",
                   "name": "id",
                   "required": true,
                   "schema": Object {
                     "type": "string",
                   },
-                  "style": "form",
                 },
               ],
               "responses": Object {
@@ -533,6 +588,7 @@ describe('generator', () => {
               "tags": undefined,
             },
             "patch": Object {
+              "parameters": Array [],
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
@@ -604,6 +660,7 @@ describe('generator', () => {
               "tags": undefined,
             },
             "post": Object {
+              "parameters": Array [],
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
@@ -703,7 +760,7 @@ describe('generator', () => {
   test('with void', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('void', {
       meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
-      input: z.void(),
+      input: z.object({}),
       output: z.void(),
       resolve: () => undefined,
     });
@@ -715,16 +772,6 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": undefined,
-          },
-        },
-        "required": false,
-      }
-    `);
     expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -754,7 +801,7 @@ describe('generator', () => {
   test('with null', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('null', {
       meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
-      input: z.null(),
+      input: z.object({}),
       output: z.null(),
       resolve: () => null,
     });
@@ -766,21 +813,6 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/null']!.post!.requestBody).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "enum": Array [
-                "null",
-              ],
-              "nullable": true,
-            },
-          },
-        },
-        "required": true,
-      }
-    `);
     expect(openApiDocument.paths['/null']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -817,7 +849,7 @@ describe('generator', () => {
   test('with undefined', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('undefined', {
       meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
-      input: z.undefined(),
+      input: z.object({}),
       output: z.undefined(),
       resolve: () => undefined,
     });
@@ -829,18 +861,6 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/undefined']!.post!.requestBody).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "not": Object {},
-            },
-          },
-        },
-        "required": false,
-      }
-    `);
     expect(openApiDocument.paths['/undefined']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -873,7 +893,7 @@ describe('generator', () => {
   test('with nullish', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('nullish', {
       meta: { openapi: { enabled: true, path: '/nullish', method: 'POST' } },
-      input: z.string().nullish(),
+      input: z.object({}),
       output: z.string().nullish(),
       resolve: () => null,
     });
@@ -885,26 +905,6 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/nullish']!.post!.requestBody).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "anyOf": Array [
-                Object {
-                  "not": Object {},
-                },
-                Object {
-                  "type": "string",
-                },
-              ],
-              "nullable": true,
-            },
-          },
-        },
-        "required": false,
-      }
-    `);
     expect(openApiDocument.paths['/nullish']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -961,14 +961,12 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
-          "explode": true,
           "in": "query",
           "name": "age",
           "required": true,
           "schema": Object {
             "type": "string",
           },
-          "style": "form",
         },
       ]
     `);
@@ -1070,6 +1068,7 @@ describe('generator', () => {
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
     expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
       Object {
+        "parameters": Array [],
         "requestBody": Object {
           "content": Object {
             "application/json": Object {
@@ -1155,7 +1154,6 @@ describe('generator', () => {
         "parameters": Array [
           Object {
             "description": "User ID",
-            "explode": true,
             "in": "query",
             "name": "id",
             "required": true,
@@ -1163,7 +1161,6 @@ describe('generator', () => {
               "format": "uuid",
               "type": "string",
             },
-            "style": "form",
           },
         ],
         "responses": Object {

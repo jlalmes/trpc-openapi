@@ -55,14 +55,14 @@ describe('standalone adapter', () => {
   });
 
   test('with invalid router', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().mutation('invalidRoute', {
-      meta: { openapi: { enabled: true, path: '/invalid-route', method: 'POST' } },
-      input: z.number(),
+    const appRouter = trpc.router<any, OpenApiMeta>().query('invalidRoute', {
+      meta: { openapi: { enabled: true, path: '/invalid-route', method: 'GET' } },
+      input: z.object({}),
       resolve: ({ input }) => input,
     });
 
     expect(() => createOpenApiHttpHandler({ router: appRouter })).toThrowError(
-      '[mutation.invalidRoute] - Output parser expects ZodType',
+      '[query.invalidRoute] - Output parser expects a Zod validator',
     );
   });
 
@@ -318,9 +318,9 @@ describe('standalone adapter', () => {
         })
         .mutation('sayHello', {
           meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
-          input: z.string(),
+          input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input}!` }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         }),
     });
 
@@ -344,7 +344,7 @@ describe('standalone adapter', () => {
       const res = await fetch(`${url}/say-hello`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify('James'),
+        body: JSON.stringify({ name: 'James' }),
       });
       const body = (await res.json()) as OpenApiSuccessResponse;
 
@@ -517,9 +517,9 @@ describe('standalone adapter', () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
-        input: z.string(),
+        input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
-        resolve: ({ input }) => ({ payload: input }),
+        resolve: ({ input }) => ({ payload: input.payload }),
       }),
     });
 
@@ -539,9 +539,9 @@ describe('standalone adapter', () => {
           {
             code: 'invalid_type',
             expected: 'string',
-            message: 'Expected string, received object',
-            path: [],
-            received: 'object',
+            message: 'Required',
+            path: ['payload'],
+            received: 'undefined',
           },
         ],
       },
@@ -558,16 +558,17 @@ describe('standalone adapter', () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
-        input: z.string(),
+        input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
-        resolve: ({ input }) => ({ payload: input }),
+        resolve: ({ input }) => ({ payload: input.payload }),
       }),
     });
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: 'James', // not JSON.stringified
+      // @ts-expect-error - not JSON.stringified
+      body: { payload: 'James' },
     });
     const body = (await res.json()) as OpenApiErrorResponse;
 
@@ -588,21 +589,23 @@ describe('standalone adapter', () => {
   });
 
   test('with maxBodySize', async () => {
+    const requestBody = JSON.stringify({ payload: 'James' });
+
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
-        input: z.string(),
+        input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
-        resolve: ({ input }) => ({ payload: input }),
+        resolve: ({ input }) => ({ payload: input.payload }),
       }),
-      maxBodySize: 10,
+      maxBodySize: requestBody.length,
     });
 
     {
       const res = await fetch(`${url}/echo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify('*'.repeat(8)),
+        body: requestBody,
       });
       const body = (await res.json()) as OpenApiSuccessResponse;
 
@@ -610,7 +613,7 @@ describe('standalone adapter', () => {
       expect(body).toEqual({
         ok: true,
         data: {
-          payload: '********',
+          payload: 'James',
         },
       });
       expect(createContextMock).toHaveBeenCalledTimes(1);
@@ -627,7 +630,7 @@ describe('standalone adapter', () => {
       const res = await fetch(`${url}/echo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify('*'.repeat(20)),
+        body: JSON.stringify({ payload: 'xJames' }),
       });
       const body = (await res.json()) as OpenApiErrorResponse;
 

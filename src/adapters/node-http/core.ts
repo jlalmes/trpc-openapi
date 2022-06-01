@@ -13,7 +13,7 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
-import { removeLeadingTrailingSlash } from '../../utils';
+import { getPath } from '../../utils';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
 import { getProcedures } from './procedures';
@@ -66,7 +66,7 @@ export const createOpenApiNodeHttpHandler = <
     const method = req.method!;
     const reqUrl = req.url!;
     const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
-    const path = `/${removeLeadingTrailingSlash(url.pathname)}`;
+    const { path } = getPath(url.pathname);
     const procedure = procedures[method]?.[path];
     let input: any;
     let ctx: any;

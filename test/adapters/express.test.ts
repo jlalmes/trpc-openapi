@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import * as trpc from '@trpc/server';
-import bodyParser from 'body-parser';
 import express from 'express';
 import fetch from 'node-fetch';
 import { z } from 'zod';
@@ -20,7 +19,7 @@ const teardownMock = jest.fn();
 
 const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
   handlerOpts: CreateOpenApiExpressMiddlewareOptions<TRouter>,
-  serverOpts?: { customBodyParser?: boolean; basePath?: `/${string}` },
+  serverOpts?: { basePath?: `/${string}` },
 ) => {
   const openApiExpressMiddleware = createOpenApiExpressMiddleware({
     router: handlerOpts.router,
@@ -32,9 +31,6 @@ const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
   });
 
   const app = express();
-  if (serverOpts?.customBodyParser) {
-    app.use(bodyParser.json({ strict: false, limit: handlerOpts.maxBodySize }));
-  }
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   app.use(serverOpts?.basePath ?? '/', openApiExpressMiddleware);
@@ -69,9 +65,9 @@ describe('express adapter', () => {
         })
         .mutation('sayHello', {
           meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
-          input: z.string(),
+          input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input}!` }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         }),
     });
 
@@ -95,7 +91,7 @@ describe('express adapter', () => {
       const res = await fetch(`${url}/say-hello`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify('James'),
+        body: JSON.stringify({ name: 'James' }),
       });
       const body = (await res.json()) as OpenApiSuccessResponse;
 
@@ -105,92 +101,6 @@ describe('express adapter', () => {
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
-    }
-
-    close();
-  });
-
-  test('with invalid json (with customBodyParser)', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      {
-        router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
-          input: z.string(),
-          output: z.object({ payload: z.string() }),
-          resolve: ({ input }) => ({ payload: input }),
-        }),
-      },
-      { customBodyParser: true },
-    );
-
-    const res = await fetch(`${url}/echo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: 'James', // not JSON.stringified
-    });
-
-    expect(res.ok).toBe(false);
-    expect(createContextMock).toHaveBeenCalledTimes(0);
-    expect(responseMetaMock).toHaveBeenCalledTimes(0);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(0);
-
-    close();
-  });
-
-  test('with maxBodySize (with customBodyParser)', async () => {
-    const { url, close } = createExpressServerWithRouter(
-      {
-        router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
-          input: z.string(),
-          output: z.object({ payload: z.string() }),
-          resolve: ({ input }) => ({ payload: input }),
-        }),
-        maxBodySize: 10,
-      },
-      {
-        customBodyParser: true,
-      },
-    );
-
-    {
-      const res = await fetch(`${url}/echo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify('*'.repeat(8)),
-      });
-      const body = (await res.json()) as OpenApiSuccessResponse;
-
-      expect(res.status).toBe(200);
-      expect(body).toEqual({
-        ok: true,
-        data: {
-          payload: '********',
-        },
-      });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
-
-      createContextMock.mockClear();
-      responseMetaMock.mockClear();
-      onErrorMock.mockClear();
-      teardownMock.mockClear();
-    }
-    {
-      const res = await fetch(`${url}/echo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify('*'.repeat(20)),
-      });
-
-      expect(res.ok).toBe(false);
-      expect(createContextMock).toHaveBeenCalledTimes(0);
-      expect(responseMetaMock).toHaveBeenCalledTimes(0);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(0);
     }
 
     close();

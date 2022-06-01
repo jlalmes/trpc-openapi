@@ -1,8 +1,9 @@
 import { TRPCError } from '@trpc/server';
 import { OpenAPIV3 } from 'openapi-types';
+import { z } from 'zod';
 
 import { OpenApiRouter } from '../types';
-import { getInputOutputParsers, removeLeadingTrailingSlash } from '../utils';
+import { getInputOutputParsers, getPath } from '../utils';
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from './schema';
 
 export const getOpenApiPathsObject = (
@@ -27,7 +28,7 @@ export const getOpenApiPathsObject = (
         });
       }
 
-      const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
+      const { path, pathParameters } = getPath(openapi.path);
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
         throw new TRPCError({
@@ -44,7 +45,7 @@ export const getOpenApiPathsObject = (
           summary,
           tags,
           security: protect ? [{ Authorization: [] }] : undefined,
-          parameters: getParameterObjects(inputParser),
+          parameters: getParameterObjects(inputParser, pathParameters, 'all'),
           responses: getResponsesObject(outputParser),
         },
       };
@@ -71,7 +72,7 @@ export const getOpenApiPathsObject = (
         });
       }
 
-      const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
+      const { path, pathParameters } = getPath(openapi.path);
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
         throw new TRPCError({
@@ -89,6 +90,7 @@ export const getOpenApiPathsObject = (
           tags,
           security: protect ? [{ Authorization: [] }] : undefined,
           requestBody: getRequestBodyObject(inputParser),
+          parameters: getParameterObjects(inputParser, pathParameters, 'path'),
           responses: getResponsesObject(outputParser),
         },
       };

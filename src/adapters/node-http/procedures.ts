@@ -1,5 +1,5 @@
 import { OpenApiRouter } from '../../types';
-import { removeLeadingTrailingSlash } from '../../utils';
+import { getPath } from '../../utils';
 
 type Procedure = { type: 'query' | 'mutation'; path: string };
 
@@ -18,7 +18,7 @@ export const getProcedures = (appRouter: OpenApiRouter) => {
     if (!procedures[method]) {
       procedures[method] = {};
     }
-    const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
+    const { path } = getPath(openapi.path);
     procedures[method]![path] = {
       type: 'query',
       path: queryPath,
@@ -35,7 +35,7 @@ export const getProcedures = (appRouter: OpenApiRouter) => {
     if (!procedures[method]) {
       procedures[method] = {};
     }
-    const path = `/${removeLeadingTrailingSlash(openapi.path)}`;
+    const { path } = getPath(openapi.path);
     procedures[method]![path] = {
       type: 'mutation',
       path: mutationPath,

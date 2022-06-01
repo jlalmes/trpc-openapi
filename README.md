@@ -231,14 +231,15 @@ export default createOpenApiNextHandler({ router: appRouter });
 
 Please see full typings [here](src/types.ts).
 
-| Property  | Type         | Description                                                                                                         | Required | Default     |
-| --------- | ------------ | ------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
-| `enabled` | `boolean`    | Exposes procedure to `trpc-openapi` adapters and in OpenAPI document                                                | `true`   | `false`     |
-| `method`  | `HttpMethod` | Method this route is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
-| `path`    | `string`     | Route this endpoint is exposed on. Value must start with `/`. Specify parameters using `{}`.                        | `true`   | `undefined` |
-| `protect` | `boolean`    | Requires this route to have an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.     | `false`  | `false`     |
-| `summary` | `string`     | Route summary included in OpenAPI document.                                                                         | `false`  | `undefined` |
-| `tags`    | `string[]`   | Route tags included in OpenAPI document.                                                                            | `false`  | `[]`        |
+| Property      | Type         | Description                                                                                                            | Required | Default     |
+| ------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
+| `enabled`     | `boolean`    | Exposes procedure to `trpc-openapi` adapters and on the OpenAPI document                                               | `true`   | `false`     |
+| `method`      | `HttpMethod` | Method this endpoint is exposed on. Value can be `GET` or `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation. | `true`   | `undefined` |
+| `path`        | `string`     | Pathname this endpoint is exposed on. Value must start with `/`. Specify parameters using `{}`.                        | `true`   | `undefined` |
+| `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.      | `false`  | `false`     |
+| `summary`     | `string`     | A short summary included in the OpenAPI document.                                                                      | `false`  | `undefined` |
+| `description` | `string`     | A verbose description included in the OpenAPI document.                                                                | `false`  | `undefined` |
+| `tags`        | `string[]`   | A list of tags to group endpoints in the OpenAPI document.                                                             | `false`  | `[]`        |
 
 #### GenerateOpenApiDocumentOptions
 

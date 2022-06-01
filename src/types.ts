@@ -10,11 +10,12 @@ export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
   openapi?: {
     enabled: boolean;
-    path: `/${string}`;
     method: OpenApiMethod;
+    path: `/${string}`;
     summary?: string;
-    tags?: string[];
+    description?: string;
     protect?: boolean;
+    tags?: string[];
   };
 };
 

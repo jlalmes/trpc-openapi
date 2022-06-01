@@ -6,7 +6,6 @@ import fetch from 'node-fetch';
 import superjson from 'superjson';
 import { z } from 'zod';
 
-// TODO: multiple query params string[]
 import {
   CreateOpenApiHttpHandlerOptions,
   OpenApiErrorResponse,
@@ -642,6 +641,31 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(0);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(1);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+    }
+
+    close();
+  });
+
+  test.only('with multiple input query string params', async () => {
+    const { url, close } = createHttpServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().query('sayHello', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+        input: z.object({ name: z.string() }),
+        output: z.object({ greeting: z.string() }),
+        resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+      }),
+    });
+
+    {
+      const res = await fetch(`${url}/say-hello?name=James&name=jlalmes`, { method: 'GET' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 

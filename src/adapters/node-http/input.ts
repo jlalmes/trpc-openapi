@@ -40,7 +40,10 @@ export const getBody = async (req: NodeHTTPRequest, maxBodySize?: number): Promi
   }
 
   await new Promise<void>((resolve, reject) => {
-    bodyParser.json({ strict: false, limit: maxBodySize ?? 102400 })(req, {} as any, (error) => {
+    bodyParser.json({
+      strict: true,
+      limit: maxBodySize ?? 102400,
+    })(req, {} as any, (error) => {
       if (error instanceof Error) {
         if (error.name === 'PayloadTooLargeError') {
           reject(

@@ -1,14 +1,12 @@
-// eslint-disable-next-line import/no-unresolved
-import { Procedure } from '@trpc/server/dist/declarations/src/internals/procedure';
-
-export const removeLeadingTrailingSlash = (path: string) => {
-  return path.replace(/^\/|\/$/g, '');
+export const normalizePath = (path: string) => {
+  return `/${path.replace(/^\/|\/$/g, '')}`;
 };
 
-// `inputParser` & `outputParser` are private so this is a hack to access it
-export const getInputOutputParsers = (procedure: Procedure<any, any, any, any, any, any, any>) => {
-  return procedure as unknown as {
-    inputParser: typeof procedure['inputParser'];
-    outputParser: typeof procedure['outputParser'];
-  };
+export const getPathParameters = (path: string) => {
+  return Array.from(path.matchAll(/\{(.+?)\}/g)).map(([_, key]) => key!);
+};
+
+export const getPathRegExp = (path: string) => {
+  const groupedExp = path.replace(/\{(.+?)\}/g, (_, key: string) => `(?<${key}>[^/]+)`);
+  return new RegExp(`^${groupedExp}$`, 'i');
 };

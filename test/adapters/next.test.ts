@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import * as trpc from '@trpc/server';
 import { NextApiRequest, NextApiResponse } from 'next';
-import fetch from 'node-fetch';
 import { z } from 'zod';
 
 import {
@@ -9,7 +8,6 @@ import {
   OpenApiMeta,
   OpenApiResponse,
   OpenApiRouter,
-  OpenApiSuccessResponse,
   createOpenApiNextHandler,
 } from '../../src';
 
@@ -83,9 +81,9 @@ describe('next adapter', () => {
         })
         .mutation('sayHello', {
           meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
-          input: z.string(),
+          input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input}!` }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .query('sayHelloSplit', {
           meta: { openapi: { enabled: true, method: 'GET', path: '/say/hello' } },
@@ -117,7 +115,7 @@ describe('next adapter', () => {
       const res = await openApiNextHandlerCaller({
         method: 'POST',
         query: { trpc: 'say-hello' },
-        body: 'James',
+        body: { name: 'James' },
       });
 
       expect(res.statusCode).toBe(200);

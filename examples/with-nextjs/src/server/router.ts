@@ -59,7 +59,7 @@ const authRouter = createRouter()
       openapi: {
         enabled: true,
         method: 'POST',
-        path: '/register',
+        path: '/auth/register',
         tags: ['auth'],
         summary: 'Register as a new user',
       },
@@ -94,7 +94,7 @@ const authRouter = createRouter()
       openapi: {
         enabled: true,
         method: 'POST',
-        path: '/login',
+        path: '/auth/login',
         tags: ['auth'],
         summary: 'Login as an existing user',
       },
@@ -128,12 +128,12 @@ const authRouter = createRouter()
     },
   });
 
-const userRouter = createRouter().query('getUser', {
+const userRouter = createRouter().query('getUserById', {
   meta: {
     openapi: {
       enabled: true,
       method: 'GET',
-      path: '/user',
+      path: '/users/{id}',
       tags: ['users'],
       summary: 'Read a user by id',
     },
@@ -163,12 +163,12 @@ const userRouter = createRouter().query('getUser', {
 });
 
 const postRouter = createRouter()
-  .query('getPost', {
+  .query('getPostById', {
     meta: {
       openapi: {
         enabled: true,
         method: 'GET',
-        path: '/post',
+        path: '/posts/{id}',
         tags: ['posts'],
         summary: 'Read a post by id',
       },
@@ -196,7 +196,7 @@ const postRouter = createRouter()
       return { post };
     },
   })
-  .query('getAllPosts', {
+  .query('getPosts', {
     meta: {
       openapi: {
         enabled: true,
@@ -206,7 +206,9 @@ const postRouter = createRouter()
         summary: 'Read all posts',
       },
     },
-    input: z.object({}),
+    input: z.object({
+      userId: z.string().uuid().optional(),
+    }),
     output: z.object({
       posts: z.array(
         z.object({
@@ -216,8 +218,16 @@ const postRouter = createRouter()
         }),
       ),
     }),
-    resolve: () => {
-      return { posts: database.posts };
+    resolve: ({ input }) => {
+      let posts: Post[] = database.posts;
+
+      if (input.userId) {
+        posts = posts.filter((post) => {
+          return post.userId === input.userId;
+        });
+      }
+
+      return { posts };
     },
   });
 
@@ -227,14 +237,14 @@ const postProtectedRouter = createProtectedRouter()
       openapi: {
         enabled: true,
         method: 'POST',
-        path: '/post',
+        path: '/posts',
         tags: ['posts'],
         protect: true,
         summary: 'Create a new post',
       },
     },
     input: z.object({
-      content: z.string().min(1),
+      content: z.string().min(1).max(140),
     }),
     output: z.object({
       post: z.object({
@@ -255,12 +265,12 @@ const postProtectedRouter = createProtectedRouter()
       return { post };
     },
   })
-  .mutation('updatePost', {
+  .mutation('updatePostById', {
     meta: {
       openapi: {
         enabled: true,
         method: 'PUT',
-        path: '/post',
+        path: '/posts/{id}',
         tags: ['posts'],
         protect: true,
         summary: 'Update an existing post',
@@ -298,12 +308,12 @@ const postProtectedRouter = createProtectedRouter()
       return { post };
     },
   })
-  .query('deletePost', {
+  .query('deletePostById', {
     meta: {
       openapi: {
         enabled: true,
         method: 'DELETE',
-        path: '/post',
+        path: '/posts/{id}',
         tags: ['posts'],
         protect: true,
         summary: 'Delete a post',

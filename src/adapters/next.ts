@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
-import { removeLeadingTrailingSlash } from '../utils';
+import { normalizePath } from '../utils';
 import {
   CreateOpenApiNodeHttpHandlerOptions,
   createOpenApiNodeHttpHandler,
@@ -19,14 +19,14 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
   const openApiHttpHandler = createOpenApiNodeHttpHandler(opts);
 
   return async (req: NextApiRequest, res: NextApiResponse) => {
-    let path: string | null = null;
+    let pathname: string | null = null;
     if (typeof req.query.trpc === 'string') {
-      path = req.query.trpc;
+      pathname = req.query.trpc;
     } else if (Array.isArray(req.query.trpc)) {
-      path = req.query.trpc.join('/');
+      pathname = req.query.trpc.join('/');
     }
 
-    if (path === null) {
+    if (pathname === null) {
       const error = new TRPCError({
         message: 'Query "trpc" not found - is the file named `[trpc]`.ts or `[...trpc].ts`?',
         code: 'INTERNAL_SERVER_ERROR',
@@ -54,7 +54,7 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
       return;
     }
 
-    req.url = `/${removeLeadingTrailingSlash(path)}`;
+    req.url = normalizePath(pathname);
     return openApiHttpHandler(req, res);
   };
 };

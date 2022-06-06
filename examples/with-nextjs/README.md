@@ -1,4 +1,4 @@
-# trpc-openapi (with-nextjs)
+# [**`trpc-openapi`**](../../README.md) (with-nextjs)
 
 ### Getting started
 

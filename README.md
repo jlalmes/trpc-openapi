@@ -238,8 +238,6 @@ Please see [error status codes here](src/adapters/node-http/errors.ts).
 
 ## Examples
 
-Please see [full test suite](test).
-
 #### With Express
 
 Please see [full example here](examples/with-express).
@@ -271,6 +269,8 @@ import { appRouter } from '../../server/appRouter';
 
 export default createOpenApiNextHandler({ router: appRouter });
 ```
+
+_For advanced use-cases, please find examples in our [complete test suite](test)._
 
 ## Types
 

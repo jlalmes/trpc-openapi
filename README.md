@@ -213,7 +213,9 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 Inspired by [Slack Web API](https://api.slack.com/web).
 
-Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`, please see [error status codes here](src/adapters/node-http/errors.ts). You can modify the each responses status code using the `responseMeta` function.
+Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`. You can modify the each responses status code using the `responseMeta` function.
+
+Please see [error status codes here](src/adapters/node-http/errors.ts).
 
 ```jsonc
 {
@@ -270,7 +272,7 @@ export default createOpenApiNextHandler({ router: appRouter });
 
 #### OpenApiMeta
 
-Please see full typings [here](src/types.ts).
+Please see [full typings here](src/types.ts).
 
 | Property      | Type         | Description                                                                                                            | Required | Default     |
 | ------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
@@ -284,7 +286,7 @@ Please see full typings [here](src/types.ts).
 
 #### GenerateOpenApiDocumentOptions
 
-Please see full typings [here](src/generator/index.ts).
+Please see [full typings here](src/generator/index.ts).
 
 | Property      | Type     | Description                          | Required |
 | ------------- | -------- | ------------------------------------ | -------- |
@@ -296,7 +298,7 @@ Please see full typings [here](src/generator/index.ts).
 
 #### CreateOpenApiNodeHttpHandlerOptions
 
-Please see full typings [here](src/adapters/node-http/core.ts).
+Please see [full typings here](src/adapters/node-http/core.ts).
 
 | Property        | Type       | Description                                                                   | Required |
 | --------------- | ---------- | ----------------------------------------------------------------------------- | -------- |

@@ -65,7 +65,7 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 
 **5. Add an `trpc-openapi` handler to your app.**
 
-We currently support adapters for `Express`, `Next.js` & `node:http` (`Fastify` & `Serverless` soon™).
+We currently support adapters for `Express`, `Next.js` & `node:http`. `Fastify` & `Serverless` soon™.
 
 ```typescript
 import http from 'http';
@@ -108,7 +108,7 @@ Please note:
 
 ## Authorization
 
-To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request in `createContext` function using the `Authorization` header with the `Bearer` scheme.
+To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request with the `createContext` function in your handler's options using the `Authorization` header with the `Bearer` scheme (e.g. `Bearer {{token}}`).
 
 Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 

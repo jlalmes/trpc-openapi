@@ -238,6 +238,8 @@ Please see [error status codes here](src/adapters/node-http/errors.ts).
 
 ## Examples
 
+Please see [full test suite](test).
+
 #### With Express
 
 Please see [full example here](examples/with-express).

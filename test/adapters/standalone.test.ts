@@ -15,10 +15,6 @@ import {
   createOpenApiHttpHandler,
 } from '../../src';
 
-// TODO: test for case sensitivity
-// TODO: test for path parameters
-// TODO: test for duplicate paths (using getPathRegExp)
-
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
@@ -670,6 +666,139 @@ describe('standalone adapter', () => {
 
       expect(res.status).toBe(200);
       expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+    }
+
+    close();
+  });
+
+  test('with case insensitivity', async () => {
+    const { url, close } = createHttpServerWithRouter({
+      router: trpc
+        .router<any, OpenApiMeta>()
+        .query('allLowerPath', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/lower' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+        })
+        .query('allUpperPath', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/UPPER' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+        }),
+    });
+
+    {
+      const res = await fetch(`${url}/LOWER?name=James`, { method: 'GET' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+
+      createContextMock.mockClear();
+      responseMetaMock.mockClear();
+      onErrorMock.mockClear();
+      teardownMock.mockClear();
+    }
+    {
+      const res = await fetch(`${url}/upper?name=James`, { method: 'GET' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+    }
+
+    close();
+  });
+
+  test('with path parameters', async () => {
+    const { url, close } = createHttpServerWithRouter({
+      router: trpc
+        .router<any, OpenApiMeta>()
+        .query('sayHelloQuery', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+        })
+        .mutation('sayHelloMutation', {
+          meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello/{name}' } },
+          input: z.object({ name: z.string() }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
+        })
+        .query('sayHelloComplex', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{first}/{last}' } },
+          input: z.object({
+            first: z.string(),
+            last: z.string(),
+            greeting: z.string(),
+          }),
+          output: z.object({ greeting: z.string() }),
+          resolve: ({ input }) => ({
+            greeting: `${input.greeting} ${input.first} ${input.last}!`,
+          }),
+        }),
+    });
+
+    {
+      const res = await fetch(`${url}/say-hello/James`, { method: 'GET' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+
+      createContextMock.mockClear();
+      responseMetaMock.mockClear();
+      onErrorMock.mockClear();
+      teardownMock.mockClear();
+    }
+
+    {
+      const res = await fetch(`${url}/say-hello/James`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'jlalmes' }),
+      });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+
+      createContextMock.mockClear();
+      responseMetaMock.mockClear();
+      onErrorMock.mockClear();
+      teardownMock.mockClear();
+    }
+    {
+      const res = await fetch(`${url}/say-hello/James/Berry?greeting=Hello&first=jlalmes`, {
+        method: 'GET',
+      });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James Berry!' } });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);

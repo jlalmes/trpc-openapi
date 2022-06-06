@@ -5,6 +5,8 @@ import { z } from 'zod';
 
 import { OpenApiMeta, generateOpenApiDocument, openApiVersion } from '../src';
 
+// TODO: test for duplicate paths (using getPathRegExp)
+
 const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion });
 
 describe('generator', () => {
@@ -374,6 +376,23 @@ describe('generator', () => {
     }).toThrowError('[subscription.currentName] - Subscriptions are not supported by OpenAPI v3');
   });
 
+  test('with missing path parameters', () => {
+    const appRouter = trpc.router().query('pathParameters', {
+      meta: { openapi: { enabled: true, path: '/path-parameters/{name}', method: 'GET' } },
+      input: z.object({}),
+      output: z.object({ name: z.string() }),
+      resolve: () => ({ name: 'asdf' }),
+    });
+
+    expect(() => {
+      generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+    }).toThrowError('[query.pathParameters] - Input parser expects key from path: "name"');
+  });
+
   test('with valid procedures', () => {
     const appRouter = trpc
       .router<any, OpenApiMeta>()
@@ -383,20 +402,26 @@ describe('generator', () => {
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: 'user-id', name: input.name }),
       })
-      .query('readUser', {
+      .query('readUsers', {
         meta: { openapi: { enabled: true, path: '/users', method: 'GET' } },
+        input: z.object({}),
+        output: z.array(z.object({ id: z.string(), name: z.string() })),
+        resolve: () => [{ id: 'user-id', name: 'name' }],
+      })
+      .query('readUser', {
+        meta: { openapi: { enabled: true, path: '/users/{id}', method: 'GET' } },
         input: z.object({ id: z.string() }),
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: input.id, name: 'name' }),
       })
       .mutation('updateUser', {
-        meta: { openapi: { enabled: true, path: '/users', method: 'PATCH' } },
+        meta: { openapi: { enabled: true, path: '/users/{id}', method: 'PATCH' } },
         input: z.object({ id: z.string(), name: z.string().optional() }),
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: input.id, name: input.name ?? 'name' }),
       })
       .query('deleteUser', {
-        meta: { openapi: { enabled: true, path: '/users', method: 'DELETE' } },
+        meta: { openapi: { enabled: true, path: '/users/{id}', method: 'DELETE' } },
         input: z.object({ id: z.string() }),
         output: z.void(),
         resolve: () => undefined,
@@ -484,12 +509,138 @@ describe('generator', () => {
         "openapi": "3.0.3",
         "paths": Object {
           "/users": Object {
+            "get": Object {
+              "description": undefined,
+              "parameters": Array [],
+              "responses": Object {
+                "200": Object {
+                  "content": Object {
+                    "application/json": Object {
+                      "schema": Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "data": Object {
+                            "items": Object {
+                              "additionalProperties": false,
+                              "properties": Object {
+                                "id": Object {
+                                  "type": "string",
+                                },
+                                "name": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "required": Array [
+                                "id",
+                                "name",
+                              ],
+                              "type": "object",
+                            },
+                            "type": "array",
+                          },
+                          "ok": Object {
+                            "enum": Array [
+                              true,
+                            ],
+                            "type": "boolean",
+                          },
+                        },
+                        "required": Array [
+                          "ok",
+                          "data",
+                        ],
+                        "type": "object",
+                      },
+                    },
+                  },
+                  "description": "Successful response",
+                },
+                "default": Object {
+                  "$ref": "#/components/responses/error",
+                },
+              },
+              "security": undefined,
+              "summary": undefined,
+              "tags": undefined,
+            },
+            "post": Object {
+              "description": undefined,
+              "parameters": Array [],
+              "requestBody": Object {
+                "content": Object {
+                  "application/json": Object {
+                    "schema": Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "name": Object {
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "name",
+                      ],
+                      "type": "object",
+                    },
+                  },
+                },
+                "required": true,
+              },
+              "responses": Object {
+                "200": Object {
+                  "content": Object {
+                    "application/json": Object {
+                      "schema": Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "data": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "id": Object {
+                                "type": "string",
+                              },
+                              "name": Object {
+                                "type": "string",
+                              },
+                            },
+                            "required": Array [
+                              "id",
+                              "name",
+                            ],
+                            "type": "object",
+                          },
+                          "ok": Object {
+                            "enum": Array [
+                              true,
+                            ],
+                            "type": "boolean",
+                          },
+                        },
+                        "required": Array [
+                          "ok",
+                          "data",
+                        ],
+                        "type": "object",
+                      },
+                    },
+                  },
+                  "description": "Successful response",
+                },
+                "default": Object {
+                  "$ref": "#/components/responses/error",
+                },
+              },
+              "security": undefined,
+              "summary": undefined,
+              "tags": undefined,
+            },
+          },
+          "/users/{id}": Object {
             "delete": Object {
               "description": undefined,
               "parameters": Array [
                 Object {
                   "description": undefined,
-                  "in": "query",
+                  "in": "path",
                   "name": "id",
                   "required": true,
                   "schema": Object {
@@ -533,7 +684,7 @@ describe('generator', () => {
               "parameters": Array [
                 Object {
                   "description": undefined,
-                  "in": "query",
+                  "in": "path",
                   "name": "id",
                   "required": true,
                   "schema": Object {
@@ -591,7 +742,17 @@ describe('generator', () => {
             },
             "patch": Object {
               "description": undefined,
-              "parameters": Array [],
+              "parameters": Array [
+                Object {
+                  "description": undefined,
+                  "in": "path",
+                  "name": "id",
+                  "required": true,
+                  "schema": Object {
+                    "type": "string",
+                  },
+                },
+              ],
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
@@ -607,76 +768,6 @@ describe('generator', () => {
                       },
                       "required": Array [
                         "id",
-                      ],
-                      "type": "object",
-                    },
-                  },
-                },
-                "required": true,
-              },
-              "responses": Object {
-                "200": Object {
-                  "content": Object {
-                    "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "id": Object {
-                                "type": "string",
-                              },
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "id",
-                              "name",
-                            ],
-                            "type": "object",
-                          },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                          "data",
-                        ],
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "description": "Successful response",
-                },
-                "default": Object {
-                  "$ref": "#/components/responses/error",
-                },
-              },
-              "security": undefined,
-              "summary": undefined,
-              "tags": undefined,
-            },
-            "post": Object {
-              "description": undefined,
-              "parameters": Array [],
-              "requestBody": Object {
-                "content": Object {
-                  "application/json": Object {
-                    "schema": Object {
-                      "additionalProperties": false,
-                      "properties": Object {
-                        "name": Object {
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "name",
                       ],
                       "type": "object",
                     },

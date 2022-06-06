@@ -65,7 +65,9 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 
 **5. Add an `trpc-openapi` handler to your app.**
 
-We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/) & [`node:http`](https://nodejs.org/api/http.html). [`Fastify`](https://www.fastify.io/) & [`Serverless`](https://www.serverless.com/) soon™.
+We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/) & [`node:http`](https://nodejs.org/api/http.html).
+
+[`Fastify`](https://www.fastify.io/) & [`Serverless`](https://www.serverless.com/) soon™, PRs are welcomed 🙌.
 
 ```typescript
 import http from 'http';

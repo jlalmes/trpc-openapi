@@ -163,18 +163,47 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ## HTTP Requests
 
-### Path parameters
+Query procedures accept inputs via URL query parameters. Mutation procedures accept inputs via the request body as an `application/json` content type. Additionally, both `queries` & `mutations` can accept a set of their inputs via URL path parameters. You can add path parameters to any OpenAPI enabled procedure by using curly brackets around a path segment input name in the `meta.openapi.path` field.
 
-TODO:
-You can add path parameters to any OpenAPI enabled procedure by using curly
+#### Query
 
-### Query parameters
+```typescript
+// Router
+export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
+  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
+  input: z.object({ name: z.string(), greeting: z.string() }),
+  output: z.object({ greeting: z.string() }),
+  resolve: ({ input }) => {
+    return { greeting: `${input.greeting} ${input.name}!` };
+  },
+});
 
-TODO:
+// Client
+const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello', { method: 'GET' });
+const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
+```
 
-### Request body
+#### Mutation
 
-TODO:
+```typescript
+// Router
+export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello', {
+  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
+  input: z.object({ name: z.string(), greeting: z.string() }),
+  output: z.object({ greeting: z.string() }),
+  resolve: ({ input }) => {
+    return { greeting: `${input.greeting} ${input.name}!` };
+  },
+});
+
+// Client
+const res = await fetch('http://localhost:3000/say-hello/James', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ greeting: 'Hello' }),
+});
+const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
+```
 
 ## HTTP Responses
 

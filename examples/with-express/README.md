@@ -1,4 +1,4 @@
-# trpc-openapi (with-express)
+# [**`trpc-openapi`**](../../README.md) (with-express)
 
 ### Getting started
 
@@ -6,7 +6,3 @@
 npm install
 npm run dev
 ```
-
-### Learn more
-
-[**`trpc-openapi`**](README.md)

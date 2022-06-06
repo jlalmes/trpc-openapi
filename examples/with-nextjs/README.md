@@ -1,4 +1,4 @@
-# trpc-openapi (with-nextjs)
+# [**`trpc-openapi`**](../../README.md) (with-nextjs)
 
 ### Getting started
 
@@ -6,7 +6,3 @@
 npm install
 npm run dev
 ```
-
-### Learn more
-
-[**`trpc-openapi`**](README.md)

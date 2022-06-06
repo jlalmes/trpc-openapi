@@ -59,7 +59,7 @@ const authRouter = createRouter()
       openapi: {
         enabled: true,
         method: 'POST',
-        path: '/register',
+        path: '/auth/register',
         tags: ['auth'],
         summary: 'Register as a new user',
       },
@@ -94,7 +94,7 @@ const authRouter = createRouter()
       openapi: {
         enabled: true,
         method: 'POST',
-        path: '/login',
+        path: '/auth/login',
         tags: ['auth'],
         summary: 'Login as an existing user',
       },
@@ -133,7 +133,7 @@ const userRouter = createRouter().query('getUserById', {
     openapi: {
       enabled: true,
       method: 'GET',
-      path: '/user/{id}',
+      path: '/users/{id}',
       tags: ['users'],
       summary: 'Read a user by id',
     },
@@ -168,7 +168,7 @@ const postRouter = createRouter()
       openapi: {
         enabled: true,
         method: 'GET',
-        path: '/post/{id}',
+        path: '/posts/{id}',
         tags: ['posts'],
         summary: 'Read a post by id',
       },
@@ -201,7 +201,7 @@ const postRouter = createRouter()
       openapi: {
         enabled: true,
         method: 'GET',
-        path: '/post',
+        path: '/posts',
         tags: ['posts'],
         summary: 'Read all posts',
       },
@@ -237,7 +237,7 @@ const postProtectedRouter = createProtectedRouter()
       openapi: {
         enabled: true,
         method: 'POST',
-        path: '/post',
+        path: '/posts',
         tags: ['posts'],
         protect: true,
         summary: 'Create a new post',
@@ -270,7 +270,7 @@ const postProtectedRouter = createProtectedRouter()
       openapi: {
         enabled: true,
         method: 'PUT',
-        path: '/post/{id}',
+        path: '/posts/{id}',
         tags: ['posts'],
         protect: true,
         summary: 'Update an existing post',
@@ -313,7 +313,7 @@ const postProtectedRouter = createProtectedRouter()
       openapi: {
         enabled: true,
         method: 'DELETE',
-        path: '/post/{id}',
+        path: '/posts/{id}',
         tags: ['posts'],
         protect: true,
         summary: 'Delete a post',

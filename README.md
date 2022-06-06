@@ -108,7 +108,7 @@ Please note:
 
 ## Authorization
 
-To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request with the `createContext` function in your handler's options using the `Authorization` header with the `Bearer` scheme (e.g. `Bearer {{token}}`).
+To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request with the `createContext` function using the `Authorization` header with the `Bearer` scheme.
 
 Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 
@@ -213,7 +213,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 Inspired by [Slack Web API](https://api.slack.com/web).
 
-Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`, please see [error status codes here](src/adapters/node-http/errors.ts). You can modify the each response status code using the `responseMeta` function in your handler's options.
+Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`, please see [error status codes here](src/adapters/node-http/errors.ts). You can modify the each responses status code using the `responseMeta` function.
 
 ```jsonc
 {

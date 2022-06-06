@@ -63,9 +63,9 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 });
 ```
 
-**5. Add an `trpc-openapi` adapter to your app.**
+**5. Add an `trpc-openapi` handler to your app.**
 
-Current support for `Express`, `Next.js` & `node:http`.
+We currently support adapters for `Express`, `Next.js` & `node:http` (`Fastify` & `Serverless` soon™).
 
 ```typescript
 import http from 'http';
@@ -163,7 +163,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ## HTTP Requests
 
-Query procedures accept inputs via URL query parameters. Mutation procedures accept inputs via the request body as an `application/json` content type. Additionally, both `queries` & `mutations` can accept a set of their inputs via URL path parameters. You can add path parameters to any OpenAPI enabled procedure by using curly brackets around a path segment input name in the `meta.openapi.path` field.
+Query procedures accept inputs via URL query parameters. Mutation procedures accept inputs via the request body as an `application/json` content type. Additionally, both queries & mutations can accept a set of their inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 
 #### Query
 
@@ -171,7 +171,7 @@ Query procedures accept inputs via URL query parameters. Mutation procedures acc
 // Router
 export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
   meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
-  input: z.object({ name: z.string(), greeting: z.string() }),
+  input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
   output: z.object({ greeting: z.string() }),
   resolve: ({ input }) => {
     return { greeting: `${input.greeting} ${input.name}!` };
@@ -179,7 +179,7 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
 });
 
 // Client
-const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello', { method: 'GET' });
+const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /* 👈 */, { method: 'GET' });
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
@@ -189,7 +189,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 // Router
 export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello', {
   meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
-  input: z.object({ name: z.string(), greeting: z.string() }),
+  input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
   output: z.object({ greeting: z.string() }),
   resolve: ({ input }) => {
     return { greeting: `${input.greeting} ${input.name}!` };
@@ -197,7 +197,7 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello'
 });
 
 // Client
-const res = await fetch('http://localhost:3000/say-hello/James', {
+const res = await fetch('http://localhost:3000/say-hello/James' /* 👈 */, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ greeting: 'Hello' }),
@@ -208,6 +208,8 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 ## HTTP Responses
 
 Inspired by [Slack Web API](https://api.slack.com/web).
+
+Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`, please see [error status codes here](src/adapters/node-http/errors.ts). You can modify the each response status code using the `responseMeta` function in your handler's options.
 
 ```jsonc
 {

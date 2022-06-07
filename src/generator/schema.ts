@@ -1,4 +1,5 @@
 import { TRPCError } from '@trpc/server';
+import e from 'express';
 import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -80,7 +81,10 @@ export const getParameterObjects = (
         !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodString) &&
         !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodEnum) &&
         !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodNativeEnum) &&
-        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodLiteral)
+        !(
+          instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodLiteral) &&
+          typeof unwrappedZodType._def.value === 'string'
+        )
       ) {
         throw new TRPCError({
           message: `Input parser key: "${key}" must be a ZodString`,

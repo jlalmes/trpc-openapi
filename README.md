@@ -165,9 +165,11 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ## HTTP Requests
 
-Query procedures accept inputs via URL query parameters.
+Query procedures accept inputs via URL `query parameters`.
 
-Mutation procedures accept inputs via the request body as an `application/json` content type.
+Mutation procedures accept inputs via the `request body` as a `application/json` content type.
+
+### Path parameters
 
 Both queries & mutations can accept a set of their inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 

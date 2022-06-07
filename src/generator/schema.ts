@@ -1,4 +1,5 @@
 import { TRPCError } from '@trpc/server';
+import e from 'express';
 import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -7,28 +8,28 @@ const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaO
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
 };
 
-const instanceofZod = (schema: any): schema is z.ZodType => {
-  return !!schema?._def?.typeName;
+const instanceofZod = (type: any): type is z.ZodType => {
+  return !!type?._def?.typeName;
 };
 
 const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
-  schema: any,
+  type: any,
   zodTypeKind: Z,
-): schema is InstanceType<typeof z[Z]> => {
-  return schema?._def?.typeName === zodTypeKind;
+): type is InstanceType<typeof z[Z]> => {
+  return type?._def?.typeName === zodTypeKind;
 };
 
-const getBaseZodType = (schema: z.ZodType): z.ZodType => {
-  if (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return getBaseZodType(schema.unwrap());
+const unwrapZodType = (type: z.ZodType): z.ZodType => {
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
+    return unwrapZodType(type.unwrap());
   }
-  if (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return getBaseZodType(schema.removeDefault());
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
+    return unwrapZodType(type.removeDefault());
   }
-  if (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return getBaseZodType(schema.innerType());
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
+    return unwrapZodType(type.innerType());
   }
-  return schema;
+  return type;
 };
 
 export const getParameterObjects = (
@@ -75,7 +76,16 @@ export const getParameterObjects = (
     .map((key) => {
       const value = shape[key]!;
 
-      if (!instanceofZodTypeKind(getBaseZodType(value), z.ZodFirstPartyTypeKind.ZodString)) {
+      const unwrappedZodType = unwrapZodType(value);
+      if (
+        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodString) &&
+        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodEnum) &&
+        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodNativeEnum) &&
+        !(
+          instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodLiteral) &&
+          typeof unwrappedZodType._def.value === 'string'
+        )
+      ) {
         throw new TRPCError({
           message: `Input parser key: "${key}" must be a ZodString`,
           code: 'INTERNAL_SERVER_ERROR',

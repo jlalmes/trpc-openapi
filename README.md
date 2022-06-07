@@ -217,7 +217,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 Inspired by [Slack Web API](https://api.slack.com/web).
 
-Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`. You can modify the each responses status code using the `responseMeta` function.
+Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`. You can modify the status code for any response using the `responseMeta` function.
 
 Please see [error status codes here](src/adapters/node-http/errors.ts).
 

@@ -185,8 +185,8 @@ describe('generator', () => {
       const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
         meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
         input: z.string(),
-        output: z.object({ name: z.string() }),
-        resolve: () => ({ name: 'jlalmes' }),
+        output: z.null(),
+        resolve: () => null,
       });
 
       expect(() => {
@@ -201,8 +201,8 @@ describe('generator', () => {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('badInput', {
         meta: { openapi: { enabled: true, path: '/bad-input', method: 'POST' } },
         input: z.string(),
-        output: z.object({ name: z.string() }),
-        resolve: () => ({ name: 'jlalmes' }),
+        output: z.null(),
+        resolve: () => null,
       });
 
       expect(() => {
@@ -230,7 +230,7 @@ describe('generator', () => {
           version: '1.0.0',
           baseUrl: 'http://localhost:3000/api',
         });
-      }).toThrowError('[query.badInput] - Input parser key: "age" must be a ZodString');
+      }).toThrowError('[query.badInput] - Input parser key: "age" must be ZodString');
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('okInput', {
@@ -274,67 +274,118 @@ describe('generator', () => {
   });
 
   test('with object-enum-value input', () => {
-    enum NativeNameEnum {
-      James = 'James',
-      jlalmes = 'jlalmes',
-    }
-
-    const appRouter = trpc
-      .router<any, OpenApiMeta>()
-      .query('enum', {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('enum', {
         meta: { openapi: { enabled: true, path: '/enum', method: 'GET' } },
-        input: z.object({ name: z.enum(['James', 'jlalmes']) }),
-        output: z.object({ name: z.enum(['James', 'jlalmes']) }),
-        resolve: () => ({ name: 'jlalmes' as const }),
-      })
-      .query('nativeEnum', {
-        meta: { openapi: { enabled: true, path: '/native-enum', method: 'GET' } },
-        input: z.object({ age: z.nativeEnum(NativeNameEnum) }),
-        output: z.object({ name: z.nativeEnum(NativeNameEnum) }),
-        resolve: () => ({ name: NativeNameEnum.James }),
+        // @ts-expect-error - intentional number in enum
+        input: z.object({ name: z.enum(['James', 1234]) }),
+        output: z.null(),
+        resolve: () => null,
       });
 
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
-    });
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.enum] - Input parser key: "name" must be ZodString');
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('enum', {
+        meta: { openapi: { enabled: true, path: '/enum', method: 'GET' } },
+        input: z.object({ name: z.enum(['James', 'jlalmes']) }),
+        output: z.null(),
+        resolve: () => null,
+      });
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/enum']!.get!.parameters).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": undefined,
-          "in": "query",
-          "name": "name",
-          "required": true,
-          "schema": Object {
-            "enum": Array [
-              "James",
-              "jlalmes",
-            ],
-            "type": "string",
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/enum']!.get!.parameters).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "description": undefined,
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": Object {
+              "enum": Array [
+                "James",
+                "jlalmes",
+              ],
+              "type": "string",
+            },
           },
-        },
-      ]
-    `);
-    expect(openApiDocument.paths['/native-enum']!.get!.parameters).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "description": undefined,
-          "in": "query",
-          "name": "age",
-          "required": true,
-          "schema": Object {
-            "enum": Array [
-              "James",
-              "jlalmes",
-            ],
-            "type": "string",
+        ]
+      `);
+    }
+  });
+
+  test('with object-native-enum-value input', () => {
+    {
+      enum InvalidEnum {
+        James,
+        jlalmes,
+      }
+
+      const appRouter = trpc.router<any, OpenApiMeta>().query('nativeEnum', {
+        meta: { openapi: { enabled: true, path: '/nativeEnum', method: 'GET' } },
+        input: z.object({ name: z.nativeEnum(InvalidEnum) }),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.nativeEnum] - Input parser key: "name" must be ZodString');
+    }
+    {
+      enum ValidEnum {
+        James = 'James',
+        jlalmes = 'jlalmes',
+      }
+
+      const appRouter = trpc.router<any, OpenApiMeta>().query('nativeEnum', {
+        meta: { openapi: { enabled: true, path: '/nativeEnum', method: 'GET' } },
+        input: z.object({ name: z.nativeEnum(ValidEnum) }),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/nativeEnum']!.get!.parameters).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "description": undefined,
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": Object {
+              "enum": Array [
+                "James",
+                "jlalmes",
+              ],
+              "type": "string",
+            },
           },
-        },
-      ]
-    `);
+        ]
+      `);
+    }
   });
 
   test('with object-literal-value input', () => {
@@ -352,7 +403,7 @@ describe('generator', () => {
           version: '1.0.0',
           baseUrl: 'http://localhost:3000/api',
         });
-      }).toThrowError('[query.numberLiteral] - Input parser key: "num" must be a ZodString');
+      }).toThrowError('[query.numberLiteral] - Input parser key: "num" must be ZodString');
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('stringLiteral', {
@@ -381,6 +432,64 @@ describe('generator', () => {
                 "strlitval",
               ],
               "type": "string",
+            },
+          },
+        ]
+      `);
+    }
+  });
+
+  test('with object-union-value input', () => {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
+        meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
+        input: z.object({ name: z.string().or(z.number()) }),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[query.union] - Input parser key: "name" must be ZodString');
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
+        meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
+        input: z.object({ name: z.string().or(z.literal('James')) }),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/union']!.get!.parameters).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "description": undefined,
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": Object {
+              "anyOf": Array [
+                Object {
+                  "type": "string",
+                },
+                Object {
+                  "enum": Array [
+                    "James",
+                  ],
+                  "type": "string",
+                },
+              ],
             },
           },
         ]

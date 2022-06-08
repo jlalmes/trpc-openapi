@@ -9,17 +9,37 @@ const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaO
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
 };
 
-const getBaseZodType = (type: z.ZodType): z.ZodType => {
+const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): boolean => {
+  return (
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid) ||
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
+  );
+};
+
+const instanceofZodTypeLikeString = (type: z.ZodTypeAny): boolean => {
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return getBaseZodType(type.unwrap());
+    return instanceofZodTypeLikeString(type.unwrap());
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return getBaseZodType(type.removeDefault());
+    return instanceofZodTypeLikeString(type.removeDefault());
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return getBaseZodType(type.innerType());
+    return instanceofZodTypeLikeString(type.innerType());
   }
-  return type;
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
+    return !type._def.values.some((value) => typeof value !== 'string');
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
+    return !Object.values(type._def.values).some((value) => typeof value !== 'string');
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
+    return typeof type._def.value === 'string';
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
+    return !type._def.options.some((option) => !instanceofZodTypeLikeString(option));
+  }
+  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
 };
 
 export const getParameterObjects = (
@@ -34,12 +54,7 @@ export const getParameterObjects = (
     });
   }
 
-  if (
-    pathParameters.length === 0 &&
-    (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodVoid) ||
-      instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-      instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodNever))
-  ) {
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
     return undefined;
   }
 
@@ -75,20 +90,9 @@ export const getParameterObjects = (
     .map((shapeKey) => {
       const shapeSchema = shape[shapeKey]!;
 
-      // TODO: support ZodUnion/z.or if string vals
-      // TODO: validate ZodNativeEnum is using string vals
-      const baseZodType = getBaseZodType(shapeSchema);
-      if (
-        !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodString) &&
-        !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodEnum) &&
-        !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodNativeEnum) &&
-        !(
-          instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodLiteral) &&
-          typeof baseZodType._def.value === 'string'
-        )
-      ) {
+      if (!instanceofZodTypeLikeString(shapeSchema)) {
         throw new TRPCError({
-          message: `Input parser key: "${shapeKey}" must be a ZodString`,
+          message: `Input parser key: "${shapeKey}" must be ZodString`,
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
@@ -117,11 +121,7 @@ export const getRequestBodyObject = (
     });
   }
 
-  if (
-    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodVoid) ||
-    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodNever)
-  ) {
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
     return undefined;
   }
 

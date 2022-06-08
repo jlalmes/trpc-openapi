@@ -893,16 +893,10 @@ describe('generator', () => {
                     "schema": Object {
                       "additionalProperties": false,
                       "properties": Object {
-                        "id": Object {
-                          "type": "string",
-                        },
                         "name": Object {
                           "type": "string",
                         },
                       },
-                      "required": Array [
-                        "id",
-                      ],
                       "type": "object",
                     },
                   },

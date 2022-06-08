@@ -64,7 +64,7 @@ export const createMatchProcedureFn = (router: OpenApiRouter) => {
     }
 
     const procedure = pathProcedureMap.get(matchingRegExp)!;
-    const pathInput = matchingRegExp.exec(path)?.groups;
+    const pathInput = matchingRegExp.exec(path)?.groups ?? {};
 
     return { procedure, pathInput };
   };

@@ -138,9 +138,9 @@ describe('standalone adapter', () => {
         issues: [
           {
             code: 'invalid_type',
-            expected: 'object',
+            expected: 'string',
             message: 'Required',
-            path: [],
+            path: ['payload'],
             received: 'undefined',
           },
         ],
@@ -180,9 +180,9 @@ describe('standalone adapter', () => {
         issues: [
           {
             code: 'invalid_type',
-            expected: 'object',
+            expected: 'string',
             message: 'Required',
-            path: [],
+            path: ['payload'],
             received: 'undefined',
           },
         ],
@@ -218,9 +218,9 @@ describe('standalone adapter', () => {
         issues: [
           {
             code: 'invalid_type',
-            expected: 'object',
+            expected: 'string',
             message: 'Required',
-            path: [],
+            path: ['payload'],
             received: 'undefined',
           },
         ],

@@ -27,7 +27,7 @@ const createOpenApiNextHandlerCaller = <TRouter extends OpenApiRouter>(
     teardown: handlerOpts.teardown ?? (teardownMock as any),
   });
 
-  return (req: { url: string; method: string; query: Record<string, any>; body?: any }) => {
+  return (req: { method: string; query: Record<string, any>; body?: any }) => {
     return new Promise<{
       statusCode: number;
       headers: Record<string, any>;
@@ -95,7 +95,6 @@ describe('next adapter', () => {
 
     {
       const res = await openApiNextHandlerCaller({
-        url: '/api/say-hello?name=James',
         method: 'GET',
         query: { trpc: 'say-hello', name: 'James' },
       });
@@ -114,7 +113,6 @@ describe('next adapter', () => {
     }
     {
       const res = await openApiNextHandlerCaller({
-        url: '/api/say-hello/',
         method: 'POST',
         query: { trpc: 'say-hello' },
         body: { name: 'James' },
@@ -134,7 +132,6 @@ describe('next adapter', () => {
     }
     {
       const res = await openApiNextHandlerCaller({
-        url: 'http://localhost:1234/api/say/hello?name=James',
         method: 'GET',
         query: { trpc: ['say', 'hello'], name: 'James' },
       });
@@ -154,7 +151,6 @@ describe('next adapter', () => {
     });
 
     const res = await openApiNextHandlerCaller({
-      url: '/api',
       method: 'GET',
       query: {},
     });
@@ -163,7 +159,7 @@ describe('next adapter', () => {
     expect(res.body).toEqual({
       ok: false,
       error: {
-        message: 'Query "trpc" not found - is the file named `[trpc]`.ts or `[...trpc].ts`?',
+        message: 'Query "trpc" not found - is the `trpc-openapi` file named `[...trpc].ts`?',
         code: 'INTERNAL_SERVER_ERROR',
       },
     });

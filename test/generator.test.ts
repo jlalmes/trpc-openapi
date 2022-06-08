@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { OpenApiMeta, generateOpenApiDocument, openApiVersion } from '../src';
 
 // TODO: test for duplicate paths (using getPathRegExp)
+// TODO: tags ordering
 
 const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion });
 

@@ -20,7 +20,6 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
 
   return async (req: NextApiRequest, res: NextApiResponse) => {
     let pathname: string | null = null;
-    const search = req.url?.split('?')[1];
     if (typeof req.query.trpc === 'string') {
       pathname = req.query.trpc;
     } else if (Array.isArray(req.query.trpc)) {
@@ -29,7 +28,7 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
 
     if (pathname === null) {
       const error = new TRPCError({
-        message: 'Query "trpc" not found - is the file named `[trpc]`.ts or `[...trpc].ts`?',
+        message: 'Query "trpc" not found - is the `trpc-openapi` file named `[...trpc].ts`?',
         code: 'INTERNAL_SERVER_ERROR',
       });
 
@@ -55,7 +54,7 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
       return;
     }
 
-    req.url = normalizePath([pathname, search].join('?'));
+    req.url = normalizePath(pathname);
     return openApiHttpHandler(req, res);
   };
 };

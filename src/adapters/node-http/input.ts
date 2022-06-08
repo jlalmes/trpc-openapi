@@ -3,11 +3,7 @@ import { TRPCError } from '@trpc/server';
 import { NodeHTTPRequest } from '@trpc/server/dist/declarations/src/adapters/node-http';
 import parse from 'co-body';
 
-export const getQuery = (req: NodeHTTPRequest, url: URL): any => {
-  if (!url.search) {
-    return undefined;
-  }
-
+export const getQuery = (req: NodeHTTPRequest, url: URL): Record<string, string> => {
   const query: Record<string, string> = {};
 
   if (!req.query) {

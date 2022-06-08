@@ -77,7 +77,16 @@ const authRouter = createRouter()
       }),
     }),
     resolve: ({ input }) => {
-      const user: User = {
+      let user = database.users.find((_user) => _user.email === input.email);
+
+      if (user) {
+        throw new TRPCError({
+          message: 'User with email already exists',
+          code: 'UNAUTHORIZED',
+        });
+      }
+
+      user = {
         id: uuid(),
         email: input.email,
         passcode: input.passcode,

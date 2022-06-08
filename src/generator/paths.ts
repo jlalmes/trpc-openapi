@@ -1,19 +1,9 @@
 import { TRPCError } from '@trpc/server';
-// eslint-disable-next-line import/no-unresolved
-import { Procedure } from '@trpc/server/dist/declarations/src/internals/procedure';
 import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
-import { getPathParameters, normalizePath } from '../utils';
+import { getInputOutputParsers, getPathParameters, normalizePath } from '../utils';
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from './schema';
-
-// `inputParser` & `outputParser` are private so this is a hack to access it
-export const getInputOutputParsers = (procedure: Procedure<any, any, any, any, any, any, any>) => {
-  return procedure as unknown as {
-    inputParser: typeof procedure['inputParser'];
-    outputParser: typeof procedure['outputParser'];
-  };
-};
 
 export const getOpenApiPathsObject = (
   appRouter: OpenApiRouter,

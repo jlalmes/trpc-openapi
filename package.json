@@ -26,13 +26,14 @@
   },
   "peerDependencies": {
     "@trpc/server": "^9.23.0",
-    "body-parser": "^1.0.0",
+    "co-body": "^6.1.0",
     "openapi-types": "^11.0.0",
     "zod": "^3.0.0",
     "zod-to-json-schema": "^3.17.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^3.2.0",
+    "@types/co-body": "^6.1.0",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.5.2",
     "@types/node": "^17.0.38",

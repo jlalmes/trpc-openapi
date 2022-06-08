@@ -1,23 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { TRPCError } from '@trpc/server';
 // eslint-disable-next-line import/no-unresolved
 import { NodeHTTPRequest } from '@trpc/server/dist/declarations/src/adapters/node-http';
-import bodyParser from 'body-parser';
+import parse from 'co-body';
 
 export const getQuery = (req: NodeHTTPRequest, url: URL): Record<string, string> => {
   const query: Record<string, string> = {};
 
   if (!req.query) {
-    const _query: Record<string, string[]> = {};
+    const parsedQs: Record<string, string[]> = {};
     url.searchParams.forEach((value, key) => {
-      if (!_query[key]) {
-        _query[key] = [];
+      if (!parsedQs[key]) {
+        parsedQs[key] = [];
       }
-      _query[key]!.push(value);
+      parsedQs[key]!.push(value);
     });
-    req.query = _query;
+    req.query = parsedQs;
   }
 
+  // normalize first value in array
   Object.keys(req.query).forEach((key) => {
     const value = req.query![key];
     if (value) {
@@ -34,41 +34,37 @@ export const getQuery = (req: NodeHTTPRequest, url: URL): Record<string, string>
   return query;
 };
 
-export const getBody = async (req: NodeHTTPRequest, maxBodySize?: number): Promise<any> => {
+const BODY_100_KB = 100000;
+export const getBody = async (req: NodeHTTPRequest, maxBodySize = BODY_100_KB): Promise<any> => {
   if ('body' in req) {
     return req.body;
   }
 
-  await new Promise<void>((resolve, reject) => {
-    bodyParser.json({
-      strict: true,
-      limit: maxBodySize ?? 102400,
-    })(req, {} as any, (error) => {
-      if (error instanceof Error) {
-        if (error.name === 'PayloadTooLargeError') {
-          reject(
-            new TRPCError({
-              message: 'Request body too large',
-              code: 'PAYLOAD_TOO_LARGE',
-              cause: error,
-            }),
-          );
-        }
-        reject(
-          new TRPCError({
-            message: 'Failed to parse request body',
-            code: 'PARSE_ERROR',
-            cause: error,
-          }),
-        );
-        return;
+  req.body = undefined;
+
+  if (req.headers['content-type'] === 'application/json') {
+    try {
+      const { raw, parsed } = await parse.json(req, {
+        limit: maxBodySize,
+        strict: false,
+        returnRawBody: true,
+      });
+      req.body = raw ? parsed : undefined;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'PayloadTooLargeError') {
+        throw new TRPCError({
+          message: 'Request body too large',
+          code: 'PAYLOAD_TOO_LARGE',
+          cause: error,
+        });
       }
-      if (!('body' in req)) {
-        req.body = {};
-      }
-      resolve();
-    });
-  });
+      throw new TRPCError({
+        message: 'Failed to parse request body',
+        code: 'PARSE_ERROR',
+        cause: error,
+      });
+    }
+  }
 
   return req.body;
 };

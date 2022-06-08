@@ -1,33 +1,23 @@
 import { TRPCError } from '@trpc/server';
-import e from 'express';
 import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
+
+import { instanceofZod, instanceofZodTypeKind } from '../utils';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
 };
 
-const instanceofZod = (type: any): type is z.ZodType => {
-  return !!type?._def?.typeName;
-};
-
-const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
-  type: any,
-  zodTypeKind: Z,
-): type is InstanceType<typeof z[Z]> => {
-  return type?._def?.typeName === zodTypeKind;
-};
-
-const unwrapZodType = (type: z.ZodType): z.ZodType => {
+const getBaseZodType = (type: z.ZodType): z.ZodType => {
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return unwrapZodType(type.unwrap());
+    return getBaseZodType(type.unwrap());
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return unwrapZodType(type.removeDefault());
+    return getBaseZodType(type.removeDefault());
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return unwrapZodType(type.innerType());
+    return getBaseZodType(type.innerType());
   }
   return type;
 };
@@ -36,12 +26,21 @@ export const getParameterObjects = (
   schema: unknown,
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
-): OpenAPIV3.ParameterObject[] => {
+): OpenAPIV3.ParameterObject[] | undefined => {
   if (!instanceofZod(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
+  }
+
+  if (
+    pathParameters.length === 0 &&
+    (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodVoid) ||
+      instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodUndefined) ||
+      instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodNever))
+  ) {
+    return undefined;
   }
 
   if (!instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
@@ -76,14 +75,16 @@ export const getParameterObjects = (
     .map((key) => {
       const value = shape[key]!;
 
-      const unwrappedZodType = unwrapZodType(value);
+      // TODO: support ZodUnion/z.or if string vals
+      // TODO: validate ZodNativeEnum is using string vals
+      const baseZodType = getBaseZodType(value);
       if (
-        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodString) &&
-        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodEnum) &&
-        !instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodNativeEnum) &&
+        !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodString) &&
+        !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodEnum) &&
+        !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodNativeEnum) &&
         !(
-          instanceofZodTypeKind(unwrappedZodType, z.ZodFirstPartyTypeKind.ZodLiteral) &&
-          typeof unwrappedZodType._def.value === 'string'
+          instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodLiteral) &&
+          typeof baseZodType._def.value === 'string'
         )
       ) {
         throw new TRPCError({
@@ -111,6 +112,14 @@ export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObje
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
+  }
+
+  if (
+    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodVoid) ||
+    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodUndefined) ||
+    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodNever)
+  ) {
+    return undefined;
   }
 
   return {

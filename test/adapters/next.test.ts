@@ -159,7 +159,7 @@ describe('next adapter', () => {
     expect(res.body).toEqual({
       ok: false,
       error: {
-        message: 'Query "trpc" not found - is the file named `[trpc]`.ts or `[...trpc].ts`?',
+        message: 'Query "trpc" not found - is the `trpc-openapi` file named `[...trpc].ts`?',
         code: 'INTERNAL_SERVER_ERROR',
       },
     });

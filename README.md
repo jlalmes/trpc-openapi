@@ -142,7 +142,7 @@ export const createContext = async ({ req, res }): Promise<Context> => {
 
 export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
   meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello', protect: true /* 👈 */ } },
-  input: z.object({}), // no input expected
+  input: z.void(), // no input expected
   output: z.object({ greeting: z.string() }),
   resolve: ({ input, ctx }) => {
     if (!ctx.user) {
@@ -313,7 +313,7 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 | `responseMeta`  | `Function` | Function that returns modifications to statusCode & headers on each response. | `false`  |
 | `onError`       | `Function` | Function called if error occurs inside handler.                               | `false`  |
 | `teardown`      | `Function` | Function called after each request is completed.                              | `false`  |
-| `maxBodySize`   | `number`   | Controls the maximum request body size in bytes (default: 10kb).              | `false`  |
+| `maxBodySize`   | `number`   | Controls the maximum request body size in bytes (default: 100kb).             | `false`  |
 
 ---
 

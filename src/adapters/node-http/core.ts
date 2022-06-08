@@ -13,9 +13,10 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
-import { normalizePath } from '../../utils';
+import { isEmpty, normalizePath } from '../../utils';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
+import { monkeyPatchVoidInputs } from './monkeyPatch';
 import { createMatchProcedureFn } from './procedures';
 
 export type CreateOpenApiNodeHttpHandlerOptions<
@@ -37,11 +38,8 @@ export const createOpenApiNodeHttpHandler = <
   opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>,
 ) => {
   // Validate router
-  generateOpenApiDocument(opts.router, {
-    title: '-',
-    version: '-',
-    baseUrl: '-',
-  });
+  generateOpenApiDocument(opts.router, { title: '-', version: '-', baseUrl: '-' });
+  monkeyPatchVoidInputs(opts.router);
 
   const { router, createContext, responseMeta, onError, teardown, maxBodySize } = opts;
   const matchProcedure = createMatchProcedureFn(router);

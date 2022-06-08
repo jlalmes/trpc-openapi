@@ -51,10 +51,10 @@ export const getParameterObjects = (
   }
 
   const shape = schema.shape;
-  const keys = Object.keys(shape);
+  const shapeKeys = Object.keys(shape);
 
   for (const pathParameter of pathParameters) {
-    if (!keys.includes(pathParameter)) {
+    if (!shapeKeys.includes(pathParameter)) {
       throw new TRPCError({
         message: `Input parser expects key from path: "${pathParameter}"`,
         code: 'INTERNAL_SERVER_ERROR',
@@ -62,9 +62,9 @@ export const getParameterObjects = (
     }
   }
 
-  return keys
-    .filter((key) => {
-      const isPathParameter = pathParameters.includes(key);
+  return shapeKeys
+    .filter((shapeKey) => {
+      const isPathParameter = pathParameters.includes(shapeKey);
       if (inType === 'path') {
         return isPathParameter;
       } else if (inType === 'query') {
@@ -72,12 +72,12 @@ export const getParameterObjects = (
       }
       return true;
     })
-    .map((key) => {
-      const value = shape[key]!;
+    .map((shapeKey) => {
+      const shapeSchema = shape[shapeKey]!;
 
       // TODO: support ZodUnion/z.or if string vals
       // TODO: validate ZodNativeEnum is using string vals
-      const baseZodType = getBaseZodType(value);
+      const baseZodType = getBaseZodType(shapeSchema);
       if (
         !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodString) &&
         !instanceofZodTypeKind(baseZodType, z.ZodFirstPartyTypeKind.ZodEnum) &&
@@ -88,18 +88,18 @@ export const getParameterObjects = (
         )
       ) {
         throw new TRPCError({
-          message: `Input parser key: "${key}" must be a ZodString`,
+          message: `Input parser key: "${shapeKey}" must be a ZodString`,
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
 
-      const isPathParameter = pathParameters.includes(key);
-      const { description, ...schema } = zodSchemaToOpenApiSchemaObject(value);
+      const isPathParameter = pathParameters.includes(shapeKey);
+      const { description, ...schema } = zodSchemaToOpenApiSchemaObject(shapeSchema);
 
       return {
-        name: key,
+        name: shapeKey,
         in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || !value.isOptional(),
+        required: isPathParameter || !shapeSchema.isOptional(),
         schema: schema,
         description: description,
       };

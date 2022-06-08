@@ -15,8 +15,6 @@ import {
   createOpenApiHttpHandler,
 } from '../../src';
 
-// TODO: test bad output
-
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
@@ -798,7 +796,6 @@ describe('standalone adapter', () => {
       onErrorMock.mockClear();
       teardownMock.mockClear();
     }
-
     {
       const res = await fetch(`${url}/say-hello/James`, {
         method: 'POST',
@@ -832,6 +829,36 @@ describe('standalone adapter', () => {
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
     }
+
+    close();
+  });
+
+  test('with bad output', async () => {
+    const { url, close } = createHttpServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().query('badOutput', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/bad-output' } },
+        input: z.void(),
+        output: z.string(),
+        // @ts-expect-error - intentional bad output
+        resolve: () => ({}),
+      }),
+    });
+
+    const res = await fetch(`${url}/bad-output`, { method: 'GET' });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(500);
+    expect(body).toEqual({
+      ok: false,
+      error: {
+        message: 'Output validation failed',
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });

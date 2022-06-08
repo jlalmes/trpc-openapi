@@ -19,7 +19,7 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      const { method, protect, summary, description, tags } = openapi;
+      const { method, protect, summary, description, tag } = openapi;
       if (method !== 'GET' && method !== 'DELETE') {
         throw new TRPCError({
           message: 'Query method must be GET or DELETE',
@@ -44,7 +44,7 @@ export const getOpenApiPathsObject = (
         [httpMethod]: {
           summary,
           description,
-          tags,
+          tags: tag ? [tag] : undefined,
           security: protect ? [{ Authorization: [] }] : undefined,
           parameters: getParameterObjects(inputParser, pathParameters, 'all'),
           responses: getResponsesObject(outputParser),
@@ -65,7 +65,7 @@ export const getOpenApiPathsObject = (
         continue;
       }
 
-      const { method, protect, summary, description, tags } = openapi;
+      const { method, protect, summary, description, tag } = openapi;
       if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
         throw new TRPCError({
           message: 'Mutation method must be POST, PATCH or PUT',
@@ -90,7 +90,7 @@ export const getOpenApiPathsObject = (
         [httpMethod]: {
           summary,
           description,
-          tags,
+          tags: tag ? [tag] : undefined,
           security: protect ? [{ Authorization: [] }] : undefined,
           requestBody: getRequestBodyObject(inputParser, pathParameters),
           parameters: getParameterObjects(inputParser, pathParameters, 'path'),

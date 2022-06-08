@@ -12,6 +12,7 @@ export type GenerateOpenApiDocumentOptions = {
   version: string;
   baseUrl: string;
   docsUrl?: string;
+  tags?: string[];
 };
 
 export const generateOpenApiDocument = (
@@ -42,6 +43,7 @@ export const generateOpenApiDocument = (
         error: errorResponseObject,
       },
     },
+    tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
 };

@@ -27,7 +27,7 @@ const createOpenApiNextHandlerCaller = <TRouter extends OpenApiRouter>(
     teardown: handlerOpts.teardown ?? (teardownMock as any),
   });
 
-  return (req: { method: string; query: Record<string, any>; body?: any }) => {
+  return (req: { url: string; method: string; query: Record<string, any>; body?: any }) => {
     return new Promise<{
       statusCode: number;
       headers: Record<string, any>;
@@ -95,6 +95,7 @@ describe('next adapter', () => {
 
     {
       const res = await openApiNextHandlerCaller({
+        url: '/api/say-hello?name=James',
         method: 'GET',
         query: { trpc: 'say-hello', name: 'James' },
       });
@@ -113,6 +114,7 @@ describe('next adapter', () => {
     }
     {
       const res = await openApiNextHandlerCaller({
+        url: '/api/say-hello/',
         method: 'POST',
         query: { trpc: 'say-hello' },
         body: { name: 'James' },
@@ -132,6 +134,7 @@ describe('next adapter', () => {
     }
     {
       const res = await openApiNextHandlerCaller({
+        url: 'http://localhost:1234/api/say/hello?name=James',
         method: 'GET',
         query: { trpc: ['say', 'hello'], name: 'James' },
       });
@@ -151,6 +154,7 @@ describe('next adapter', () => {
     });
 
     const res = await openApiNextHandlerCaller({
+      url: '/api',
       method: 'GET',
       query: {},
     });

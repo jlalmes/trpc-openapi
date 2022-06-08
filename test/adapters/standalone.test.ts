@@ -15,6 +15,8 @@ import {
   createOpenApiHttpHandler,
 } from '../../src';
 
+// TODO: test bad output
+
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
@@ -56,7 +58,7 @@ describe('standalone adapter', () => {
   test('with invalid router', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('invalidRoute', {
       meta: { openapi: { enabled: true, path: '/invalid-route', method: 'GET' } },
-      input: z.object({}),
+      input: z.void(),
       resolve: ({ input }) => input,
     });
 
@@ -69,7 +71,7 @@ describe('standalone adapter', () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('ping', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
-        input: z.object({}),
+        input: z.void(),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
       }),
@@ -92,7 +94,7 @@ describe('standalone adapter', () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('ping', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
-        input: z.object({}),
+        input: z.void(),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
       }),
@@ -111,7 +113,48 @@ describe('standalone adapter', () => {
     close();
   });
 
-  test('with invalid mimetype', async () => {
+  test('with missing content-type header', async () => {
+    const { url, close } = createHttpServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('echo', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        resolve: ({ input }) => ({ payload: input.payload }),
+      }),
+    });
+
+    const res = await fetch(`${url}/echo`, {
+      method: 'POST',
+      body: JSON.stringify('James'),
+    });
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(400);
+    expect(body).toEqual({
+      ok: false,
+      error: {
+        message: 'Input validation failed',
+        code: 'BAD_REQUEST',
+        issues: [
+          {
+            code: 'invalid_type',
+            expected: 'object',
+            message: 'Required',
+            path: [],
+            received: 'undefined',
+          },
+        ],
+      },
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with invalid content-type', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
         meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
@@ -137,9 +180,9 @@ describe('standalone adapter', () => {
         issues: [
           {
             code: 'invalid_type',
-            expected: 'string',
+            expected: 'object',
             message: 'Required',
-            path: ['payload'],
+            path: [],
             received: 'undefined',
           },
         ],
@@ -175,9 +218,9 @@ describe('standalone adapter', () => {
         issues: [
           {
             code: 'invalid_type',
-            expected: 'string',
+            expected: 'object',
             message: 'Required',
-            path: ['payload'],
+            path: [],
             received: 'undefined',
           },
         ],
@@ -360,23 +403,49 @@ describe('standalone adapter', () => {
 
   test('with no input', async () => {
     const { url, close } = createHttpServerWithRouter({
-      router: trpc.router<any, OpenApiMeta>().query('ping', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
-        input: z.object({}),
-        output: z.literal('pong'),
-        resolve: () => 'pong' as const,
-      }),
+      router: trpc
+        .router<any, OpenApiMeta>()
+        .query('pingQuery', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+          input: z.void(),
+          output: z.literal('pong'),
+          resolve: () => 'pong' as const,
+        })
+        .mutation('pingMutation', {
+          meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+          input: z.void(),
+          output: z.literal('pong'),
+          resolve: () => 'pong' as const,
+        }),
     });
 
-    const res = await fetch(`${url}/ping`, { method: 'GET' });
-    const body = (await res.json()) as OpenApiSuccessResponse;
+    {
+      const res = await fetch(`${url}/ping`, { method: 'GET' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ ok: true, data: 'pong' });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: 'pong' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+
+      createContextMock.mockClear();
+      responseMetaMock.mockClear();
+      onErrorMock.mockClear();
+      teardownMock.mockClear();
+    }
+    {
+      const res = await fetch(`${url}/ping`, { method: 'POST' });
+      const body = (await res.json()) as OpenApiSuccessResponse;
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ ok: true, data: 'pong' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
+    }
 
     close();
   });
@@ -507,47 +576,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(0);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
-
-    close();
-  });
-
-  test('with missing content-type header', async () => {
-    const { url, close } = createHttpServerWithRouter({
-      router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
-        input: z.object({ payload: z.string() }),
-        output: z.object({ payload: z.string() }),
-        resolve: ({ input }) => ({ payload: input.payload }),
-      }),
-    });
-
-    const res = await fetch(`${url}/echo`, {
-      method: 'POST',
-      body: JSON.stringify('James'),
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
-
-    expect(res.status).toBe(400);
-    expect(body).toEqual({
-      ok: false,
-      error: {
-        message: 'Input validation failed',
-        code: 'BAD_REQUEST',
-        issues: [
-          {
-            code: 'invalid_type',
-            expected: 'string',
-            message: 'Required',
-            path: ['payload'],
-            received: 'undefined',
-          },
-        ],
-      },
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
     expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();

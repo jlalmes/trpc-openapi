@@ -13,7 +13,7 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
-import { normalizePath } from '../../utils';
+import { isEmpty, normalizePath } from '../../utils';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
 import { createMatchProcedureFn } from './procedures';
@@ -90,10 +90,19 @@ export const createOpenApiNodeHttpHandler = <
         });
       }
 
-      input = {
-        ...(procedure.type === 'query' ? getQuery(req, url) : await getBody(req, maxBodySize)),
-        ...pathInput,
-      };
+      let input: any;
+      if (procedure.type === 'query') {
+        input = getQuery(req, url);
+      } else {
+        input = await getBody(req, maxBodySize);
+      }
+      if (pathInput && !isEmpty(pathInput)) {
+        input = {
+          ...input,
+          ...pathInput,
+        };
+      }
+
       ctx = await createContext?.({ ...opts, req, res });
       const caller = router.createCaller(ctx);
       data = await caller[procedure.type](procedure.path, input);

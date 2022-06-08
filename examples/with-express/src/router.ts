@@ -131,74 +131,72 @@ const authRouter = createRouter()
     },
   });
 
-const userRouter = createRouter().query('getUserById', {
-  meta: {
-    openapi: {
-      enabled: true,
-      method: 'GET',
-      path: '/users/{id}',
-      tags: ['users'],
-      summary: 'Read a user by id',
-    },
-  },
-  input: z.object({
-    id: z.string().uuid(),
-  }),
-  output: z.object({
-    user: z.object({
-      id: z.string().uuid(),
-      email: z.string().email(),
-      name: z.string(),
-    }),
-  }),
-  resolve: ({ input }) => {
-    const user = database.users.find((_user) => _user.id === input.id);
-
-    if (!user) {
-      throw new TRPCError({
-        message: 'User not found',
-        code: 'NOT_FOUND',
-      });
-    }
-
-    return { user };
-  },
-});
-
-const postRouter = createRouter()
-  .query('getPostById', {
+const usersRouter = createRouter()
+  .query('getUsers', {
     meta: {
       openapi: {
         enabled: true,
         method: 'GET',
-        path: '/posts/{id}',
-        tags: ['posts'],
-        summary: 'Read a post by id',
+        path: '/users',
+        tags: ['users'],
+        summary: 'Read all users',
+      },
+    },
+    input: z.void(),
+    output: z.object({
+      users: z.array(
+        z.object({
+          id: z.string().uuid(),
+          email: z.string().email(),
+          name: z.string(),
+        }),
+      ),
+    }),
+    resolve: () => {
+      const users = database.users.map((user) => ({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      }));
+
+      return { users };
+    },
+  })
+  .query('getUserById', {
+    meta: {
+      openapi: {
+        enabled: true,
+        method: 'GET',
+        path: '/users/{id}',
+        tags: ['users'],
+        summary: 'Read a user by id',
       },
     },
     input: z.object({
       id: z.string().uuid(),
     }),
     output: z.object({
-      post: z.object({
+      user: z.object({
         id: z.string().uuid(),
-        content: z.string(),
-        userId: z.string().uuid(),
+        email: z.string().email(),
+        name: z.string(),
       }),
     }),
     resolve: ({ input }) => {
-      const post = database.posts.find((_post) => _post.id === input.id);
+      const user = database.users.find((_user) => _user.id === input.id);
 
-      if (!post) {
+      if (!user) {
         throw new TRPCError({
-          message: 'Post not found',
+          message: 'User not found',
           code: 'NOT_FOUND',
         });
       }
 
-      return { post };
+      return { user };
     },
-  })
+  });
+
+const postsRouter = createRouter()
   .query('getPosts', {
     meta: {
       openapi: {
@@ -232,9 +230,42 @@ const postRouter = createRouter()
 
       return { posts };
     },
+  })
+  .query('getPostById', {
+    meta: {
+      openapi: {
+        enabled: true,
+        method: 'GET',
+        path: '/posts/{id}',
+        tags: ['posts'],
+        summary: 'Read a post by id',
+      },
+    },
+    input: z.object({
+      id: z.string().uuid(),
+    }),
+    output: z.object({
+      post: z.object({
+        id: z.string().uuid(),
+        content: z.string(),
+        userId: z.string().uuid(),
+      }),
+    }),
+    resolve: ({ input }) => {
+      const post = database.posts.find((_post) => _post.id === input.id);
+
+      if (!post) {
+        throw new TRPCError({
+          message: 'Post not found',
+          code: 'NOT_FOUND',
+        });
+      }
+
+      return { post };
+    },
   });
 
-const postProtectedRouter = createProtectedRouter()
+const postsProtectedRouter = createProtectedRouter()
   .mutation('createPost', {
     meta: {
       openapi: {
@@ -350,8 +381,8 @@ const postProtectedRouter = createProtectedRouter()
 
 export const appRouter = createRouter()
   .merge(authRouter)
-  .merge(userRouter)
-  .merge(postRouter)
-  .merge(postProtectedRouter);
+  .merge(usersRouter)
+  .merge(postsRouter)
+  .merge(postsProtectedRouter);
 
 export type AppRouter = typeof appRouter;

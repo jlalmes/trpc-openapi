@@ -36,12 +36,21 @@ export const getParameterObjects = (
   schema: unknown,
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
-): OpenAPIV3.ParameterObject[] => {
+): OpenAPIV3.ParameterObject[] | undefined => {
   if (!instanceofZod(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
+  }
+
+  if (
+    pathParameters.length === 0 &&
+    (instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodVoid) ||
+      instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodUndefined) ||
+      instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodNever))
+  ) {
+    return undefined;
   }
 
   if (!instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
@@ -111,6 +120,14 @@ export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObje
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
+  }
+
+  if (
+    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodVoid) ||
+    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodUndefined) ||
+    instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodNever)
+  ) {
+    return undefined;
   }
 
   return {

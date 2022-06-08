@@ -20,6 +20,7 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
 
   return async (req: NextApiRequest, res: NextApiResponse) => {
     let pathname: string | null = null;
+    const search = req.url?.split('?')[1];
     if (typeof req.query.trpc === 'string') {
       pathname = req.query.trpc;
     } else if (Array.isArray(req.query.trpc)) {
@@ -54,7 +55,7 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
       return;
     }
 
-    req.url = normalizePath(pathname);
+    req.url = normalizePath([pathname, search].join('?'));
     return openApiHttpHandler(req, res);
   };
 };

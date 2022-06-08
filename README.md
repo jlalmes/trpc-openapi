@@ -288,19 +288,20 @@ Please see [full typings here](src/types.ts).
 | `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential using the `Bearer` scheme on OpenAPI document.      | `false`  | `false`     |
 | `summary`     | `string`     | A short summary included in the OpenAPI document.                                                                      | `false`  | `undefined` |
 | `description` | `string`     | A verbose description included in the OpenAPI document.                                                                | `false`  | `undefined` |
-| `tags`        | `string[]`   | A list of tags to group endpoints in the OpenAPI document.                                                             | `false`  | `[]`        |
+| `tag`         | `string`     | A tag to group endpoints in the OpenAPI document.                                                                      | `false`  | `undefined` |
 
 #### GenerateOpenApiDocumentOptions
 
 Please see [full typings here](src/generator/index.ts).
 
-| Property      | Type     | Description                          | Required |
-| ------------- | -------- | ------------------------------------ | -------- |
-| `title`       | `string` | The title of the API.                | `true`   |
-| `description` | `string` | A short description of the API.      | `false`  |
-| `version`     | `string` | The version of the OpenAPI document. | `true`   |
-| `baseUrl`     | `string` | The base URL of the target server.   | `true`   |
-| `docsUrl`     | `string` | A URL to any external documentation. | `false`  |
+| Property      | Type       | Description                            | Required |
+| ------------- | ---------- | -------------------------------------- | -------- |
+| `title`       | `string`   | The title of the API.                  | `true`   |
+| `description` | `string`   | A short description of the API.        | `false`  |
+| `version`     | `string`   | The version of the OpenAPI document.   | `true`   |
+| `baseUrl`     | `string`   | The base URL of the target server.     | `true`   |
+| `docsUrl`     | `string`   | A URL to any external documentation.   | `false`  |
+| `tags`        | `string[]` | Tag list for ordering endpoint groups. | `false`  |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

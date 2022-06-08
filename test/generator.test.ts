@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { OpenApiMeta, generateOpenApiDocument, openApiVersion } from '../src';
 
 // TODO: test for duplicate paths (using getPathRegExp)
-// TODO: tags ordering
 
 const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion });
 
@@ -25,6 +24,7 @@ describe('generator', () => {
       description: 'API documentation',
       baseUrl: 'http://localhost:3000/api',
       docsUrl: 'http://localhost:3000/docs',
+      tags: [],
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
@@ -109,6 +109,7 @@ describe('generator', () => {
             "url": "http://localhost:3000/api",
           },
         ],
+        "tags": Array [],
       }
     `);
   });
@@ -958,6 +959,7 @@ describe('generator', () => {
             "url": "http://localhost:3000/api",
           },
         ],
+        "tags": undefined,
       }
     `);
   });
@@ -1217,7 +1219,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with summary, description & tags', () => {
+  test('with summary, description & tag', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
         openapi: {
@@ -1226,7 +1228,7 @@ describe('generator', () => {
           method: 'GET',
           summary: 'Short summary',
           description: 'Verbose description',
-          tags: ['tag'],
+          tag: 'tag',
         },
       },
       input: z.object({ name: z.string() }),

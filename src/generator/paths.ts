@@ -92,7 +92,7 @@ export const getOpenApiPathsObject = (
           description,
           tags,
           security: protect ? [{ Authorization: [] }] : undefined,
-          requestBody: getRequestBodyObject(inputParser),
+          requestBody: getRequestBodyObject(inputParser, pathParameters),
           parameters: getParameterObjects(inputParser, pathParameters, 'path'),
           responses: getResponsesObject(outputParser),
         },

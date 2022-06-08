@@ -106,7 +106,10 @@ export const getParameterObjects = (
     });
 };
 
-export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObject | undefined => {
+export const getRequestBodyObject = (
+  schema: unknown,
+  pathParameters: string[],
+): OpenAPIV3.RequestBodyObject | undefined => {
   if (!instanceofZod(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
@@ -122,11 +125,25 @@ export const getRequestBodyObject = (schema: unknown): OpenAPIV3.RequestBodyObje
     return undefined;
   }
 
+  if (!instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
+    throw new TRPCError({
+      message: 'Input parser must be a ZodObject',
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+  }
+
+  // remove path parameters
+  const mask: Record<string, true> = {};
+  pathParameters.forEach((pathParameter) => {
+    mask[pathParameter] = true;
+  });
+  const dedupedSchema = schema.omit(mask);
+
   return {
     required: !schema.isOptional(),
     content: {
       'application/json': {
-        schema: zodSchemaToOpenApiSchemaObject(schema),
+        schema: zodSchemaToOpenApiSchemaObject(dedupedSchema),
       },
     },
   };

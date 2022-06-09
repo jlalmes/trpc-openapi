@@ -419,23 +419,21 @@ describe('standalone adapter', () => {
   });
 
   test('with void input', async () => {
-    const router = trpc
-      .router<any, OpenApiMeta>()
-      .query('pingQuery', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
-        input: z.void(),
-        output: z.literal('pong'),
-        resolve: () => 'pong' as const,
-      })
-      .mutation('pingMutation', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
-        input: z.void(),
-        output: z.literal('pong'),
-        resolve: () => 'pong' as const,
-      });
-
     const { url, close } = createHttpServerWithRouter({
-      router,
+      router: trpc
+        .router<any, OpenApiMeta>()
+        .query('pingQuery', {
+          meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+          input: z.void(),
+          output: z.literal('pong'),
+          resolve: () => 'pong' as const,
+        })
+        .mutation('pingMutation', {
+          meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+          input: z.void(),
+          output: z.literal('pong'),
+          resolve: () => 'pong' as const,
+        }),
     });
 
     {
@@ -464,14 +462,6 @@ describe('standalone adapter', () => {
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
-    }
-    {
-      // ensure monkey patch doesnt break router
-      const client = createTRPCClient<typeof router>({ url: `${url}/trpc` });
-      const queryRes = await client.query('pingQuery');
-      expect(queryRes).toBe('pong');
-      const mutationRes = await client.mutation('pingMutation');
-      expect(mutationRes).toBe('pong');
     }
 
     close();
@@ -888,6 +878,68 @@ describe('standalone adapter', () => {
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
     expect(teardownMock).toHaveBeenCalledTimes(1);
+
+    close();
+  });
+
+  test('with void and trpc client', async () => {
+    // ensure monkey patch doesnt break router
+    const router = trpc
+      .router<any, OpenApiMeta>()
+      .query('with-void', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/with-void' } },
+        input: z.void(),
+        output: z.object({ payload: z.any() }),
+        resolve: ({ input }) => ({ payload: input }),
+      })
+      .mutation('with-void', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/with-void' } },
+        input: z.void(),
+        output: z.object({ payload: z.any() }),
+        resolve: ({ input }) => ({ payload: input }),
+      });
+
+    const { url, close } = createHttpServerWithRouter({ router });
+    const client = createTRPCClient<typeof router>({ url: `${url}/trpc` });
+
+    {
+      const res = await client.query('with-void');
+      expect(res).toEqual({});
+
+      await expect(() => {
+        // @ts-expect-error - send monkey patched input type
+        return client.query('with-void', {});
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "[
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"void\\",
+          \\"received\\": \\"object\\",
+          \\"path\\": [],
+          \\"message\\": \\"Expected void, received object\\"
+        }
+      ]"
+      `);
+    }
+    {
+      const res = await client.mutation('with-void');
+      expect(res).toEqual({});
+
+      await expect(() => {
+        // @ts-expect-error - send monkey patched input type
+        return client.mutation('with-void', {});
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "[
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"void\\",
+            \\"received\\": \\"object\\",
+            \\"path\\": [],
+            \\"message\\": \\"Expected void, received object\\"
+          }
+        ]"
+      `);
+    }
 
     close();
   });

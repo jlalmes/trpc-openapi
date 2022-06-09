@@ -4,6 +4,7 @@ import {
   NodeHTTPRequest,
   NodeHTTPResponse, // eslint-disable-next-line import/no-unresolved
 } from '@trpc/server/dist/declarations/src/adapters/node-http';
+import cloneDeep from 'lodash.clonedeep';
 import { ZodError } from 'zod';
 
 import { generateOpenApiDocument } from '../../generator';
@@ -13,7 +14,7 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
-import { isEmpty, normalizePath } from '../../utils';
+import { normalizePath } from '../../utils';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
 import { monkeyPatchVoidInputs } from './monkeyPatch';
@@ -37,11 +38,13 @@ export const createOpenApiNodeHttpHandler = <
 >(
   opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>,
 ) => {
-  // Validate router
-  generateOpenApiDocument(opts.router, { title: '-', version: '-', baseUrl: '-' });
-  monkeyPatchVoidInputs(opts.router);
+  const router = cloneDeep(opts.router);
 
-  const { router, createContext, responseMeta, onError, teardown, maxBodySize } = opts;
+  // Validate router
+  generateOpenApiDocument(router, { title: '-', version: '-', baseUrl: '-' });
+  monkeyPatchVoidInputs(router);
+
+  const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
   const matchProcedure = createMatchProcedureFn(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {

@@ -33,7 +33,3 @@ export const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
 ): type is InstanceType<typeof z[Z]> => {
   return type?._def?.typeName === zodTypeKind;
 };
-
-export const isEmpty = (obj: Record<string, any>) => {
-  return Object.values(obj).length === 0;
-};

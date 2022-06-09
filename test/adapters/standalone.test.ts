@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
+import { createTRPCClient } from '@trpc/client';
 import * as trpc from '@trpc/server';
 import { TRPCError } from '@trpc/server';
+import { createHTTPHandler } from '@trpc/server/adapters/standalone';
 import { Server } from 'http';
 import fetch from 'node-fetch';
 import superjson from 'superjson';
@@ -14,6 +16,9 @@ import {
   OpenApiSuccessResponse,
   createOpenApiHttpHandler,
 } from '../../src';
+
+// @ts-expect-error - global fetch
+global.fetch = fetch;
 
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
@@ -31,9 +36,23 @@ const createHttpServerWithRouter = <TRouter extends OpenApiRouter>(
     teardown: handlerOpts.teardown ?? (teardownMock as any),
     maxBodySize: handlerOpts.maxBodySize,
   });
+  const httpHandler = createHTTPHandler({
+    router: handlerOpts.router,
+    createContext: handlerOpts.createContext ?? (createContextMock as any),
+    responseMeta: handlerOpts.responseMeta ?? (responseMetaMock as any),
+    onError: handlerOpts.onError ?? (onErrorMock as any),
+    teardown: handlerOpts.teardown ?? (teardownMock as any),
+    maxBodySize: handlerOpts.maxBodySize,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  const server = new Server(openApiHttpHandler);
+  const server = new Server((req, res) => {
+    if (req.url!.startsWith('/trpc')) {
+      req.url = req.url!.replace('/trpc', '');
+      return httpHandler(req, res);
+    }
+    return openApiHttpHandler(req, res);
+  });
 
   server.listen(0);
   const port = (server.address() as any).port as number;
@@ -399,22 +418,24 @@ describe('standalone adapter', () => {
     close();
   });
 
-  test('with no input', async () => {
+  test('with void input', async () => {
+    const router = trpc
+      .router<any, OpenApiMeta>()
+      .query('pingQuery', {
+        meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+        input: z.void(),
+        output: z.literal('pong'),
+        resolve: () => 'pong' as const,
+      })
+      .mutation('pingMutation', {
+        meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+        input: z.void(),
+        output: z.literal('pong'),
+        resolve: () => 'pong' as const,
+      });
+
     const { url, close } = createHttpServerWithRouter({
-      router: trpc
-        .router<any, OpenApiMeta>()
-        .query('pingQuery', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
-          input: z.void(),
-          output: z.literal('pong'),
-          resolve: () => 'pong' as const,
-        })
-        .mutation('pingMutation', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
-          input: z.void(),
-          output: z.literal('pong'),
-          resolve: () => 'pong' as const,
-        }),
+      router,
     });
 
     {
@@ -444,11 +465,19 @@ describe('standalone adapter', () => {
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
     }
+    {
+      // ensure monkey patch doesnt break router
+      const client = createTRPCClient<typeof router>({ url: `${url}/trpc` });
+      const queryRes = await client.query('pingQuery');
+      expect(queryRes).toBe('pong');
+      const mutationRes = await client.mutation('pingMutation');
+      expect(mutationRes).toBe('pong');
+    }
 
     close();
   });
 
-  test('with no output', async () => {
+  test('with void output', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('ping', {
         meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },

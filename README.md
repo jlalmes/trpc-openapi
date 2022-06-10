@@ -196,7 +196,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 ```typescript
 // Router
 export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello', {
-  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
+  meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello/{name}' /* 👈 */ } },
   input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
   output: z.object({ greeting: z.string() }),
   resolve: ({ input }) => {

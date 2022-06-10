@@ -1,0 +1,64 @@
+{
+  "name": "trpc-openapi",
+  "version": "0.1.0",
+  "description": "tRPC OpenAPI",
+  "author": "James Berry <jb@jamesbe.com>",
+  "private": false,
+  "license": "MIT",
+  "keywords": [
+    "trpc",
+    "openapi",
+    "swagger"
+  ],
+  "homepage": "https://github.com/jlalmes/trpc-openapi",
+  "repository": "github:jlalmes/trpc-openapi",
+  "bugs": "https://github.com/jlalmes/trpc-openapi/issues",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "workspaces": [
+    ".",
+    "examples/*"
+  ],
+  "scripts": {
+    "test": "tsc --noEmit && jest --verbose",
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "release:patch": "npm test && npm version patch && npm run build && npm publish",
+    "release:minor": "npm test && npm version minor && npm run build && npm publish"
+  },
+  "peerDependencies": {
+    "@trpc/server": "^9.23.0",
+    "co-body": "^6.1.0",
+    "lodash.clonedeep": "^4.0.0",
+    "openapi-types": "^11.0.0",
+    "zod": "^3.0.0",
+    "zod-to-json-schema": "^3.17.0"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
+    "@trpc/client": "^9.23.0",
+    "@types/co-body": "^6.1.0",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.5.2",
+    "@types/lodash.clonedeep": "^4.5.7",
+    "@types/node": "^17.0.38",
+    "@types/node-fetch": "^2.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "express": "^4.18.1",
+    "jest": "^28.1.0",
+    "next": "^12.1.6",
+    "node-fetch": "^2.6.7",
+    "openapi-schema-validator": "^11.0.1",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
+    "superjson": "^1.9.1",
+    "ts-jest": "^28.0.3",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.7.2"
+  }
+}

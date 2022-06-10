@@ -22,7 +22,8 @@
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
-    "release": "npm test && npm version prerelease --preid alpha && npm run build && npm publish"
+    "release:patch": "npm test && npm version patch && npm run build && npm publish",
+    "release:minor": "npm test && npm version minor && npm run build && npm publish"
   },
   "peerDependencies": {
     "@trpc/server": "^9.23.0",

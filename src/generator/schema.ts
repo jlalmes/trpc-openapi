@@ -3,43 +3,15 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import { instanceofZod, instanceofZodTypeKind } from '../utils';
+import {
+  instanceofZod,
+  instanceofZodTypeLikeObject,
+  instanceofZodTypeLikeString,
+  instanceofZodTypeLikeVoid,
+} from '../utils';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
   return zodToJsonSchema(zodSchema, { target: 'openApi3' });
-};
-
-const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): boolean => {
-  return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
-  );
-};
-
-const instanceofZodTypeLikeString = (type: z.ZodTypeAny): boolean => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return instanceofZodTypeLikeString(type.unwrap());
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return instanceofZodTypeLikeString(type.removeDefault());
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return instanceofZodTypeLikeString(type.innerType());
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
-    return !type._def.values.some((value) => typeof value !== 'string');
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
-    return !Object.values(type._def.values).some((value) => typeof value !== 'string');
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
-    return typeof type._def.value === 'string';
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
-    return !type._def.options.some((option) => !instanceofZodTypeLikeString(option));
-  }
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
 };
 
 export const getParameterObjects = (
@@ -58,7 +30,7 @@ export const getParameterObjects = (
     return undefined;
   }
 
-  if (!instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
+  if (!instanceofZodTypeLikeObject(schema)) {
     throw new TRPCError({
       message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',
@@ -125,7 +97,7 @@ export const getRequestBodyObject = (
     return undefined;
   }
 
-  if (!instanceofZodTypeKind(schema, z.ZodFirstPartyTypeKind.ZodObject)) {
+  if (!instanceofZodTypeLikeObject(schema)) {
     throw new TRPCError({
       message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { OpenApiRouter } from '../../types';
-import { getInputOutputParsers, instanceofZodTypeKind } from '../../utils';
+import { getInputOutputParsers, instanceofZodTypeLikeVoid } from '../../utils';
 
 export const monkeyPatchVoidInputs = (appRouter: OpenApiRouter) => {
   const { queries, mutations } = appRouter._def;
@@ -15,11 +15,7 @@ export const monkeyPatchVoidInputs = (appRouter: OpenApiRouter) => {
     }
 
     const { inputParser } = getInputOutputParsers(query);
-    if (
-      instanceofZodTypeKind(inputParser, z.ZodFirstPartyTypeKind.ZodVoid) ||
-      instanceofZodTypeKind(inputParser, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-      instanceofZodTypeKind(inputParser, z.ZodFirstPartyTypeKind.ZodNever)
-    ) {
+    if (instanceofZodTypeLikeVoid(inputParser)) {
       (appRouter._def.queries[queryPath] as any).parseInputFn = zObject.parse.bind(zObject);
     }
   }
@@ -32,11 +28,7 @@ export const monkeyPatchVoidInputs = (appRouter: OpenApiRouter) => {
     }
 
     const { inputParser } = getInputOutputParsers(mutation);
-    if (
-      instanceofZodTypeKind(inputParser, z.ZodFirstPartyTypeKind.ZodVoid) ||
-      instanceofZodTypeKind(inputParser, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-      instanceofZodTypeKind(inputParser, z.ZodFirstPartyTypeKind.ZodNever)
-    ) {
+    if (instanceofZodTypeLikeVoid(inputParser)) {
       (appRouter._def.mutations[mutationPath] as any).parseInputFn = zObject.parse.bind(zObject);
     }
   }

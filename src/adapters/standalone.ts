@@ -14,6 +14,6 @@ export const createOpenApiHttpHandler = <TRouter extends OpenApiRouter>(
 ) => {
   const openApiHttpHandler = createOpenApiNodeHttpHandler(opts);
   return async (req: IncomingMessage, res: ServerResponse) => {
-    return openApiHttpHandler(req, res);
+    await openApiHttpHandler(req, res);
   };
 };

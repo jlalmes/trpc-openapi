@@ -1,6 +1,6 @@
 {
   "name": "trpc-openapi",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha.2",
   "description": "tRPC OpenAPI",
   "author": "James Berry <jb@jamesbe.com>",
   "private": false,
@@ -22,16 +22,19 @@
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "release:alpha": "npm test && npm version prerelease --preid alpha && npm run build && npm publish",
     "release:patch": "npm test && npm version patch && npm run build && npm publish",
     "release:minor": "npm test && npm version minor && npm run build && npm publish"
   },
   "peerDependencies": {
     "@trpc/server": "^9.23.0",
-    "co-body": "^6.1.0",
-    "lodash.clonedeep": "^4.0.0",
-    "openapi-types": "^11.0.0",
-    "zod": "^3.0.0",
-    "zod-to-json-schema": "^3.17.0"
+    "zod": "^3.14.4"
+  },
+  "dependencies": {
+    "co-body": "6.1.0",
+    "lodash.clonedeep": "4.5.0",
+    "openapi-types": "12.0.0",
+    "zod-to-json-schema": "3.17.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^3.2.0",

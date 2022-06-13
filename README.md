@@ -90,15 +90,18 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ## Requirements
 
-For every OpenAPI enabled procedure the following _must_ be true:
+Peer dependencies:
 
-- [`tRPC`](https://github.com/trpc/trpc) version 9 (`@trpc/server@^9.23.0`) is installed.
-- Both `input` and `output` parsers are present.
-- Parsers use [`Zod`](https://github.com/colinhacks/zod) validation.
-- Query `input` parsers are `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
-- Mutation `input` parsers are `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
+- [`tRPC`](https://github.com/trpc/trpc) version 9 (`@trpc/server@^9.23.0`) must be installed.
+- [`Zod`](https://github.com/colinhacks/zod) version 3 (`zod@^3.0.0`) must be installed.
+
+For a procedure to support OpenAPI the following _must_ be true:
+
+- Both `input` and `output` parsers are present AND use `Zod` validation.
+- Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
+- Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
 - `meta.openapi.enabled` is set to `true`.
-- `meta.openapi.method` is `GET`, `DELETE` for queries OR `POST`, `PUT` or `PATCH` for mutations.
+- `meta.openapi.method` is `GET`, `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation.
 - `meta.openapi.path` is a string starting with `/`.
 - `meta.openapi.path` parameters exist in `input` parser as `ZodString`
 
@@ -112,7 +115,7 @@ Please note:
 
 Query procedures accept input via URL `query parameters`.
 
-Mutation procedures accept input via the `request body` as a `application/json` content type.
+Mutation procedures accept input via the `request body` with a `application/json` content type.
 
 ### Path parameters
 
@@ -187,7 +190,7 @@ Please see [error status codes here](src/adapters/node-http/errors.ts).
 
 ## Authorization
 
-To create protected endpoints, just add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request with the `createContext` function using the `Authorization` header with the `Bearer` scheme.
+To create protected endpoints, add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request with the `createContext` function using the `Authorization` header with the `Bearer` scheme.
 
 Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 
@@ -295,15 +298,15 @@ Please see [full typings here](src/generator/index.ts).
 
 Please see [full typings here](src/types.ts).
 
-| Property      | Type         | Description                                                                                                     | Required | Default     |
-| ------------- | ------------ | --------------------------------------------------------------------------------------------------------------- | -------- | ----------- |
-| `enabled`     | `boolean`    | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                  | `true`   | `false`     |
-| `method`      | `HttpMethod` | Method this endpoint is exposed on. Value can be `GET`/`DELETE` for query OR `POST`/`PUT`/`PATCH` for mutation. | `true`   | `undefined` |
-| `path`        | `string`     | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.            | `true`   | `undefined` |
-| `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.    | `false`  | `false`     |
-| `summary`     | `string`     | A short summary of the endpoint included in the OpenAPI document.                                               | `false`  | `undefined` |
-| `description` | `string`     | A verbose description of the endpoint included in the OpenAPI document.                                         | `false`  | `undefined` |
-| `tag`         | `string`     | A tag used for logical grouping of endpoints in the OpenAPI document.                                           | `false`  | `undefined` |
+| Property      | Type         | Description                                                                                                        | Required | Default     |
+| ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
+| `enabled`     | `boolean`    | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `true`   | `false`     |
+| `method`      | `HttpMethod` | Method this endpoint is exposed on. Value can be `GET`/`DELETE` for queries OR `POST`/`PUT`/`PATCH` for mutations. | `true`   | `undefined` |
+| `path`        | `string`     | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined` |
+| `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.       | `false`  | `false`     |
+| `summary`     | `string`     | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined` |
+| `description` | `string`     | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
+| `tag`         | `string`     | A tag used for logical grouping of endpoints in the OpenAPI document.                                              | `false`  | `undefined` |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

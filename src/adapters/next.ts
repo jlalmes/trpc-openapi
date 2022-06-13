@@ -55,6 +55,6 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
     }
 
     req.url = normalizePath(pathname);
-    return openApiHttpHandler(req, res);
+    await openApiHttpHandler(req, res);
   };
 };

@@ -95,7 +95,7 @@ export const createOpenApiNodeHttpHandler = <
         ...(procedure.type === 'query' ? getQuery(req, url) : await getBody(req, maxBodySize)),
         ...pathInput,
       };
-      ctx = await createContext?.({ ...opts, req, res });
+      ctx = await createContext?.({ req, res });
       const caller = router.createCaller(ctx);
       data = await caller[procedure.type](procedure.path, input);
 

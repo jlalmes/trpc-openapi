@@ -111,18 +111,18 @@ Please note:
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
 
-### `ZodParameterType`
+#### `ZodParameterType`
 
-The following `ZodType`s are supported (see the [full typing here](src/types.ts)):
+The following `ZodType`s are supported ([full typing](src/types.ts)):
 
-- ZodString
-- ZodNumber
-- ZodBoolean
-- ZodDate
-- ZodLiteral
-- ZodEnum
-- ZodNativeEnum
-- ZodUnion
+- `ZodString`
+- `ZodNumber`
+- `ZodBoolean`
+- `ZodDate`
+- `ZodLiteral`
+- `ZodEnum`
+- `ZodNativeEnum`
+- `ZodUnion`
 
 ## HTTP Requests
 

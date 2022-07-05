@@ -72,3 +72,9 @@ export const instanceofZodTypeLikeString = (type: z.ZodTypeAny): boolean => {
   }
   return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
 };
+
+export const instanceofZodTypeLikeOptional = (
+  type: z.ZodTypeAny,
+): type is z.ZodOptional<z.ZodTypeAny> => {
+  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional);
+};

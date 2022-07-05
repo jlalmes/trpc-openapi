@@ -6,6 +6,7 @@ import zodToJsonSchema from 'zod-to-json-schema';
 import {
   instanceofZod,
   instanceofZodTypeLikeObject,
+  instanceofZodTypeLikeOptional,
   instanceofZodTypeLikeString,
   instanceofZodTypeLikeVoid,
 } from '../utils';
@@ -60,7 +61,8 @@ export const getParameterObjects = (
       return true;
     })
     .map((shapeKey) => {
-      const shapeSchema = shape[shapeKey]!;
+      let shapeSchema = shape[shapeKey]!;
+      const isRequired = !shapeSchema.isOptional();
 
       if (!instanceofZodTypeLikeString(shapeSchema)) {
         throw new TRPCError({
@@ -69,13 +71,17 @@ export const getParameterObjects = (
         });
       }
 
+      if (instanceofZodTypeLikeOptional(shapeSchema)) {
+        shapeSchema = shapeSchema.unwrap();
+      }
+
       const isPathParameter = pathParameters.includes(shapeKey);
       const { description, ...schema } = zodSchemaToOpenApiSchemaObject(shapeSchema);
 
       return {
         name: shapeKey,
         in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || !shapeSchema.isOptional(),
+        required: isPathParameter || isRequired,
         schema: schema,
         description: description,
       };

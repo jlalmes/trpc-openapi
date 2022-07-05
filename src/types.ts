@@ -60,10 +60,7 @@ export type ZodParameterType =
   | ZodNumber
   | ZodBoolean
   | ZodDate
-  | ZodLiteral<string | number | boolean | Date>
+  | ZodLiteral<string | number | boolean>
   | ZodEnum<[string, ...string[]]>
   | ZodNativeEnum<{ [k: string]: string | number; [nu: number]: string }>
-  | ZodUnion<[ZodString, ...ZodString[]]>
-  | ZodUnion<[ZodNumber, ...ZodNumber[]]>
-  | ZodUnion<[ZodBoolean, ...ZodBoolean[]]>
-  | ZodUnion<[ZodDate, ...ZodDate[]]>;
+  | ZodUnion<[ZodParameterType]>;

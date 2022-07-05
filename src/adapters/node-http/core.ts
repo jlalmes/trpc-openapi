@@ -17,7 +17,7 @@ import {
 import { normalizePath } from '../../utils';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
-import { monkeyPatchVoidInputs } from './monkeyPatch';
+import { monkeyPatchParameterInputs, monkeyPatchVoidInputs } from './monkeyPatch';
 import { createMatchProcedureFn } from './procedures';
 
 export type CreateOpenApiNodeHttpHandlerOptions<
@@ -42,7 +42,10 @@ export const createOpenApiNodeHttpHandler = <
 
   // Validate router
   generateOpenApiDocument(router, { title: '-', version: '-', baseUrl: '-' });
+
+  // monkey patches
   monkeyPatchVoidInputs(router);
+  monkeyPatchParameterInputs(router);
 
   const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
   const matchProcedure = createMatchProcedureFn(router);

@@ -3,7 +3,17 @@ import { ProcedureRecord } from '@trpc/server';
 import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
 // eslint-disable-next-line import/no-unresolved
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/dist/declarations/src/rpc';
-import { ZodIssue } from 'zod';
+import {
+  ZodBoolean,
+  ZodDate,
+  ZodEnum,
+  ZodIssue,
+  ZodLiteral,
+  ZodNativeEnum,
+  ZodNumber,
+  ZodString,
+  ZodUnion,
+} from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
@@ -44,3 +54,16 @@ export type OpenApiErrorResponse = {
 };
 
 export type OpenApiResponse<D = any> = OpenApiSuccessResponse<D> | OpenApiErrorResponse;
+
+export type ZodParameterType =
+  | ZodString
+  | ZodNumber
+  | ZodBoolean
+  | ZodDate
+  | ZodLiteral<string | number | boolean | Date>
+  | ZodEnum<[string, ...string[]]>
+  | ZodNativeEnum<{ [k: string]: string | number; [nu: number]: string }>
+  | ZodUnion<[ZodString, ...ZodString[]]>
+  | ZodUnion<[ZodNumber, ...ZodNumber[]]>
+  | ZodUnion<[ZodBoolean, ...ZodBoolean[]]>
+  | ZodUnion<[ZodDate, ...ZodDate[]]>;

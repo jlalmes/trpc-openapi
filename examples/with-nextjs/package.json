@@ -13,7 +13,7 @@
     "jsonwebtoken": "^8.5.1",
     "next": "12.1.6",
     "react": "18.2.0",
-    "react-dom": "18.1.0",
+    "react-dom": "18.2.0",
     "swagger-ui-react": "^4.11.1",
     "uuid": "^8.3.2",
     "zod": "^3.0.0"

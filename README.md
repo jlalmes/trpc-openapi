@@ -98,18 +98,31 @@ Peer dependencies:
 For a procedure to support OpenAPI the following _must_ be true:
 
 - Both `input` and `output` parsers are present AND use `Zod` validation.
-- Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
+- Query `input` parsers extend `ZodObject<{ [string]: ZodParameterType }>` or `ZodVoid`.
 - Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
 - `meta.openapi.enabled` is set to `true`.
 - `meta.openapi.method` is `GET`, `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation.
 - `meta.openapi.path` is a string starting with `/`.
-- `meta.openapi.path` parameters exist in `input` parser as `ZodString`
+- `meta.openapi.path` parameters exist in `input` parser as `ZodParameterType`
 
 Please note:
 
 - Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
+
+### `ZodParameterType`
+
+The following `ZodType`s are supported.
+
+- ZodString
+- ZodNumber
+- ZodBoolean
+- ZodDate
+- ZodLiteral
+- ZodEnum
+- ZodNativeEnum
+- ZodUnion
 
 ## HTTP Requests
 

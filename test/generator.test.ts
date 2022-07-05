@@ -1,6 +1,5 @@
 import * as trpc from '@trpc/server';
 import { Subscription } from '@trpc/server';
-import e from 'express';
 import openAPISchemaValidator from 'openapi-schema-validator';
 import { z } from 'zod';
 
@@ -618,6 +617,23 @@ describe('generator', () => {
         baseUrl: 'http://localhost:3000/api',
       });
     }).toThrowError('[query.pathParameters] - Input parser must be a ZodObject');
+  });
+
+  test('with optional path parameters', () => {
+    const appRouter = trpc.router().query('pathParameters', {
+      meta: { openapi: { enabled: true, path: '/path-parameters/{name}', method: 'GET' } },
+      input: z.object({ name: z.string().optional() }),
+      output: z.object({ name: z.string() }),
+      resolve: () => ({ name: 'asdf' }),
+    });
+
+    expect(() => {
+      generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+    }).toThrowError('[query.pathParameters] - Path parameter: "name" must not be optional');
   });
 
   test('with missing path parameters', () => {
@@ -1574,6 +1590,63 @@ describe('generator', () => {
         "security": undefined,
         "summary": undefined,
         "tags": undefined,
+      }
+    `);
+  });
+
+  test('with optional query input parameter', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('optional', {
+      meta: { openapi: { enabled: true, path: '/optional', method: 'GET' } },
+      input: z.object({ payload: z.string().optional() }),
+      output: z.string().optional(),
+      resolve: ({ input }) => input.payload,
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/optional']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "payload",
+          "required": false,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/optional']!.get!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "type": "string",
+                },
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
       }
     `);
   });

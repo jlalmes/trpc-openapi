@@ -6,6 +6,7 @@ import zodToJsonSchema from 'zod-to-json-schema';
 import {
   instanceofZod,
   instanceofZodTypeLikeObject,
+  instanceofZodTypeLikeOptional,
   instanceofZodTypeLikeString,
   instanceofZodTypeLikeVoid,
 } from '../utils';
@@ -60,7 +61,9 @@ export const getParameterObjects = (
       return true;
     })
     .map((shapeKey) => {
-      const shapeSchema = shape[shapeKey]!;
+      let shapeSchema = shape[shapeKey]!;
+      const isRequired = !shapeSchema.isOptional();
+      const isPathParameter = pathParameters.includes(shapeKey);
 
       if (!instanceofZodTypeLikeString(shapeSchema)) {
         throw new TRPCError({
@@ -69,13 +72,22 @@ export const getParameterObjects = (
         });
       }
 
-      const isPathParameter = pathParameters.includes(shapeKey);
+      if (instanceofZodTypeLikeOptional(shapeSchema)) {
+        if (isPathParameter) {
+          throw new TRPCError({
+            message: `Path parameter: "${shapeKey}" must not be optional`,
+            code: 'INTERNAL_SERVER_ERROR',
+          });
+        }
+        shapeSchema = shapeSchema.unwrap();
+      }
+
       const { description, ...schema } = zodSchemaToOpenApiSchemaObject(shapeSchema);
 
       return {
         name: shapeKey,
         in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || !shapeSchema.isOptional(),
+        required: isPathParameter || isRequired,
         schema: schema,
         description: description,
       };

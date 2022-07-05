@@ -41,7 +41,7 @@
     "@trpc/client": "^9.23.0",
     "@types/co-body": "^6.1.0",
     "@types/express": "^4.17.13",
-    "@types/jest": "^27.5.2",
+    "@types/jest": "^28.1.4",
     "@types/lodash.clonedeep": "^4.5.7",
     "@types/node": "^17.0.38",
     "@types/node-fetch": "^2.6.1",

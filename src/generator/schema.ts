@@ -63,6 +63,7 @@ export const getParameterObjects = (
     .map((shapeKey) => {
       let shapeSchema = shape[shapeKey]!;
       const isRequired = !shapeSchema.isOptional();
+      const isPathParameter = pathParameters.includes(shapeKey);
 
       if (!instanceofZodTypeLikeString(shapeSchema)) {
         throw new TRPCError({
@@ -72,10 +73,15 @@ export const getParameterObjects = (
       }
 
       if (instanceofZodTypeLikeOptional(shapeSchema)) {
+        if (isPathParameter) {
+          throw new TRPCError({
+            message: `Path parameter: "${shapeKey}" must not be optional`,
+            code: 'INTERNAL_SERVER_ERROR',
+          });
+        }
         shapeSchema = shapeSchema.unwrap();
       }
 
-      const isPathParameter = pathParameters.includes(shapeKey);
       const { description, ...schema } = zodSchemaToOpenApiSchemaObject(shapeSchema);
 
       return {

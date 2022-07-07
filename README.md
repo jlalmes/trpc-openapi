@@ -115,14 +115,11 @@ Please note:
 
 The following `ZodType`s are supported ([full typing](src/types.ts)):
 
-- `ZodString`
-- `ZodNumber`
-- `ZodBoolean`
-- `ZodDate`
-- `ZodLiteral`
-- `ZodEnum`
-- `ZodNativeEnum`
-- `ZodUnion`
+- `string`
+- `number`
+- `boolean`
+- `Date`
+- `enum`
 
 ## HTTP Requests
 

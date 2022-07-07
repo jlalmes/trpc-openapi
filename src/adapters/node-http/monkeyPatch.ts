@@ -25,7 +25,7 @@ export const monkeyPatchVoidInputs = (appRouter: OpenApiRouter) => {
 
     const { inputParser } = getInputOutputParsers(query);
     if (instanceofZodTypeLikeVoid(inputParser)) {
-      (query as any).parseInputFn = zObject.parse.bind(zObject);
+      (query as any).parseInputFn = zObject.parseAsync.bind(zObject);
     }
   }
 
@@ -38,7 +38,7 @@ export const monkeyPatchVoidInputs = (appRouter: OpenApiRouter) => {
 
     const { inputParser } = getInputOutputParsers(mutation);
     if (instanceofZodTypeLikeVoid(inputParser)) {
-      (mutation as any).parseInputFn = zObject.parse.bind(zObject);
+      (mutation as any).parseInputFn = zObject.parseAsync.bind(zObject);
     }
   }
 };
@@ -92,7 +92,7 @@ export const monkeyPatchParameterInputs = (appRouter: OpenApiRouter) => {
           return;
         }
       });
-      (query as any).parseInputFn = zObject.parse.bind(zObject);
+      (query as any).parseInputFn = zObject.parseAsync.bind(zObject);
     }
   }
 
@@ -134,7 +134,7 @@ export const monkeyPatchParameterInputs = (appRouter: OpenApiRouter) => {
           return;
         }
       });
-      (mutation as any).parseInputFn = zObject.parse.bind(zObject);
+      (mutation as any).parseInputFn = zObject.parseAsync.bind(zObject);
     }
   }
 };

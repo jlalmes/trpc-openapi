@@ -6,9 +6,6 @@ import { z } from 'zod';
 import { OpenApiMeta, generateOpenApiDocument, openApiVersion } from '../src';
 
 // TODO: test for duplicate paths (using getPathRegExp)
-// TODO: ZodRecord
-// TODO: ZodLazy
-// TODO: ZodIntersection
 
 const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion });
 
@@ -285,95 +282,492 @@ describe('generator', () => {
   });
 
   test('with ZodParameterType query input', () => {
-    // ZodString
-    // ZodNumber
-    // ZodBoolean
-    // ZodDate
-    // ZodLiteral
-    // ZodEnum
-    // ZodNativeEnum
-    // ZodUnion
+    {
+      enum NativeStringEnum {
+        James = 'James',
+        jlalmes = 'jlalmes',
+      }
 
-    enum NativeStringEnum {
-      A = 'A',
-      B = 'B',
-      C = 'C',
-    }
-    enum NativeNumberEnum {
-      X,
-      Y,
-      Z,
-    }
+      const likeStringRouter = trpc
+        .router<any, OpenApiMeta>()
+        .query('string', {
+          meta: { openapi: { enabled: true, path: '/string', method: 'GET' } },
+          input: z.object({ name: z.string() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringOptional', {
+          meta: { openapi: { enabled: true, path: '/string-optional', method: 'GET' } },
+          input: z.object({ name: z.string().optional() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringDefault', {
+          meta: { openapi: { enabled: true, path: '/string-default', method: 'GET' } },
+          input: z.object({ name: z.string().default('James') }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringPreprocess', {
+          meta: { openapi: { enabled: true, path: '/string-preprocess', method: 'GET' } },
+          input: z.object({ name: z.preprocess((arg) => arg, z.string()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringLiteral', {
+          meta: { openapi: { enabled: true, path: '/string-literal', method: 'GET' } },
+          input: z.object({ name: z.literal('James') }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringEnum', {
+          meta: { openapi: { enabled: true, path: '/string-enum', method: 'GET' } },
+          input: z.object({ name: z.enum(['James', 'jlalmes']) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringNativeEnum', {
+          meta: { openapi: { enabled: true, path: '/string-native-enum', method: 'GET' } },
+          input: z.object({ name: z.nativeEnum(NativeStringEnum) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringUnion', {
+          meta: { openapi: { enabled: true, path: '/string-union', method: 'GET' } },
+          input: z.object({ name: z.union([z.literal('James'), z.literal('jlalmes')]) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringIntersection', {
+          meta: { openapi: { enabled: true, path: '/string-intersection', method: 'GET' } },
+          input: z.object({
+            name: z.intersection(
+              z.union([z.literal('a'), z.literal('b')]),
+              z.union([z.literal('b'), z.literal('c')]),
+            ),
+          }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('stringLazy', {
+          meta: { openapi: { enabled: true, path: '/string-lazy', method: 'GET' } },
+          input: z.object({ name: z.lazy(() => z.string()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        });
 
-    const appRouter = trpc
-      .router<any, OpenApiMeta>()
-      .query('ZodString', {
-        meta: { openapi: { enabled: true, path: '/zod-string', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodNumber', {
-        meta: { openapi: { enabled: true, path: '/zod-number', method: 'GET' } },
-        input: z.object({ name: z.number() }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodBoolean', {
-        meta: { openapi: { enabled: true, path: '/zod-boolean', method: 'GET' } },
-        input: z.object({ name: z.boolean() }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodDate', {
-        meta: { openapi: { enabled: true, path: '/zod-date', method: 'GET' } },
-        input: z.object({ name: z.date() }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodLiteral.String', {
-        meta: { openapi: { enabled: true, path: '/zod-literal-string', method: 'GET' } },
-        input: z.object({ name: z.literal('string') }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodLiteral.Number', {
-        meta: { openapi: { enabled: true, path: '/zod-literal-number', method: 'GET' } },
-        input: z.object({ name: z.literal(1234) }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodLiteral.Boolean', {
-        meta: { openapi: { enabled: true, path: '/zod-literal-boolean', method: 'GET' } },
-        input: z.object({ name: z.literal(true) }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodEnum', {
-        meta: { openapi: { enabled: true, path: '/zod-enum', method: 'GET' } },
-        input: z.object({ name: z.enum(['James', 'jlalmes']) }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodNativeEnum.String', {
-        meta: { openapi: { enabled: true, path: '/zod-native-enum-string', method: 'GET' } },
-        input: z.object({ name: z.nativeEnum(NativeStringEnum) }),
-        output: z.void(),
-        resolve: () => undefined,
-      })
-      .query('ZodNativeEnum.Number', {
-        meta: { openapi: { enabled: true, path: '/zod-native-enum-number', method: 'GET' } },
-        input: z.object({ name: z.nativeEnum(NativeNumberEnum) }),
-        output: z.void(),
-        resolve: () => undefined,
+      const openApiDocument = generateOpenApiDocument(likeStringRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
       });
-    // TODO:
-    // .query('ZodUnion.String', {
-    //   meta: { openapi: { enabled: true, path: '/zod-union-string', method: 'GET' } },
-    //   input: z.object({ name: z.union([z.string(), 'jlalmes']) }),
-    //   output: z.void(),
-    //   resolve: () => undefined,
-    // });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect((openApiDocument.paths['/string']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'string',
+      });
+      expect(
+        (openApiDocument.paths['/string-optional']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'string',
+      });
+      expect(
+        (openApiDocument.paths['/string-default']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'string',
+        default: 'James',
+      });
+      expect(
+        (openApiDocument.paths['/string-preprocess']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'string',
+      });
+      expect(
+        (openApiDocument.paths['/string-literal']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'string',
+        enum: ['James'],
+      });
+      expect((openApiDocument.paths['/string-enum']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'string',
+        enum: ['James', 'jlalmes'],
+      });
+      expect(
+        (openApiDocument.paths['/string-native-enum']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'string',
+        enum: ['James', 'jlalmes'],
+      });
+      expect((openApiDocument.paths['/string-union']!.get!.parameters![0]! as any).schema).toEqual({
+        anyOf: [
+          { type: 'string', enum: ['James'] },
+          { type: 'string', enum: ['jlalmes'] },
+        ],
+      });
+      expect(
+        (openApiDocument.paths['/string-intersection']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        allOf: [
+          {
+            anyOf: [
+              { type: 'string', enum: ['a'] },
+              { type: 'string', enum: ['b'] },
+            ],
+          },
+          {
+            anyOf: [
+              { type: 'string', enum: ['b'] },
+              { type: 'string', enum: ['c'] },
+            ],
+          },
+        ],
+      });
+      expect((openApiDocument.paths['/string-lazy']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'string',
+      });
+    }
+    {
+      enum NativeNumberEnum {
+        James,
+        jlalmes,
+      }
+
+      const numberLikeRouter = trpc
+        .router<any, OpenApiMeta>()
+        .query('number', {
+          meta: { openapi: { enabled: true, path: '/number', method: 'GET' } },
+          input: z.object({ name: z.number() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberOptional', {
+          meta: { openapi: { enabled: true, path: '/number-optional', method: 'GET' } },
+          input: z.object({ name: z.number().optional() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberDefault', {
+          meta: { openapi: { enabled: true, path: '/number-default', method: 'GET' } },
+          input: z.object({ name: z.number().default(123) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberPreprocess', {
+          meta: { openapi: { enabled: true, path: '/number-preprocess', method: 'GET' } },
+          input: z.object({ name: z.preprocess((arg) => arg, z.number()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberLiteral', {
+          meta: { openapi: { enabled: true, path: '/number-literal', method: 'GET' } },
+          input: z.object({ name: z.literal(123) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberNativeEnum', {
+          meta: { openapi: { enabled: true, path: '/number-native-enum', method: 'GET' } },
+          input: z.object({ name: z.nativeEnum(NativeNumberEnum) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberUnion', {
+          meta: { openapi: { enabled: true, path: '/number-union', method: 'GET' } },
+          input: z.object({ name: z.union([z.literal(123), z.literal(456)]) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberIntersection', {
+          meta: { openapi: { enabled: true, path: '/number-intersection', method: 'GET' } },
+          input: z.object({
+            name: z.intersection(
+              z.union([z.literal(1), z.literal(2)]),
+              z.union([z.literal(2), z.literal(3)]),
+            ),
+          }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('numberLazy', {
+          meta: { openapi: { enabled: true, path: '/number-lazy', method: 'GET' } },
+          input: z.object({ name: z.lazy(() => z.number()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        });
+
+      const openApiDocument = generateOpenApiDocument(numberLikeRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect((openApiDocument.paths['/number']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'number',
+      });
+      expect(
+        (openApiDocument.paths['/number-optional']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'number',
+      });
+      expect(
+        (openApiDocument.paths['/number-default']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'number',
+        default: 123,
+      });
+      expect(
+        (openApiDocument.paths['/number-preprocess']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'number',
+      });
+      expect(
+        (openApiDocument.paths['/number-literal']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'number',
+        enum: [123],
+      });
+      expect(
+        (openApiDocument.paths['/number-native-enum']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'number',
+        enum: [0, 1],
+      });
+      expect((openApiDocument.paths['/number-union']!.get!.parameters![0]! as any).schema).toEqual({
+        anyOf: [
+          { type: 'number', enum: [123] },
+          { type: 'number', enum: [456] },
+        ],
+      });
+      expect(
+        (openApiDocument.paths['/number-intersection']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        allOf: [
+          {
+            anyOf: [
+              { type: 'number', enum: [1] },
+              { type: 'number', enum: [2] },
+            ],
+          },
+          {
+            anyOf: [
+              { type: 'number', enum: [2] },
+              { type: 'number', enum: [3] },
+            ],
+          },
+        ],
+      });
+      expect((openApiDocument.paths['/number-lazy']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'number',
+      });
+    }
+    {
+      const booleanLikeRouter = trpc
+        .router<any, OpenApiMeta>()
+        .query('boolean', {
+          meta: { openapi: { enabled: true, path: '/boolean', method: 'GET' } },
+          input: z.object({ name: z.boolean() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanOptional', {
+          meta: { openapi: { enabled: true, path: '/boolean-optional', method: 'GET' } },
+          input: z.object({ name: z.boolean().optional() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanDefault', {
+          meta: { openapi: { enabled: true, path: '/boolean-default', method: 'GET' } },
+          input: z.object({ name: z.boolean().default(true) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanPreprocess', {
+          meta: { openapi: { enabled: true, path: '/boolean-preprocess', method: 'GET' } },
+          input: z.object({ name: z.preprocess((arg) => arg, z.boolean()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanLiteral', {
+          meta: { openapi: { enabled: true, path: '/boolean-literal', method: 'GET' } },
+          input: z.object({ name: z.literal(true) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanUnion', {
+          meta: { openapi: { enabled: true, path: '/boolean-union', method: 'GET' } },
+          input: z.object({ name: z.union([z.literal(true), z.literal(false)]) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanIntersection', {
+          meta: { openapi: { enabled: true, path: '/boolean-intersection', method: 'GET' } },
+          input: z.object({
+            name: z.intersection(z.union([z.literal(true), z.literal(false)]), z.literal(true)),
+          }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('booleanLazy', {
+          meta: { openapi: { enabled: true, path: '/boolean-lazy', method: 'GET' } },
+          input: z.object({ name: z.lazy(() => z.boolean()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        });
+
+      const openApiDocument = generateOpenApiDocument(booleanLikeRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect((openApiDocument.paths['/boolean']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'boolean',
+      });
+      expect(
+        (openApiDocument.paths['/boolean-optional']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'boolean',
+      });
+      expect(
+        (openApiDocument.paths['/boolean-default']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'boolean',
+        default: true,
+      });
+      expect(
+        (openApiDocument.paths['/boolean-preprocess']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'boolean',
+      });
+      expect(
+        (openApiDocument.paths['/boolean-literal']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'boolean',
+        enum: [true],
+      });
+      expect((openApiDocument.paths['/boolean-union']!.get!.parameters![0]! as any).schema).toEqual(
+        {
+          anyOf: [
+            { type: 'boolean', enum: [true] },
+            { type: 'boolean', enum: [false] },
+          ],
+        },
+      );
+      expect(
+        (openApiDocument.paths['/boolean-intersection']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        allOf: [
+          {
+            anyOf: [
+              { type: 'boolean', enum: [true] },
+              { type: 'boolean', enum: [false] },
+            ],
+          },
+          { type: 'boolean', enum: [true] },
+        ],
+      });
+      expect((openApiDocument.paths['/boolean-lazy']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'boolean',
+      });
+    }
+    {
+      const now = new Date();
+
+      const dateLikeRouter = trpc
+        .router<any, OpenApiMeta>()
+        .query('date', {
+          meta: { openapi: { enabled: true, path: '/date', method: 'GET' } },
+          input: z.object({ name: z.date() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('dateOptional', {
+          meta: { openapi: { enabled: true, path: '/date-optional', method: 'GET' } },
+          input: z.object({ name: z.date().optional() }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('dateDefault', {
+          meta: { openapi: { enabled: true, path: '/date-default', method: 'GET' } },
+          input: z.object({ name: z.date().default(now) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('datePreprocess', {
+          meta: { openapi: { enabled: true, path: '/date-preprocess', method: 'GET' } },
+          input: z.object({ name: z.preprocess((arg) => arg, z.date()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('dateUnion', {
+          meta: { openapi: { enabled: true, path: '/date-union', method: 'GET' } },
+          input: z.object({ name: z.union([z.date(), z.date()]) }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('dateIntersection', {
+          meta: { openapi: { enabled: true, path: '/date-intersection', method: 'GET' } },
+          input: z.object({
+            name: z.intersection(z.date(), z.date()),
+          }),
+          output: z.void(),
+          resolve: () => undefined,
+        })
+        .query('dateLazy', {
+          meta: { openapi: { enabled: true, path: '/date-lazy', method: 'GET' } },
+          input: z.object({ name: z.lazy(() => z.date()) }),
+          output: z.void(),
+          resolve: () => undefined,
+        });
+
+      const openApiDocument = generateOpenApiDocument(dateLikeRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect((openApiDocument.paths['/date']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'string',
+        format: 'date-time',
+      });
+      expect((openApiDocument.paths['/date-optional']!.get!.parameters![0]! as any).schema).toEqual(
+        {
+          type: 'string',
+          format: 'date-time',
+        },
+      );
+      expect((openApiDocument.paths['/date-default']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'string',
+        format: 'date-time',
+        default: now,
+      });
+      expect(
+        (openApiDocument.paths['/date-preprocess']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        type: 'string',
+        format: 'date-time',
+      });
+      expect((openApiDocument.paths['/date-union']!.get!.parameters![0]! as any).schema).toEqual({
+        anyOf: [
+          { type: 'string', format: 'date-time' },
+          { type: 'string', format: 'date-time' },
+        ],
+      });
+      expect(
+        (openApiDocument.paths['/date-intersection']!.get!.parameters![0]! as any).schema,
+      ).toEqual({
+        allOf: [
+          { type: 'string', format: 'date-time' },
+          { type: 'string', format: 'date-time' },
+        ],
+      });
+      expect((openApiDocument.paths['/date-lazy']!.get!.parameters![0]! as any).schema).toEqual({
+        type: 'string',
+        format: 'date-time',
+      });
+    }
   });
 
   test('with bad method', () => {
@@ -1224,6 +1618,38 @@ describe('generator', () => {
     `);
   });
 
+  test('with refine', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('refine', {
+      meta: { openapi: { enabled: true, path: '/refine', method: 'GET' } },
+      input: z.object({
+        age: z.string().refine((input) => parseInt(input) < 18, { message: 'Too young' }),
+      }),
+      output: z.number(),
+      resolve: ({ input }) => parseInt(input.age),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/refine']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "age",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+  });
+
   test('with preprocess', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('preprocess', {
       meta: { openapi: { enabled: true, path: '/preprocess', method: 'GET' } },
@@ -1315,7 +1741,7 @@ describe('generator', () => {
     ]);
   });
 
-  test('with schema descriptions', () => {
+  test('with schema description', () => {
     const appRouter = trpc
       .router<any, OpenApiMeta>()
       .mutation('createUser', {
@@ -1566,231 +1992,85 @@ describe('generator', () => {
     `);
   });
 
-  ///////
+  test('with record', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('record', {
+      meta: { openapi: { enabled: true, path: '/record', method: 'GET' } },
+      input: z.record(z.string()),
+      output: z.void(),
+      resolve: () => undefined,
+    });
 
-  test('with object enum value query input', () => {
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('enum', {
-        meta: { openapi: { enabled: true, path: '/enum', method: 'GET' } },
-        // @ts-expect-error - intentional number in enum
-        input: z.object({ name: z.enum([1234, 5678]) }),
-        output: z.null(),
-        resolve: () => null,
-      });
-
-      expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
-      }).toThrowError('[query.enum] - Input parser key: "name" must be ZodParameterType');
-    }
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('enum', {
-        meta: { openapi: { enabled: true, path: '/enum', method: 'GET' } },
-        input: z.object({ name: z.enum(['James', 'jlalmes']) }),
-        output: z.null(),
-        resolve: () => null,
-      });
-
-      const openApiDocument = generateOpenApiDocument(appRouter, {
+    expect(() => {
+      generateOpenApiDocument(appRouter, {
         title: 'tRPC OpenAPI',
         version: '1.0.0',
         baseUrl: 'http://localhost:3000/api',
       });
-
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/enum']!.get!.parameters).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "description": undefined,
-            "in": "query",
-            "name": "name",
-            "required": true,
-            "schema": Object {
-              "enum": Array [
-                "James",
-                "jlalmes",
-              ],
-              "type": "string",
-            },
-          },
-        ]
-      `);
-    }
+    }).toThrowError('[query.record] - Input parser must be a ZodObject');
   });
 
-  test('with object native-enum value query input', () => {
-    {
-      enum InvalidEnum {
-        James,
-        jlalmes,
-      }
+  test('with async transform', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('asyncTransform', {
+      meta: { openapi: { enabled: true, path: '/async-transform', method: 'GET' } },
+      input: z.object({
+        age: z.string().transform(async (input) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return parseInt(input);
+        }),
+      }),
+      output: z.object({ age: z.number() }),
+      resolve: ({ input }) => ({ age: input.age }),
+    });
 
-      const appRouter = trpc.router<any, OpenApiMeta>().query('nativeEnum', {
-        meta: { openapi: { enabled: true, path: '/nativeEnum', method: 'GET' } },
-        input: z.object({ name: z.nativeEnum(InvalidEnum) }),
-        output: z.null(),
-        resolve: () => null,
-      });
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
 
-      expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
-      }).toThrowError('[query.nativeEnum] - Input parser key: "name" must be ZodParameterType');
-    }
-    {
-      enum ValidEnum {
-        James = 'James',
-        jlalmes = 'jlalmes',
-      }
-
-      const appRouter = trpc.router<any, OpenApiMeta>().query('nativeEnum', {
-        meta: { openapi: { enabled: true, path: '/nativeEnum', method: 'GET' } },
-        input: z.object({ name: z.nativeEnum(ValidEnum) }),
-        output: z.null(),
-        resolve: () => null,
-      });
-
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/nativeEnum']!.get!.parameters).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "description": undefined,
-            "in": "query",
-            "name": "name",
-            "required": true,
-            "schema": Object {
-              "enum": Array [
-                "James",
-                "jlalmes",
-              ],
-              "type": "string",
-            },
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/async-transform']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "age",
+          "required": true,
+          "schema": Object {
+            "type": "string",
           },
-        ]
-      `);
-    }
+        },
+      ]
+    `);
   });
 
-  // FIXME: skipped
-  test.skip('with object literal value query input', () => {
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('numberLiteral', {
-        meta: { openapi: { enabled: true, path: '/number-literal', method: 'GET' } },
-        input: z.object({ num: z.literal(123) }),
-        output: z.object({ num: z.literal(123) }),
-        resolve: () => ({ num: 123 as const }),
-      });
+  test('with lazy', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('lazy', {
+      meta: { openapi: { enabled: true, path: '/lazy', method: 'GET' } },
+      input: z.object({ name: z.lazy(() => z.string()) }),
+      output: z.object({ name: z.string() }),
+      resolve: ({ input }) => ({ name: input.name }),
+    });
 
-      expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
-      }).toThrowError('[query.numberLiteral] - Input parser key: "num" must be ZodStringxxx');
-    }
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('stringLiteral', {
-        meta: { openapi: { enabled: true, path: '/string-literal', method: 'GET' } },
-        input: z.object({ str: z.literal('strlitval') }),
-        output: z.object({ str: z.literal('strlitval') }),
-        resolve: () => ({ str: 'strlitval' as const }),
-      });
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/string-literal']!.get!.parameters).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "description": undefined,
-            "in": "query",
-            "name": "str",
-            "required": true,
-            "schema": Object {
-              "enum": Array [
-                "strlitval",
-              ],
-              "type": "string",
-            },
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/lazy']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "name",
+          "required": true,
+          "schema": Object {
+            "type": "string",
           },
-        ]
-      `);
-    }
-  });
-
-  // FIXME: skipped
-  test.skip('with object union value query input', () => {
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
-        meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
-        input: z.object({ name: z.string().or(z.number()) }),
-        output: z.null(),
-        resolve: () => null,
-      });
-
-      expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
-      }).toThrowError('[query.union] - Input parser key: "name" must be ZodStringxxx');
-    }
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
-        meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
-        input: z.object({ name: z.string().or(z.literal('James')) }),
-        output: z.null(),
-        resolve: () => null,
-      });
-
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
-
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/union']!.get!.parameters).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "description": undefined,
-            "in": "query",
-            "name": "name",
-            "required": true,
-            "schema": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "enum": Array [
-                    "James",
-                  ],
-                  "type": "string",
-                },
-              ],
-            },
-          },
-        ]
-      `);
-    }
+        },
+      ]
+    `);
   });
 });

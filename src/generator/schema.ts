@@ -4,11 +4,11 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 import {
-  instanceofZod,
-  instanceofZodTypeLikeObject,
-  instanceofZodTypeLikeOptional,
-  instanceofZodTypeLikeString,
+  instanceofZodType,
+  instanceofZodTypeLikeParameter,
   instanceofZodTypeLikeVoid,
+  instanceofZodTypeObject,
+  instanceofZodTypeOptional,
 } from '../utils';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
@@ -20,7 +20,7 @@ export const getParameterObjects = (
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
 ): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!instanceofZod(schema)) {
+  if (!instanceofZodType(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
@@ -31,7 +31,7 @@ export const getParameterObjects = (
     return undefined;
   }
 
-  if (!instanceofZodTypeLikeObject(schema)) {
+  if (!instanceofZodTypeObject(schema)) {
     throw new TRPCError({
       message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',
@@ -65,14 +65,14 @@ export const getParameterObjects = (
       const isRequired = !shapeSchema.isOptional();
       const isPathParameter = pathParameters.includes(shapeKey);
 
-      if (!instanceofZodTypeLikeString(shapeSchema)) {
+      if (!instanceofZodTypeLikeParameter(shapeSchema)) {
         throw new TRPCError({
-          message: `Input parser key: "${shapeKey}" must be ZodString`,
+          message: `Input parser key: "${shapeKey}" must be ZodParameterType (Please see: https://github.com/jlalmes/trpc-openapi##zodparametertype)`,
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
 
-      if (instanceofZodTypeLikeOptional(shapeSchema)) {
+      if (instanceofZodTypeOptional(shapeSchema)) {
         if (isPathParameter) {
           throw new TRPCError({
             message: `Path parameter: "${shapeKey}" must not be optional`,
@@ -98,7 +98,7 @@ export const getRequestBodyObject = (
   schema: unknown,
   pathParameters: string[],
 ): OpenAPIV3.RequestBodyObject | undefined => {
-  if (!instanceofZod(schema)) {
+  if (!instanceofZodType(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
@@ -109,14 +109,14 @@ export const getRequestBodyObject = (
     return undefined;
   }
 
-  if (!instanceofZodTypeLikeObject(schema)) {
+  if (!instanceofZodTypeObject(schema)) {
     throw new TRPCError({
       message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  // remove path parameters
+  // dedupe path parameters
   const mask: Record<string, true> = {};
   pathParameters.forEach((pathParameter) => {
     mask[pathParameter] = true;
@@ -152,7 +152,7 @@ export const errorResponseObject = {
 };
 
 export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
-  if (!instanceofZod(schema)) {
+  if (!instanceofZodType(schema)) {
     throw new TRPCError({
       message: 'Output parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',

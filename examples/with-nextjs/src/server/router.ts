@@ -179,7 +179,7 @@ const usersRouter = createRouter()
       },
     },
     input: z.object({
-      id: z.string().uuid(),
+      id: z.number(),
     }),
     output: z.object({
       user: z.object({
@@ -189,7 +189,8 @@ const usersRouter = createRouter()
       }),
     }),
     resolve: ({ input }) => {
-      const user = database.users.find((_user) => _user.id === input.id);
+      const id = input.id.toString();
+      const user = database.users.find((_user) => _user.id === id);
 
       if (!user) {
         throw new TRPCError({

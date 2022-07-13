@@ -2,9 +2,9 @@
 
 <div align="center">
   <h1>trpc-openapi</h1>
-  <a href="https://www.npmjs.com/package/trpc-openapi"><img src="https://img.shields.io/npm/v/trpc-openapi.svg?style=flat&color=brightgreen" /></a>
-  <a href="https://github.com/prisma/prisma/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" /></a>
-  <a href="https://trpc.io/discord"><img src="https://img.shields.io/badge/chat-discord-blue.svg" /></a>
+  <a href="https://www.npmjs.com/package/trpc-openapi"><img src="https://img.shields.io/npm/v/trpc-openapi.svg?style=flat&color=brightgreen" target="_blank" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" /></a>
+  <a href="https://trpc.io/discord" target="_blank"><img src="https://img.shields.io/badge/chat-discord-blue.svg" /></a>
   <br />
   <hr />
 </div>

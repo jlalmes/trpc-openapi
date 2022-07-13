@@ -1,12 +1,15 @@
-<p align="left">
-  <a href="/">
-    <img src="./assets/trpc-openapi.svg" alt="tRPC-OpenAPI" height="100"/>
-  </a>
-</p>
+![trpc-openapi](assets/trpc-openapi-readme.png)
 
-# trpc-openapi
+<div align="center">
+  <h1>trpc-openapi</h1>
+  <a href="https://www.npmjs.com/package/trpc-openapi"><img src="https://img.shields.io/npm/v/trpc-openapi.svg?style=flat&color=brightgreen" /></a>
+  <a href="https://github.com/prisma/prisma/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" /></a>
+  <a href="https://trpc.io/discord"><img src="https://img.shields.io/badge/chat-discord-blue.svg" /></a>
+  <br />
+  <hr />
+</div>
 
-### **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
+## **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
 
 - Easy REST endpoints for your tRPC procedures.
 - Perfect for incremental adoption.

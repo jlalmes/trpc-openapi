@@ -113,7 +113,6 @@ Please note:
 - Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
-- Query `input`s are always a `string`. If you wish to support `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ## HTTP Requests
 
@@ -126,6 +125,8 @@ Mutation procedures accept input via the `request body` with a `application/json
 Both queries & mutations can accept a set of their inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 
 #### Query
+
+Query `input`s are always a `string`. If you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ```typescript
 // Router

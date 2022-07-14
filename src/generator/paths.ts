@@ -2,7 +2,8 @@ import { TRPCError } from '@trpc/server';
 import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
-import { getInputOutputParsers, getPathParameters, normalizePath } from '../utils';
+import { getPathParameters, normalizePath } from '../utils/path';
+import { forEachOpenApiProcedure, getInputOutputParsers } from '../utils/procedure';
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from './schema';
 
 export const getOpenApiPathsObject = (
@@ -11,14 +12,8 @@ export const getOpenApiPathsObject = (
 ): OpenAPIV3.PathsObject => {
   const { queries, mutations, subscriptions } = appRouter._def;
 
-  for (const queryPath of Object.keys(queries)) {
+  forEachOpenApiProcedure(queries, ({ path: queryPath, procedure, openapi }) => {
     try {
-      const query = queries[queryPath]!;
-      const { openapi } = query.meta ?? {};
-      if (!openapi?.enabled) {
-        continue;
-      }
-
       const { method, protect, summary, description, tag } = openapi;
       if (method !== 'GET' && method !== 'DELETE') {
         throw new TRPCError({
@@ -37,7 +32,7 @@ export const getOpenApiPathsObject = (
         });
       }
 
-      const { inputParser, outputParser } = getInputOutputParsers(query);
+      const { inputParser, outputParser } = getInputOutputParsers(procedure);
 
       pathsObject[path] = {
         ...pathsObject[path],
@@ -55,16 +50,10 @@ export const getOpenApiPathsObject = (
       error.message = `[query.${queryPath}] - ${error.message}`;
       throw error;
     }
-  }
+  });
 
-  for (const mutationPath of Object.keys(mutations)) {
+  forEachOpenApiProcedure(mutations, ({ path: mutationPath, procedure, openapi }) => {
     try {
-      const mutation = mutations[mutationPath]!;
-      const { openapi } = mutation.meta ?? {};
-      if (!openapi?.enabled) {
-        continue;
-      }
-
       const { method, protect, summary, description, tag } = openapi;
       if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
         throw new TRPCError({
@@ -83,7 +72,7 @@ export const getOpenApiPathsObject = (
         });
       }
 
-      const { inputParser, outputParser } = getInputOutputParsers(mutation);
+      const { inputParser, outputParser } = getInputOutputParsers(procedure);
 
       pathsObject[path] = {
         ...pathsObject[path],
@@ -102,16 +91,10 @@ export const getOpenApiPathsObject = (
       error.message = `[mutation.${mutationPath}] - ${error.message}`;
       throw error;
     }
-  }
+  });
 
-  for (const subscriptionPath of Object.keys(subscriptions)) {
+  forEachOpenApiProcedure(subscriptions, ({ path: subscriptionPath }) => {
     try {
-      const subscription = subscriptions[subscriptionPath]!;
-      const { openapi } = subscription.meta ?? {};
-      if (!openapi?.enabled) {
-        continue;
-      }
-
       throw new TRPCError({
         message: 'Subscriptions are not supported by OpenAPI v3',
         code: 'INTERNAL_SERVER_ERROR',
@@ -121,7 +104,7 @@ export const getOpenApiPathsObject = (
       error.message = `[subscription.${subscriptionPath}] - ${error.message}`;
       throw error;
     }
-  }
+  });
 
   return pathsObject;
 };

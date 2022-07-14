@@ -1,5 +1,6 @@
 import { OpenApiRouter } from '../../types';
-import { getPathRegExp, normalizePath } from '../../utils';
+import { getPathRegExp, normalizePath } from '../../utils/path';
+import { forEachOpenApiProcedure } from '../../utils/procedure';
 
 type Procedure = { type: 'query' | 'mutation'; path: string };
 
@@ -8,12 +9,7 @@ const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
 
   const { queries, mutations } = appRouter._def;
 
-  for (const queryPath of Object.keys(queries)) {
-    const query = queries[queryPath]!;
-    const { openapi } = query.meta ?? {};
-    if (!openapi?.enabled) {
-      continue;
-    }
+  forEachOpenApiProcedure(queries, ({ path: queryPath, procedure, openapi }) => {
     const { method } = openapi;
     if (!map.has(method)) {
       map.set(method, new Map());
@@ -24,14 +20,9 @@ const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
       type: 'query',
       path: queryPath,
     });
-  }
+  });
 
-  for (const mutationPath of Object.keys(mutations)) {
-    const mutation = mutations[mutationPath]!;
-    const { openapi } = mutation.meta ?? {};
-    if (!openapi?.enabled) {
-      continue;
-    }
+  forEachOpenApiProcedure(mutations, ({ path: mutationPath, procedure, openapi }) => {
     const { method } = openapi;
     if (!map.has(method)) {
       map.set(method, new Map());
@@ -42,7 +33,7 @@ const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
       type: 'mutation',
       path: mutationPath,
     });
-  }
+  });
 
   return map;
 };

@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
-import { normalizePath } from '../utils';
+import { normalizePath } from '../utils/path';
 import {
   CreateOpenApiNodeHttpHandlerOptions,
   createOpenApiNodeHttpHandler,

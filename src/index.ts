@@ -19,6 +19,7 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from './types';
+import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
 
 export {
   CreateOpenApiExpressMiddlewareOptions,
@@ -36,4 +37,6 @@ export {
   OpenApiResponse,
   OpenApiSuccessResponse,
   OpenApiErrorResponse,
+  ZodTypeLikeString,
+  ZodTypeLikeVoid,
 };

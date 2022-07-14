@@ -114,6 +114,8 @@ Please note:
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
 
+Query `input`s are always a `string`. If you wish to support `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
+
 ## HTTP Requests
 
 Query procedures accept input via URL `query parameters`.

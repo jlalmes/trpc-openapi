@@ -14,7 +14,7 @@ import {
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
-import { normalizePath } from '../../utils';
+import { normalizePath } from '../../utils/path';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
 import { monkeyPatchVoidInputs } from './monkeyPatch';

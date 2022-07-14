@@ -3,7 +3,7 @@ import { ProcedureRecord } from '@trpc/server';
 import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
 // eslint-disable-next-line import/no-unresolved
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/dist/declarations/src/rpc';
-import { ZodIssue } from 'zod';
+import { ZodIssue, z } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
@@ -19,13 +19,23 @@ export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
   };
 };
 
+export type OpenApiProcedureRecord<TMeta = Record<string, any>> = ProcedureRecord<
+  any,
+  any,
+  OpenApiMeta<TMeta> | undefined,
+  any,
+  any,
+  any,
+  any
+>;
+
 export type OpenApiRouter<TContext = any, TMeta = Record<string, any>> = Router<
   TContext,
   TContext,
   OpenApiMeta<TMeta>,
-  ProcedureRecord<any, any, OpenApiMeta<TMeta> | undefined>,
-  ProcedureRecord<any, any, OpenApiMeta<TMeta> | undefined>,
-  ProcedureRecord<any, any, TMeta | undefined>,
+  OpenApiProcedureRecord<TMeta>,
+  OpenApiProcedureRecord<TMeta>,
+  ProcedureRecord<any, any, TMeta | undefined, any, any, any, any>,
   DefaultErrorShape
 >;
 

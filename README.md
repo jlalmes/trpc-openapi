@@ -126,7 +126,7 @@ Both queries & mutations can accept a set of their inputs via URL path parameter
 
 #### Query
 
-Query inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
+Query inputs are always received as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ```typescript
 // Router

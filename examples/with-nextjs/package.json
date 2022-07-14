@@ -22,7 +22,7 @@
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "18.0.1",
     "@types/react": "18.0.14",
-    "@types/react-dom": "18.0.5",
+    "@types/react-dom": "18.0.6",
     "@types/swagger-ui-react": "^4.11.0",
     "@types/uuid": "^8.3.4",
     "eslint": "8.19.0",

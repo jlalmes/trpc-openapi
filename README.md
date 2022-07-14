@@ -113,8 +113,7 @@ Please note:
 - Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
-
-Query `input`s are always a `string`. If you wish to support `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
+- Query `input`s are always a `string`. If you wish to support `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ## HTTP Requests
 

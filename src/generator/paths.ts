@@ -37,6 +37,7 @@ export const getOpenApiPathsObject = (
       pathsObject[path] = {
         ...pathsObject[path],
         [httpMethod]: {
+          operationId: queryPath,
           summary,
           description,
           tags: tag ? [tag] : undefined,
@@ -77,6 +78,7 @@ export const getOpenApiPathsObject = (
       pathsObject[path] = {
         ...pathsObject[path],
         [httpMethod]: {
+          operationId: mutationPath,
           summary,
           description,
           tags: tag ? [tag] : undefined,

@@ -547,6 +547,7 @@ describe('generator', () => {
           "/users": Object {
             "get": Object {
               "description": undefined,
+              "operationId": "readUsers",
               "parameters": undefined,
               "responses": Object {
                 "200": Object {
@@ -601,6 +602,7 @@ describe('generator', () => {
             },
             "post": Object {
               "description": undefined,
+              "operationId": "createUser",
               "parameters": Array [],
               "requestBody": Object {
                 "content": Object {
@@ -673,6 +675,7 @@ describe('generator', () => {
           "/users/{id}": Object {
             "delete": Object {
               "description": undefined,
+              "operationId": "deleteUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -717,6 +720,7 @@ describe('generator', () => {
             },
             "get": Object {
               "description": undefined,
+              "operationId": "readUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -778,6 +782,7 @@ describe('generator', () => {
             },
             "patch": Object {
               "description": undefined,
+              "operationId": "updateUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -982,6 +987,7 @@ describe('generator', () => {
     expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
+        "operationId": "createUser",
         "parameters": Array [],
         "requestBody": Object {
           "content": Object {
@@ -1066,6 +1072,7 @@ describe('generator', () => {
     expect(openApiDocument.paths['/user']!.get!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
+        "operationId": "getUser",
         "parameters": Array [
           Object {
             "description": "User ID",

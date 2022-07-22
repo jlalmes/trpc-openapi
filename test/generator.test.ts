@@ -888,7 +888,7 @@ describe('generator', () => {
     expect(Object.keys(openApiDocument.paths).length).toBe(0);
   });
 
-  test('with summary, description & tag', () => {
+  test('with summary, description & single tag', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
         openapi: {
@@ -915,6 +915,35 @@ describe('generator', () => {
     expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary');
     expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description');
     expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tag']);
+  });
+
+  test('with summary, description & multiple tags', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
+      meta: {
+        openapi: {
+          enabled: true,
+          path: '/metadata/all',
+          method: 'GET',
+          summary: 'Short summary',
+          description: 'Verbose description',
+          tags: ['tagA', 'tagB'],
+        },
+      },
+      input: z.object({ name: z.string() }),
+      output: z.object({ name: z.string() }),
+      resolve: ({ input }) => ({ name: input.name }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary');
+    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description');
+    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tagA', 'tagB']);
   });
 
   test('with security', () => {

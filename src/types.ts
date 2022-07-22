@@ -15,7 +15,7 @@ export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
     summary?: string;
     description?: string;
     protect?: boolean;
-    tag?: string;
+    tags?: string[];
   };
 };
 

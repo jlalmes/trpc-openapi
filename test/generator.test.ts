@@ -897,7 +897,7 @@ describe('generator', () => {
           method: 'GET',
           summary: 'Short summary',
           description: 'Verbose description',
-          tag: 'tag',
+          tags: ['tag'],
         },
       },
       input: z.object({ name: z.string() }),

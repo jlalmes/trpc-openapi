@@ -140,7 +140,9 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
 });
 
 // Client
-const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /* 👈 */, { method: 'GET' });
+const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /* 👈 */, {
+  method: 'GET',
+});
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
@@ -243,7 +245,7 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
 ```typescript
 const res = await fetch('http://localhost:3000/say-hello', {
   method: 'GET',
-  headers: { 'Authorization': 'Bearer usr_123' }, /* 👈 */
+  headers: { Authorization: 'Bearer usr_123' } /* 👈 */,
 });
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
@@ -311,7 +313,7 @@ Please see [full typings here](src/types.ts).
 | `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.       | `false`  | `false`     |
 | `summary`     | `string`     | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined` |
 | `description` | `string`     | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
-| `tag`         | `string`     | A tag used for logical grouping of endpoints in the OpenAPI document.                                              | `false`  | `undefined` |
+| `tags`        | `string[]`   | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined` |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

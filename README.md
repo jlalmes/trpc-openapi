@@ -313,7 +313,6 @@ Please see [full typings here](src/types.ts).
 | `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.       | `false`  | `false`     |
 | `summary`     | `string`     | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined` |
 | `description` | `string`     | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
-| `tag`         | `string`     | A single tag used for logical grouping of endpoints in the OpenAPI document.                                       | `false`  | `undefined` |
 | `tags`        | `string[]`   | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined` |
 
 #### CreateOpenApiNodeHttpHandlerOptions

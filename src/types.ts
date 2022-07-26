@@ -15,7 +15,18 @@ export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
     summary?: string;
     description?: string;
     protect?: boolean;
-  } & ({ tag?: never; tags?: string[] } | { tag?: string; tags?: never });
+  } & (
+    | {
+        tags?: never;
+        /** @deprecated Use `tags` instead */
+        tag?: string;
+      }
+    | {
+        tags?: string[];
+        /** @deprecated Use `tags` instead */
+        tag?: never;
+      }
+  );
 };
 
 export type OpenApiProcedureRecord<TMeta = Record<string, any>> = ProcedureRecord<

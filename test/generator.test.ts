@@ -214,6 +214,71 @@ describe('generator', () => {
     }
   });
 
+  test('with effects input', () => {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('okInput', {
+        meta: { openapi: { enabled: true, path: '/ok-input', method: 'POST' } },
+        input: z
+          .object({
+            a: z.string(),
+            b: z.string(),
+          })
+          .refine((data) => data.a === data.b),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/ok-input']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "a": Object {
+                  "type": "string",
+                },
+                "b": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "a",
+                "b",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('badInput', {
+        meta: { openapi: { enabled: true, path: '/bad-input', method: 'POST' } },
+        input: z.string().refine((data) => data.length > 0),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, {
+          title: 'tRPC OpenAPI',
+          version: '1.0.0',
+          baseUrl: 'http://localhost:3000/api',
+        });
+      }).toThrowError('[mutation.badInput] - Input parser must be a ZodObject');
+    }
+  });
+
   test('with object non-string input', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {

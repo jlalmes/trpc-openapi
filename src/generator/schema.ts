@@ -5,6 +5,7 @@ import zodToJsonSchema from 'zod-to-json-schema';
 
 import {
   instanceofZodType,
+  instanceofZodTypeEffects,
   instanceofZodTypeLikeString,
   instanceofZodTypeLikeVoid,
   instanceofZodTypeObject,
@@ -16,20 +17,22 @@ const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaO
 };
 
 export const getParameterObjects = (
-  schema: unknown,
+  zodType: unknown,
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
 ): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!instanceofZodType(schema)) {
+  if (!instanceofZodType(zodType)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(zodType)) {
     return undefined;
   }
+
+  const schema = instanceofZodTypeEffects(zodType) ? zodType._def.schema : zodType;
 
   if (!instanceofZodTypeObject(schema)) {
     throw new TRPCError({
@@ -95,19 +98,21 @@ export const getParameterObjects = (
 };
 
 export const getRequestBodyObject = (
-  schema: unknown,
+  zodType: unknown,
   pathParameters: string[],
 ): OpenAPIV3.RequestBodyObject | undefined => {
-  if (!instanceofZodType(schema)) {
+  if (!instanceofZodType(zodType)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(zodType)) {
     return undefined;
   }
+
+  const schema = instanceofZodTypeEffects(zodType) ? zodType._def.schema : zodType;
 
   if (!instanceofZodTypeObject(schema)) {
     throw new TRPCError({

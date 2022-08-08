@@ -5,11 +5,11 @@ import zodToJsonSchema from 'zod-to-json-schema';
 
 import {
   instanceofZodType,
-  instanceofZodTypeEffects,
   instanceofZodTypeLikeString,
   instanceofZodTypeLikeVoid,
   instanceofZodTypeObject,
   instanceofZodTypeOptional,
+  unwrapZodType,
 } from '../utils/zod';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
@@ -17,22 +17,22 @@ const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaO
 };
 
 export const getParameterObjects = (
-  zodType: unknown,
+  _schema: unknown,
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
 ): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!instanceofZodType(zodType)) {
+  if (!instanceofZodType(_schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(zodType)) {
+  const schema = unwrapZodType(_schema);
+
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
     return undefined;
   }
-
-  const schema = instanceofZodTypeEffects(zodType) ? zodType._def.schema : zodType;
 
   if (!instanceofZodTypeObject(schema)) {
     throw new TRPCError({
@@ -98,21 +98,21 @@ export const getParameterObjects = (
 };
 
 export const getRequestBodyObject = (
-  zodType: unknown,
+  _schema: unknown,
   pathParameters: string[],
 ): OpenAPIV3.RequestBodyObject | undefined => {
-  if (!instanceofZodType(zodType)) {
+  if (!instanceofZodType(_schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(zodType)) {
+  const schema = unwrapZodType(_schema);
+
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
     return undefined;
   }
-
-  const schema = instanceofZodTypeEffects(zodType) ? zodType._def.schema : zodType;
 
   if (!instanceofZodTypeObject(schema)) {
     throw new TRPCError({

@@ -21,12 +21,6 @@ export const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject
   return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodObject);
 };
 
-export const instanceofZodTypeEffects = (
-  type: z.ZodTypeAny,
-): type is z.ZodEffects<z.ZodTypeAny> => {
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects);
-};
-
 export type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
 
 export const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid => {
@@ -35,6 +29,27 @@ export const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLi
     instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
     instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
   );
+};
+
+export const unwrapZodType = (type: z.ZodTypeAny): z.ZodTypeAny => {
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
+    return unwrapZodType(type.unwrap());
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
+    return unwrapZodType(type.removeDefault());
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
+    return unwrapZodType(type._def.getter());
+  }
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
+    if (type._def.effect.type === 'refinement') {
+      return unwrapZodType(type._def.schema);
+    }
+    if (type._def.effect.type === 'transform') {
+      return unwrapZodType(type._def.schema);
+    }
+  }
+  return type;
 };
 
 type NativeEnumType = {
@@ -54,15 +69,13 @@ export type ZodTypeLikeString =
   | z.ZodEnum<[string, ...string[]]>
   | z.ZodNativeEnum<NativeEnumType>;
 
-export const instanceofZodTypeLikeString = (type: z.ZodTypeAny): type is ZodTypeLikeString => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return instanceofZodTypeLikeString(type.unwrap());
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return instanceofZodTypeLikeString(type.removeDefault());
-  }
+export const instanceofZodTypeLikeString = (_type: z.ZodTypeAny): _type is ZodTypeLikeString => {
+  const type = unwrapZodType(_type);
+
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return true;
+    if (type._def.effect.type === 'preprocess') {
+      return true;
+    }
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
     return !type._def.options.some((option) => !instanceofZodTypeLikeString(option));
@@ -71,9 +84,6 @@ export const instanceofZodTypeLikeString = (type: z.ZodTypeAny): type is ZodType
     return (
       instanceofZodTypeLikeString(type._def.left) && instanceofZodTypeLikeString(type._def.right)
     );
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return instanceofZodTypeLikeString(type._def.getter());
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
     return typeof type._def.value === 'string';

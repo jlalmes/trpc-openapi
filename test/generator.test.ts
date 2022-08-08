@@ -2024,4 +2024,105 @@ describe('generator', () => {
       `);
     }
   });
+
+  test('with no refs', () => {
+    const schemas = { emails: z.array(z.string().email()) };
+
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('refs', {
+      meta: { openapi: { enabled: true, method: 'POST', path: '/refs' } },
+      input: z.object({ allowed: schemas.emails, blocked: schemas.emails }),
+      output: z.object({ allowed: schemas.emails, blocked: schemas.emails }),
+      resolve: () => ({ allowed: [], blocked: [] }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/refs']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "allowed": Object {
+                  "items": Object {
+                    "format": "email",
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "blocked": Object {
+                  "items": Object {
+                    "format": "email",
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+              },
+              "required": Array [
+                "allowed",
+                "blocked",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
+    expect(openApiDocument.paths['/refs']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "additionalProperties": false,
+                  "properties": Object {
+                    "allowed": Object {
+                      "items": Object {
+                        "format": "email",
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "blocked": Object {
+                      "items": Object {
+                        "format": "email",
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                  },
+                  "required": Array [
+                    "allowed",
+                    "blocked",
+                  ],
+                  "type": "object",
+                },
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+                "data",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+  });
 });

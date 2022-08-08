@@ -1169,23 +1169,65 @@ describe('generator', () => {
     `);
   });
 
-  test('with void query input', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().mutation('void', {
-      meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
-      input: z.void(),
-      output: z.void(),
-      resolve: () => undefined,
-    });
+  test('with void', () => {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().query('void', {
+        meta: { openapi: { enabled: true, path: '/void', method: 'GET' } },
+        input: z.void(),
+        output: z.void(),
+        resolve: () => undefined,
+      });
 
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
-    });
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
-    expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/void']!.get!.parameters).toMatchInlineSnapshot(`undefined`);
+      expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(`
+        Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "ok": Object {
+                    "enum": Array [
+                      true,
+                    ],
+                    "type": "boolean",
+                  },
+                },
+                "required": Array [
+                  "ok",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "description": "Successful response",
+        }
+      `);
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('void', {
+        meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
+        input: z.void(),
+        output: z.void(),
+        resolve: () => undefined,
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
+      expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1209,9 +1251,10 @@ describe('generator', () => {
         "description": "Successful response",
       }
     `);
+    }
   });
 
-  test('with null query input', () => {
+  test('with null', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('null', {
       meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
       input: z.void(),
@@ -1259,7 +1302,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with undefined query input', () => {
+  test('with undefined', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('undefined', {
       meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
       input: z.undefined(),
@@ -1306,7 +1349,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with nullish query input', () => {
+  test('with nullish', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('nullish', {
       meta: { openapi: { enabled: true, path: '/nullish', method: 'POST' } },
       input: z.void(),
@@ -1358,11 +1401,12 @@ describe('generator', () => {
     `);
   });
 
-  test('with never query input', () => {
+  test('with never', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('never', {
       meta: { openapi: { enabled: true, path: '/never', method: 'POST' } },
       input: z.never(),
-      output: z.void(),
+      output: z.never(),
+      // @ts-expect-error - cannot return never
       resolve: () => undefined,
     });
 
@@ -1374,9 +1418,37 @@ describe('generator', () => {
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
     expect(openApiDocument.paths['/never']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
+    expect(openApiDocument.paths['/never']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "not": Object {},
+                },
+                "ok": Object {
+                  "enum": Array [
+                    true,
+                  ],
+                  "type": "boolean",
+                },
+              },
+              "required": Array [
+                "ok",
+                "data",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
   });
 
-  test('with optional query input', () => {
+  test('with optional', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('optional', {
       meta: { openapi: { enabled: true, path: '/optional', method: 'GET' } },
       input: z.object({ payload: z.string().optional() }),
@@ -1433,7 +1505,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with default query input', () => {
+  test('with default', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('default', {
       meta: { openapi: { enabled: true, path: '/default', method: 'GET' } },
       input: z.object({ payload: z.string().default('James') }),
@@ -1492,7 +1564,88 @@ describe('generator', () => {
     `);
   });
 
-  test('with transform query input', () => {
+  test('with refine', () => {
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('refine', {
+        meta: { openapi: { enabled: true, path: '/refine', method: 'POST' } },
+        input: z.object({ a: z.string().refine((arg) => arg.length > 10) }),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
+        Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "a": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "a",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        }
+      `);
+    }
+    {
+      const appRouter = trpc.router<any, OpenApiMeta>().mutation('objectRefine', {
+        meta: { openapi: { enabled: true, path: '/object-refine', method: 'POST' } },
+        input: z.object({ a: z.string(), b: z.string() }).refine((data) => data.a === data.b),
+        output: z.null(),
+        resolve: () => null,
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
+      });
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
+        Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "a": Object {
+                    "type": "string",
+                  },
+                  "b": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "a",
+                  "b",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        }
+      `);
+    }
+  });
+
+  test('with transform', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('transform', {
       meta: { openapi: { enabled: true, path: '/transform', method: 'GET' } },
       input: z.object({ age: z.string().transform((input) => parseInt(input)) }),
@@ -1522,7 +1675,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with preprocess query input', () => {
+  test('with preprocess', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('preprocess', {
       meta: { openapi: { enabled: true, path: '/preprocess', method: 'GET' } },
       input: z.object({
@@ -1587,7 +1740,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with union query input', () => {
+  test('with union', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
         meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
@@ -1645,7 +1798,7 @@ describe('generator', () => {
     }
   });
 
-  test('with intersection query input', () => {
+  test('with intersection', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('intersection', {
       meta: { openapi: { enabled: true, path: '/intersection', method: 'GET' } },
       input: z.object({
@@ -1713,7 +1866,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with lazy query input', () => {
+  test('with lazy', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('lazy', {
       meta: { openapi: { enabled: true, path: '/lazy', method: 'GET' } },
       input: z.object({ payload: z.lazy(() => z.string()) }),
@@ -1743,7 +1896,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with literal query input', () => {
+  test('with literal', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('literal', {
       meta: { openapi: { enabled: true, path: '/literal', method: 'GET' } },
       input: z.object({ payload: z.literal('literal') }),
@@ -1776,7 +1929,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with enum query input', () => {
+  test('with enum', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('enum', {
       meta: { openapi: { enabled: true, path: '/enum', method: 'GET' } },
       input: z.object({ name: z.enum(['James', 'jlalmes']) }),
@@ -1810,7 +1963,7 @@ describe('generator', () => {
     `);
   });
 
-  test('with native-enum query input', () => {
+  test('with native-enum', () => {
     {
       enum InvalidEnum {
         James,

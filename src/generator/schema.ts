@@ -13,7 +13,7 @@ import {
 } from '../utils/zod';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
-  return zodToJsonSchema(zodSchema, { target: 'openApi3' });
+  return zodToJsonSchema(zodSchema, { target: 'openApi3', $refStrategy: 'none' });
 };
 
 export const getParameterObjects = (

@@ -11,7 +11,7 @@
   "dependencies": {
     "@trpc/server": "^9.26.2",
     "jsonwebtoken": "^8.5.1",
-    "next": "12.2.2",
+    "next": "12.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "swagger-ui-react": "^4.12.0",

@@ -548,7 +548,7 @@ describe('generator', () => {
             "get": Object {
               "description": undefined,
               "operationId": "readUsers",
-              "parameters": undefined,
+              "parameters": Array [],
               "responses": Object {
                 "200": Object {
                   "content": Object {
@@ -888,35 +888,6 @@ describe('generator', () => {
     expect(Object.keys(openApiDocument.paths).length).toBe(0);
   });
 
-  test('with summary, description & single tag', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
-      meta: {
-        openapi: {
-          enabled: true,
-          path: '/metadata/all',
-          method: 'GET',
-          summary: 'Short summary',
-          description: 'Verbose description',
-          tag: 'tag',
-        },
-      },
-      input: z.object({ name: z.string() }),
-      output: z.object({ name: z.string() }),
-      resolve: ({ input }) => ({ name: input.name }),
-    });
-
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
-    });
-
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary');
-    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description');
-    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tag']);
-  });
-
   test('with summary, description & multiple tags', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
@@ -944,6 +915,32 @@ describe('generator', () => {
     expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary');
     expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description');
     expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tagA', 'tagB']);
+  });
+
+  // @deprecated
+  test('with single tag', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
+      meta: {
+        openapi: {
+          enabled: true,
+          path: '/metadata/all',
+          method: 'GET',
+          tag: 'tag',
+        },
+      },
+      input: z.object({ name: z.string() }),
+      output: z.object({ name: z.string() }),
+      resolve: ({ input }) => ({ name: input.name }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tag']);
   });
 
   test('with security', () => {
@@ -1185,7 +1182,7 @@ describe('generator', () => {
       });
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/void']!.get!.parameters).toMatchInlineSnapshot(`undefined`);
+      expect(openApiDocument.paths['/void']!.get!.parameters).toEqual([]);
       expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -2123,6 +2120,55 @@ describe('generator', () => {
         },
         "description": "Successful response",
       }
+    `);
+  });
+
+  test('with custom header', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('echo', {
+      meta: {
+        openapi: {
+          enabled: true,
+          path: '/echo',
+          method: 'GET',
+          headers: [
+            {
+              name: 'x-custom-header',
+              required: true,
+              description: 'Some custom header',
+            },
+          ],
+        },
+      },
+      input: z.object({ id: z.string() }),
+      output: z.object({ id: z.string() }),
+      resolve: ({ input }) => ({ id: input.id }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/echo']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "Some custom header",
+          "in": "header",
+          "name": "x-custom-header",
+          "required": true,
+        },
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "id",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
     `);
   });
 });

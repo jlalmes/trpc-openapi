@@ -14,7 +14,7 @@ export const getOpenApiPathsObject = (
 
   forEachOpenApiProcedure(queries, ({ path: queryPath, procedure, openapi }) => {
     try {
-      const { method, protect, summary, description, tags, tag } = openapi;
+      const { method, protect, summary, description, tags, tag, headers } = openapi;
       if (method !== 'GET' && method !== 'DELETE') {
         throw new TRPCError({
           message: 'Query method must be GET or DELETE',
@@ -24,6 +24,7 @@ export const getOpenApiPathsObject = (
 
       const path = normalizePath(openapi.path);
       const pathParameters = getPathParameters(path);
+      const headerParameters = headers?.map((header) => ({ ...header, in: 'header' })) || [];
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
         throw new TRPCError({
@@ -42,7 +43,10 @@ export const getOpenApiPathsObject = (
           description,
           tags: tags ?? (tag ? [tag] : undefined),
           security: protect ? [{ Authorization: [] }] : undefined,
-          parameters: getParameterObjects(inputParser, pathParameters, 'all'),
+          parameters: [
+            ...headerParameters,
+            ...(getParameterObjects(inputParser, pathParameters, 'all') || []),
+          ],
           responses: getResponsesObject(outputParser),
         },
       };
@@ -55,7 +59,7 @@ export const getOpenApiPathsObject = (
 
   forEachOpenApiProcedure(mutations, ({ path: mutationPath, procedure, openapi }) => {
     try {
-      const { method, protect, summary, description, tags, tag } = openapi;
+      const { method, protect, summary, description, tags, tag, headers } = openapi;
       if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
         throw new TRPCError({
           message: 'Mutation method must be POST, PATCH or PUT',
@@ -65,6 +69,7 @@ export const getOpenApiPathsObject = (
 
       const path = normalizePath(openapi.path);
       const pathParameters = getPathParameters(path);
+      const headerParameters = headers?.map((header) => ({ ...header, in: 'header' })) || [];
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (pathsObject[path]?.[httpMethod]) {
         throw new TRPCError({
@@ -84,7 +89,10 @@ export const getOpenApiPathsObject = (
           tags: tags ?? (tag ? [tag] : undefined),
           security: protect ? [{ Authorization: [] }] : undefined,
           requestBody: getRequestBodyObject(inputParser, pathParameters),
-          parameters: getParameterObjects(inputParser, pathParameters, 'path'),
+          parameters: [
+            ...headerParameters,
+            ...(getParameterObjects(inputParser, pathParameters, 'path') || []),
+          ],
           responses: getResponsesObject(outputParser),
         },
       };

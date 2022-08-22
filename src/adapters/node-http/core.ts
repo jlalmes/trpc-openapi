@@ -7,6 +7,7 @@ import {
 import cloneDeep from 'lodash.clonedeep';
 import { ZodError } from 'zod';
 
+import { generateOpenApiDocument } from '../../generator';
 import {
   OpenApiErrorResponse,
   OpenApiMethod,
@@ -88,8 +89,6 @@ export const createOpenApiNodeHttpHandler = <
         });
       }
 
-      monkeyPatchProcedure(procedure.procedure);
-
       input = {
         ...(acceptsRequestBody(method) ? await getBody(req, maxBodySize) : getQuery(req, url)),
         ...pathInput,
@@ -97,6 +96,9 @@ export const createOpenApiNodeHttpHandler = <
 
       ctx = await createContext?.({ req, res });
       const caller = router.createCaller(ctx);
+
+      monkeyPatchProcedure(procedure.procedure);
+
       data = await caller[procedure.type](procedure.path, input);
 
       const meta = responseMeta?.({

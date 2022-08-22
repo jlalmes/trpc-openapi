@@ -273,38 +273,21 @@ describe('generator', () => {
   });
 
   test('with bad method', () => {
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().query('postQuery', {
-        meta: { openapi: { enabled: true, path: '/post-query', method: 'POST' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
-      });
+    const appRouter = trpc.router<any, OpenApiMeta>().query('badMethod', {
+      // @ts-expect-error - bad method
+      meta: { openapi: { enabled: true, path: '/bad-method', method: 'BAD_METHOD' } },
+      input: z.object({ name: z.string() }),
+      output: z.object({ name: z.string() }),
+      resolve: ({ input }) => ({ name: input.name }),
+    });
 
-      expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
-      }).toThrowError('[query.postQuery] - Query method must be GET or DELETE');
-    }
-    {
-      const appRouter = trpc.router<any, OpenApiMeta>().mutation('getMutation', {
-        meta: { openapi: { enabled: true, path: '/get-mutation', method: 'GET' } },
-        input: z.object({ name: z.string() }),
-        output: z.object({ name: z.string() }),
-        resolve: ({ input }) => ({ name: input.name }),
+    expect(() => {
+      generateOpenApiDocument(appRouter, {
+        title: 'tRPC OpenAPI',
+        version: '1.0.0',
+        baseUrl: 'http://localhost:3000/api',
       });
-
-      expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
-      }).toThrowError('[mutation.getMutation] - Mutation method must be POST, PATCH or PUT');
-    }
+    }).toThrowError('[query.badMethod] - Method must be GET, POST, PATCH, PUT or DELETE');
   });
 
   test('with duplicate routes', () => {
@@ -547,7 +530,7 @@ describe('generator', () => {
           "/users": Object {
             "get": Object {
               "description": undefined,
-              "operationId": "readUsers",
+              "operationId": "query.readUsers",
               "parameters": Array [],
               "responses": Object {
                 "200": Object {
@@ -602,7 +585,7 @@ describe('generator', () => {
             },
             "post": Object {
               "description": undefined,
-              "operationId": "createUser",
+              "operationId": "mutation.createUser",
               "parameters": Array [],
               "requestBody": Object {
                 "content": Object {
@@ -675,7 +658,7 @@ describe('generator', () => {
           "/users/{id}": Object {
             "delete": Object {
               "description": undefined,
-              "operationId": "deleteUser",
+              "operationId": "query.deleteUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -720,7 +703,7 @@ describe('generator', () => {
             },
             "get": Object {
               "description": undefined,
-              "operationId": "readUser",
+              "operationId": "query.readUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -782,7 +765,7 @@ describe('generator', () => {
             },
             "patch": Object {
               "description": undefined,
-              "operationId": "updateUser",
+              "operationId": "mutation.updateUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -1013,7 +996,7 @@ describe('generator', () => {
     expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
-        "operationId": "createUser",
+        "operationId": "mutation.createUser",
         "parameters": Array [],
         "requestBody": Object {
           "content": Object {
@@ -1098,7 +1081,7 @@ describe('generator', () => {
     expect(openApiDocument.paths['/user']!.get!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
-        "operationId": "getUser",
+        "operationId": "query.getUser",
         "parameters": Array [
           Object {
             "description": "User ID",
@@ -2159,6 +2142,39 @@ describe('generator', () => {
           "name": "x-custom-header",
           "required": true,
         },
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "id",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('with DELETE method mutation', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().mutation('deleteThing', {
+      meta: { openapi: { enabled: true, path: '/thing/delete', method: 'DELETE' } },
+      input: z.object({ id: z.string() }),
+      output: z.object({ id: z.string() }),
+      resolve: ({ input }) => ({ id: input.id }),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/thing/delete']!.delete!.requestBody).toMatchInlineSnapshot(
+      `undefined`,
+    );
+    expect(openApiDocument.paths['/thing/delete']!.delete!.parameters).toMatchInlineSnapshot(`
+      Array [
         Object {
           "description": undefined,
           "in": "query",

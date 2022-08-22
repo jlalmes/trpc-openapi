@@ -104,7 +104,7 @@ For a procedure to support OpenAPI the following _must_ be true:
 - Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
 - Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
 - `meta.openapi.enabled` is set to `true`.
-- `meta.openapi.method` is `GET`, `DELETE` for query OR `POST`, `PUT` or `PATCH` for mutation.
+- `meta.openapi.method` is `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.
 - `meta.openapi.path` is a string starting with `/`.
 - `meta.openapi.path` parameters exist in `input` parser as `ZodString`
 
@@ -116,17 +116,15 @@ Please note:
 
 ## HTTP Requests
 
-Query procedures accept input via URL `query parameters`.
-
-Mutation procedures accept input via the `request body` with a `application/json` content type.
+Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parameters`. Procedures with a `POST`/`PATCH`/`PUT` method will accept inputs via the `request body` with a `application/json` content type.
 
 ### Path parameters
 
-Both queries & mutations can accept a set of their inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
+A procedure can accept a set of inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 
-#### Query
+#### Query parameters
 
-Query (& path parameter) inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
+Query & path parameter inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ```typescript
 // Router
@@ -146,7 +144,7 @@ const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
-#### Mutation
+#### Request body
 
 ```typescript
 // Router
@@ -310,16 +308,16 @@ Please see [full typings here](src/generator/index.ts).
 
 Please see [full typings here](src/types.ts).
 
-| Property      | Type                | Description                                                                                                        | Required | Default     |
-| ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
-| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `true`   | `false`     |
-| `method`      | `HttpMethod`        | Method this endpoint is exposed on. Value can be `GET`/`DELETE` for queries OR `POST`/`PUT`/`PATCH` for mutations. | `true`   | `undefined` |
-| `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined` |
-| `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.       | `false`  | `false`     |
-| `summary`     | `string`            | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined` |
-| `description` | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
-| `tags`        | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined` |
-| `headers`     | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                       | `false`  | `undefined` |
+| Property      | Type                | Description                                                                                                  | Required | Default     |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
+| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `true`   | `false`     |
+| `method`      | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined` |
+| `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined` |
+| `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`     |
+| `summary`     | `string`            | A short summary of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
+| `description` | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                      | `false`  | `undefined` |
+| `tags`        | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                               | `false`  | `undefined` |
+| `headers`     | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                 | `false`  | `undefined` |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

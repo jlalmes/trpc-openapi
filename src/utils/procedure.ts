@@ -11,6 +11,23 @@ export const getInputOutputParsers = (procedure: Procedure<any, any, any, any, a
   };
 };
 
+export const mergeProcedureRecords = (
+  queries: OpenApiProcedureRecord,
+  mutations: OpenApiProcedureRecord,
+) => {
+  const prefix = (procedures: OpenApiProcedureRecord, type: string) => {
+    const next: OpenApiProcedureRecord = {};
+    Object.keys(procedures).forEach((path) => {
+      next[`${type}.${path}`] = procedures[path]!;
+    });
+    return next;
+  };
+  return {
+    ...prefix(queries, 'query'),
+    ...prefix(mutations, 'mutation'),
+  };
+};
+
 export const forEachOpenApiProcedure = (
   procedureRecord: OpenApiProcedureRecord,
   callback: (values: {

@@ -10,6 +10,7 @@ import { appRouter, createContext } from './router';
 
 const app = express();
 
+// Setup CORS
 app.use(cors());
 
 // Handle incoming tRPC requests

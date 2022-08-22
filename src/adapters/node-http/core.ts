@@ -7,7 +7,6 @@ import {
 import cloneDeep from 'lodash.clonedeep';
 import { ZodError } from 'zod';
 
-import { generateOpenApiDocument } from '../../generator';
 import {
   OpenApiErrorResponse,
   OpenApiMethod,
@@ -19,8 +18,8 @@ import { acceptsRequestBody } from '../../utils/method';
 import { normalizePath } from '../../utils/path';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
-import { monkeyPatchVoidInputs } from './monkeyPatch';
-import { createMatchProcedureFn } from './procedures';
+import { monkeyPatchProcedure } from './monkeyPatch';
+import { createGetRouterProcedure } from './procedures';
 
 export type CreateOpenApiNodeHttpHandlerOptions<
   TRouter extends OpenApiRouter,
@@ -42,12 +41,8 @@ export const createOpenApiNodeHttpHandler = <
 ) => {
   const router = cloneDeep(opts.router);
 
-  // Validate router
-  generateOpenApiDocument(router, { title: '-', version: '-', baseUrl: '-' });
-  monkeyPatchVoidInputs(router);
-
   const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
-  const matchProcedure = createMatchProcedureFn(router);
+  const getRouterProcedure = createGetRouterProcedure(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
     const sendResponse = (
@@ -69,7 +64,7 @@ export const createOpenApiNodeHttpHandler = <
     const reqUrl = req.url!;
     const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
     const path = normalizePath(url.pathname);
-    const { procedure, pathInput } = matchProcedure(method, path) ?? {};
+    const { procedure, pathInput } = getRouterProcedure(method, path) ?? {};
 
     let input: any;
     let ctx: any;
@@ -93,10 +88,13 @@ export const createOpenApiNodeHttpHandler = <
         });
       }
 
+      monkeyPatchProcedure(procedure.procedure);
+
       input = {
         ...(acceptsRequestBody(method) ? await getBody(req, maxBodySize) : getQuery(req, url)),
         ...pathInput,
       };
+
       ctx = await createContext?.({ req, res });
       const caller = router.createCaller(ctx);
       data = await caller[procedure.type](procedure.path, input);

@@ -1,11 +1,15 @@
-import { OpenApiRouter } from '../../types';
+import { OpenApiMethod, OpenApiProcedure, OpenApiRouter } from '../../types';
 import { getPathRegExp, normalizePath } from '../../utils/path';
 import { forEachOpenApiProcedure } from '../../utils/procedure';
 
-type Procedure = { type: 'query' | 'mutation'; path: string };
+type RouterProcedure = {
+  type: 'query' | 'mutation';
+  path: string;
+  procedure: OpenApiProcedure;
+};
 
-const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
-  const map = new Map<string, Map<RegExp, Procedure>>();
+const getMethodRegExpProcedureMap = (appRouter: OpenApiRouter) => {
+  const map = new Map<OpenApiMethod, Map<RegExp, RouterProcedure>>();
 
   const { queries, mutations } = appRouter._def;
 
@@ -19,6 +23,7 @@ const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
     map.get(method)!.set(pathRegExp, {
       type: 'query',
       path: queryPath,
+      procedure,
     });
   });
 
@@ -32,30 +37,29 @@ const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
     map.get(method)!.set(pathRegExp, {
       type: 'mutation',
       path: mutationPath,
+      procedure,
     });
   });
 
   return map;
 };
 
-export const createMatchProcedureFn = (router: OpenApiRouter) => {
-  const methodPathProcedureMap = getMethodPathProcedureMap(router);
+export const createGetRouterProcedure = (router: OpenApiRouter) => {
+  const methodRegExpProcedureMap = getMethodRegExpProcedureMap(router);
 
-  return (method: string, path: string) => {
-    const pathProcedureMap = methodPathProcedureMap.get(method);
-    if (!pathProcedureMap) {
+  return (method: OpenApiMethod, path: string) => {
+    const regExpProcedureMap = methodRegExpProcedureMap.get(method);
+    if (!regExpProcedureMap) {
       return undefined;
     }
 
-    const matchingRegExp = Array.from(pathProcedureMap.keys()).find((regExp) => {
-      return regExp.test(path);
-    });
-    if (!matchingRegExp) {
+    const regExp = Array.from(regExpProcedureMap.keys()).find((re) => re.test(path));
+    if (!regExp) {
       return undefined;
     }
 
-    const procedure = pathProcedureMap.get(matchingRegExp)!;
-    const pathInput = matchingRegExp.exec(path)?.groups ?? {};
+    const procedure = regExpProcedureMap.get(regExp)!;
+    const pathInput = regExp.exec(path)?.groups ?? {};
 
     return { procedure, pathInput };
   };

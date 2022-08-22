@@ -10,10 +10,12 @@ import { ZodError } from 'zod';
 import { generateOpenApiDocument } from '../../generator';
 import {
   OpenApiErrorResponse,
+  OpenApiMethod,
   OpenApiResponse,
   OpenApiRouter,
   OpenApiSuccessResponse,
 } from '../../types';
+import { acceptsRequestBody } from '../../utils/method';
 import { normalizePath } from '../../utils/path';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
@@ -63,7 +65,7 @@ export const createOpenApiNodeHttpHandler = <
       res.end(JSON.stringify(body));
     };
 
-    const method = req.method!;
+    const method = req.method! as OpenApiMethod & 'HEAD';
     const reqUrl = req.url!;
     const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
     const path = normalizePath(url.pathname);
@@ -92,7 +94,7 @@ export const createOpenApiNodeHttpHandler = <
       }
 
       input = {
-        ...(procedure.type === 'query' ? getQuery(req, url) : await getBody(req, maxBodySize)),
+        ...(acceptsRequestBody(method) ? await getBody(req, maxBodySize) : getQuery(req, url)),
         ...pathInput,
       };
       ctx = await createContext?.({ req, res });

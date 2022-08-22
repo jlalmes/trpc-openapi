@@ -126,7 +126,7 @@ Both queries & mutations can accept a set of their inputs via URL path parameter
 
 #### Query
 
-Query inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
+Query (& path parameter) inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ```typescript
 // Router
@@ -168,6 +168,10 @@ const res = await fetch('http://localhost:3000/say-hello/James' /* 👈 */, {
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
+### Custom headers
+
+Any custom headers can be specified in the `meta.openapi.headers` array, these headers will not be validated on request. Please consider using [Authorization](#authorization) for first-class OpenAPI auth/security support.
+
 ## HTTP Responses
 
 Inspired by [Slack Web API](https://api.slack.com/web).
@@ -181,7 +185,7 @@ Please see [error status codes here](src/adapters/node-http/errors.ts).
 ```jsonc
 {
   "ok": true,
-  "data": "This is good" /* tRPC procedure output */
+  "data": "This is good" /* Output from tRPC procedure */
 }
 ```
 
@@ -189,8 +193,9 @@ Please see [error status codes here](src/adapters/node-http/errors.ts).
 {
   "ok": false,
   "error": {
-    "message": "This is bad" /* Message from TRPCError */,
-    "code": "BAD_REQUEST" /* Code from TRPCError */
+    "message": "This is bad", /* Message from TRPCError */,
+    "code": "BAD_REQUEST", /* Code from TRPCError */
+    "issues": [...] /* (optional) ZodIssues[] from TRPCError */
   }
 }
 ```
@@ -305,15 +310,16 @@ Please see [full typings here](src/generator/index.ts).
 
 Please see [full typings here](src/types.ts).
 
-| Property      | Type         | Description                                                                                                        | Required | Default     |
-| ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
-| `enabled`     | `boolean`    | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `true`   | `false`     |
-| `method`      | `HttpMethod` | Method this endpoint is exposed on. Value can be `GET`/`DELETE` for queries OR `POST`/`PUT`/`PATCH` for mutations. | `true`   | `undefined` |
-| `path`        | `string`     | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined` |
-| `protect`     | `boolean`    | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.       | `false`  | `false`     |
-| `summary`     | `string`     | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined` |
-| `description` | `string`     | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
-| `tags`        | `string[]`   | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined` |
+| Property      | Type                | Description                                                                                                        | Required | Default     |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
+| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `true`   | `false`     |
+| `method`      | `HttpMethod`        | Method this endpoint is exposed on. Value can be `GET`/`DELETE` for queries OR `POST`/`PUT`/`PATCH` for mutations. | `true`   | `undefined` |
+| `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined` |
+| `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document.       | `false`  | `false`     |
+| `summary`     | `string`            | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined` |
+| `description` | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
+| `tags`        | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined` |
+| `headers`     | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                       | `false`  | `undefined` |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

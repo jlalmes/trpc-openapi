@@ -3,6 +3,7 @@ import { ProcedureRecord } from '@trpc/server';
 import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
 // eslint-disable-next-line import/no-unresolved
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/dist/declarations/src/rpc';
+import { OpenAPIV3 } from 'openapi-types';
 import { ZodIssue, z } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -15,6 +16,7 @@ export type OpenApiMeta<TMeta = Record<string, any>> = TMeta & {
     summary?: string;
     description?: string;
     protect?: boolean;
+    headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
   } & (
     | {
         tags?: never;

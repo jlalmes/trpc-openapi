@@ -42,6 +42,11 @@ export const createOpenApiNodeHttpHandler = <
 ) => {
   const router = cloneDeep(opts.router);
 
+  // Validate router
+  if (process.env.NODE_ENV !== 'production') {
+    generateOpenApiDocument(router, { title: '', version: '', baseUrl: '' });
+  }
+
   const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
   const getRouterProcedure = createGetRouterProcedure(router);
 

@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
+import { acceptsRequestBody } from '../utils/method';
 import { getPathParameters, normalizePath } from '../utils/path';
 import {
   forEachOpenApiProcedure,
@@ -9,13 +10,6 @@ import {
   mergeProcedureRecords,
 } from '../utils/procedure';
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from './schema';
-
-const acceptsRequestBody = (httpMethod: OpenAPIV3.HttpMethods) => {
-  if (httpMethod === 'get' || httpMethod === 'delete') {
-    return false;
-  }
-  return true;
-};
 
 export const getOpenApiPathsObject = (
   appRouter: OpenApiRouter,
@@ -69,7 +63,7 @@ export const getOpenApiPathsObject = (
           description,
           tags: tags ?? (tag ? [tag] : undefined),
           security: protect ? [{ Authorization: [] }] : undefined,
-          ...(acceptsRequestBody(httpMethod)
+          ...(acceptsRequestBody(method)
             ? {
                 requestBody: getRequestBodyObject(inputParser, pathParameters),
                 parameters: [

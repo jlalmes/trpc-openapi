@@ -351,7 +351,7 @@ const postsProtectedRouter = createProtectedRouter()
       return { post };
     },
   })
-  .query('deletePostById', {
+  .mutation('deletePostById', {
     meta: {
       openapi: {
         enabled: true,

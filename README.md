@@ -170,7 +170,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 
 ### Custom headers
 
-Any custom headers can be specified in the `meta.openapi.headers` array, these will not be validated on request. Please consider using [Authorization](#authorization) for first-class OpenAPI auth/security support.
+Any custom headers can be specified in the `meta.openapi.headers` array, these headers will not be validated on request. Please consider using [Authorization](#authorization) for first-class OpenAPI auth/security support.
 
 ## HTTP Responses
 

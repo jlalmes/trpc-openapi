@@ -31,22 +31,25 @@ export const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLi
   );
 };
 
-export const unwrapZodType = (type: z.ZodTypeAny): z.ZodTypeAny => {
+export const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional)) {
-    return unwrapZodType(type.unwrap());
+    return unwrapZodType(type.unwrap(), unwrapPreprocess);
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)) {
-    return unwrapZodType(type.removeDefault());
+    return unwrapZodType(type.removeDefault(), unwrapPreprocess);
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodType(type._def.getter());
+    return unwrapZodType(type._def.getter(), unwrapPreprocess);
   }
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
     if (type._def.effect.type === 'refinement') {
-      return unwrapZodType(type._def.schema);
+      return unwrapZodType(type._def.schema, unwrapPreprocess);
     }
     if (type._def.effect.type === 'transform') {
-      return unwrapZodType(type._def.schema);
+      return unwrapZodType(type._def.schema, unwrapPreprocess);
+    }
+    if (unwrapPreprocess && type._def.effect.type === 'preprocess') {
+      return unwrapZodType(type._def.schema, unwrapPreprocess);
     }
   }
   return type;
@@ -70,7 +73,7 @@ export type ZodTypeLikeString =
   | z.ZodNativeEnum<NativeEnumType>;
 
 export const instanceofZodTypeLikeString = (_type: z.ZodTypeAny): _type is ZodTypeLikeString => {
-  const type = unwrapZodType(_type);
+  const type = unwrapZodType(_type, false);
 
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
     if (type._def.effect.type === 'preprocess') {

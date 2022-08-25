@@ -28,7 +28,7 @@ export const getParameterObjects = (
     });
   }
 
-  const schema = unwrapZodType(_schema);
+  const schema = unwrapZodType(_schema, true);
 
   if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
     return undefined;
@@ -108,7 +108,7 @@ export const getRequestBodyObject = (
     });
   }
 
-  const schema = unwrapZodType(_schema);
+  const schema = unwrapZodType(_schema, true);
 
   if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
     return undefined;

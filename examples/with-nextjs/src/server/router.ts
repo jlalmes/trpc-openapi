@@ -57,7 +57,6 @@ const authRouter = createRouter()
   .mutation('register', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'POST',
         path: '/auth/register',
         tags: ['auth'],
@@ -101,7 +100,6 @@ const authRouter = createRouter()
   .mutation('login', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'POST',
         path: '/auth/login',
         tags: ['auth'],
@@ -141,7 +139,6 @@ const usersRouter = createRouter()
   .query('getUsers', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/users',
         tags: ['users'],
@@ -171,7 +168,6 @@ const usersRouter = createRouter()
   .query('getUserById', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/users/{id}',
         tags: ['users'],
@@ -206,7 +202,6 @@ const postsRouter = createRouter()
   .query('getPosts', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/posts',
         tags: ['posts'],
@@ -240,7 +235,6 @@ const postsRouter = createRouter()
   .query('getPostById', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/posts/{id}',
         tags: ['posts'],
@@ -275,7 +269,6 @@ const postsProtectedRouter = createProtectedRouter()
   .mutation('createPost', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'POST',
         path: '/posts',
         tags: ['posts'],
@@ -308,7 +301,6 @@ const postsProtectedRouter = createProtectedRouter()
   .mutation('updatePostById', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'PUT',
         path: '/posts/{id}',
         tags: ['posts'],
@@ -351,7 +343,6 @@ const postsProtectedRouter = createProtectedRouter()
   .mutation('deletePostById', {
     meta: {
       openapi: {
-        enabled: true,
         method: 'DELETE',
         path: '/posts/{id}',
         tags: ['posts'],

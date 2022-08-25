@@ -12,7 +12,7 @@ type TRPCMeta = Record<string, any>;
 
 export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
   openapi?: {
-    enabled: boolean;
+    enabled?: boolean;
     method: OpenApiMethod;
     path: `/${string}`;
     summary?: string;

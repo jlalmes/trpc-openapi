@@ -42,7 +42,7 @@ import * as trpc from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
 export const appRouter = trpc.router<any, OpenApiMeta>().query('sayHello', {
-  meta: { /* 👉 */ openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+  meta: { /* 👉 */ openapi: { method: 'GET', path: '/say-hello' } },
   input: z.object({ name: z.string() }),
   output: z.object({ greeting: z.string() }),
   resolve: ({ input }) => {
@@ -103,7 +103,6 @@ For a procedure to support OpenAPI the following _must_ be true:
 - Both `input` and `output` parsers are present AND use `Zod` validation.
 - Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
 - Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
-- `meta.openapi.enabled` is set to `true`.
 - `meta.openapi.method` is `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.
 - `meta.openapi.path` is a string starting with `/`.
 - `meta.openapi.path` parameters exist in `input` parser as `ZodString`
@@ -120,7 +119,7 @@ Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parame
 
 ### Path parameters
 
-A procedure can accept a set of inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
+A procedure can accept a set of inputs via URL path parameters. You can add a path parameter to any OpenAPI procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 
 #### Query parameters
 
@@ -129,7 +128,7 @@ Query & path parameter inputs are always accepted as a `string`, if you wish to 
 ```typescript
 // Router
 export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
+  meta: { openapi: { method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
   input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
   output: z.object({ greeting: z.string() }),
   resolve: ({ input }) => {
@@ -149,7 +148,7 @@ const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' }
 ```typescript
 // Router
 export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello', {
-  meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello/{name}' /* 👈 */ } },
+  meta: { openapi: { method: 'POST', path: '/say-hello/{name}' /* 👈 */ } },
   input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
   output: z.object({ greeting: z.string() }),
   resolve: ({ input }) => {
@@ -231,7 +230,7 @@ export const createContext = async ({ req, res }): Promise<Context> => {
 };
 
 export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello', protect: true /* 👈 */ } },
+  meta: { openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } },
   input: z.void(), // no input expected
   output: z.object({ greeting: z.string() }),
   resolve: ({ input, ctx }) => {
@@ -310,7 +309,7 @@ Please see [full typings here](src/types.ts).
 
 | Property      | Type                | Description                                                                                                  | Required | Default     |
 | ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
-| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `true`   | `false`     |
+| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`   | `true`     |
 | `method`      | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined` |
 | `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined` |
 | `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`     |

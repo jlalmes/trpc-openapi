@@ -116,7 +116,7 @@ describe('generator', () => {
   test('with missing input', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('noInput', {
-        meta: { openapi: { enabled: true, path: '/no-input', method: 'GET' } },
+        meta: { openapi: { path: '/no-input', method: 'GET' } },
         output: z.object({ name: z.string() }),
         resolve: () => ({ name: 'jlalmes' }),
       });
@@ -131,7 +131,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('noInput', {
-        meta: { openapi: { enabled: true, path: '/no-input', method: 'POST' } },
+        meta: { openapi: { path: '/no-input', method: 'POST' } },
         output: z.object({ name: z.string() }),
         resolve: () => ({ name: 'jlalmes' }),
       });
@@ -149,7 +149,7 @@ describe('generator', () => {
   test('with missing output', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('noOutput', {
-        meta: { openapi: { enabled: true, path: '/no-output', method: 'GET' } },
+        meta: { openapi: { path: '/no-output', method: 'GET' } },
         input: z.object({ name: z.string() }),
         resolve: ({ input }) => ({ name: input.name }),
       });
@@ -164,7 +164,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('noOutput', {
-        meta: { openapi: { enabled: true, path: '/no-output', method: 'POST' } },
+        meta: { openapi: { path: '/no-output', method: 'POST' } },
         input: z.object({ name: z.string() }),
         resolve: ({ input }) => ({ name: input.name }),
       });
@@ -182,7 +182,7 @@ describe('generator', () => {
   test('with non-object input', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
-        meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
+        meta: { openapi: { path: '/bad-input', method: 'GET' } },
         input: z.string(),
         output: z.null(),
         resolve: () => null,
@@ -198,7 +198,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('badInput', {
-        meta: { openapi: { enabled: true, path: '/bad-input', method: 'POST' } },
+        meta: { openapi: { path: '/bad-input', method: 'POST' } },
         input: z.string(),
         output: z.null(),
         resolve: () => null,
@@ -217,7 +217,7 @@ describe('generator', () => {
   test('with object non-string input', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('badInput', {
-        meta: { openapi: { enabled: true, path: '/bad-input', method: 'GET' } },
+        meta: { openapi: { path: '/bad-input', method: 'GET' } },
         input: z.object({ age: z.number() }),
         output: z.object({ name: z.string() }),
         resolve: () => ({ name: 'jlalmes' }),
@@ -233,7 +233,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('okInput', {
-        meta: { openapi: { enabled: true, path: '/ok-input', method: 'POST' } },
+        meta: { openapi: { path: '/ok-input', method: 'POST' } },
         input: z.object({ age: z.number().min(0).max(122) }), // RIP Jeanne Calment
         output: z.object({ name: z.string() }),
         resolve: () => ({ name: 'jlalmes' }),
@@ -275,7 +275,7 @@ describe('generator', () => {
   test('with bad method', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('badMethod', {
       // @ts-expect-error - bad method
-      meta: { openapi: { enabled: true, path: '/bad-method', method: 'BAD_METHOD' } },
+      meta: { openapi: { path: '/bad-method', method: 'BAD_METHOD' } },
       input: z.object({ name: z.string() }),
       output: z.object({ name: z.string() }),
       resolve: ({ input }) => ({ name: input.name }),
@@ -295,13 +295,13 @@ describe('generator', () => {
       const appRouter = trpc
         .router<any, OpenApiMeta>()
         .query('procedure1', {
-          meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+          meta: { openapi: { path: '/procedure', method: 'GET' } },
           input: z.object({ name: z.string() }),
           output: z.object({ name: z.string() }),
           resolve: ({ input }) => ({ name: input.name }),
         })
         .query('procedure2', {
-          meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+          meta: { openapi: { path: '/procedure', method: 'GET' } },
           input: z.object({ name: z.string() }),
           output: z.object({ name: z.string() }),
           resolve: ({ input }) => ({ name: input.name }),
@@ -319,13 +319,13 @@ describe('generator', () => {
       const appRouter = trpc
         .router<any, OpenApiMeta>()
         .query('procedure1', {
-          meta: { openapi: { enabled: true, path: '/procedure/', method: 'GET' } },
+          meta: { openapi: { path: '/procedure/', method: 'GET' } },
           input: z.object({ name: z.string() }),
           output: z.object({ name: z.string() }),
           resolve: ({ input }) => ({ name: input.name }),
         })
         .query('procedure2', {
-          meta: { openapi: { enabled: true, path: '/procedure', method: 'GET' } },
+          meta: { openapi: { path: '/procedure', method: 'GET' } },
           input: z.object({ name: z.string() }),
           output: z.object({ name: z.string() }),
           resolve: ({ input }) => ({ name: input.name }),
@@ -343,7 +343,7 @@ describe('generator', () => {
 
   test('with unsupported subscription', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().subscription('currentName', {
-      meta: { openapi: { enabled: true, path: '/current-name', method: 'PATCH' } },
+      meta: { openapi: { path: '/current-name', method: 'PATCH' } },
       input: z.object({ name: z.string() }),
       resolve: ({ input }) =>
         new Subscription((emit) => {
@@ -363,7 +363,7 @@ describe('generator', () => {
 
   test('with void and path parameters', () => {
     const appRouter = trpc.router().query('pathParameters', {
-      meta: { openapi: { enabled: true, path: '/path-parameters/{name}', method: 'GET' } },
+      meta: { openapi: { path: '/path-parameters/{name}', method: 'GET' } },
       input: z.void(),
       output: z.object({ name: z.string() }),
       resolve: () => ({ name: 'asdf' }),
@@ -380,7 +380,7 @@ describe('generator', () => {
 
   test('with optional path parameters', () => {
     const appRouter = trpc.router().query('pathParameters', {
-      meta: { openapi: { enabled: true, path: '/path-parameters/{name}', method: 'GET' } },
+      meta: { openapi: { path: '/path-parameters/{name}', method: 'GET' } },
       input: z.object({ name: z.string().optional() }),
       output: z.object({ name: z.string() }),
       resolve: () => ({ name: 'asdf' }),
@@ -397,7 +397,7 @@ describe('generator', () => {
 
   test('with missing path parameters', () => {
     const appRouter = trpc.router().query('pathParameters', {
-      meta: { openapi: { enabled: true, path: '/path-parameters/{name}', method: 'GET' } },
+      meta: { openapi: { path: '/path-parameters/{name}', method: 'GET' } },
       input: z.object({}),
       output: z.object({ name: z.string() }),
       resolve: () => ({ name: 'asdf' }),
@@ -416,31 +416,31 @@ describe('generator', () => {
     const appRouter = trpc
       .router<any, OpenApiMeta>()
       .mutation('createUser', {
-        meta: { openapi: { enabled: true, path: '/users', method: 'POST' } },
+        meta: { openapi: { path: '/users', method: 'POST' } },
         input: z.object({ name: z.string() }),
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: 'user-id', name: input.name }),
       })
       .query('readUsers', {
-        meta: { openapi: { enabled: true, path: '/users', method: 'GET' } },
+        meta: { openapi: { path: '/users', method: 'GET' } },
         input: z.void(),
         output: z.array(z.object({ id: z.string(), name: z.string() })),
         resolve: () => [{ id: 'user-id', name: 'name' }],
       })
       .query('readUser', {
-        meta: { openapi: { enabled: true, path: '/users/{id}', method: 'GET' } },
+        meta: { openapi: { path: '/users/{id}', method: 'GET' } },
         input: z.object({ id: z.string() }),
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: input.id, name: 'name' }),
       })
       .mutation('updateUser', {
-        meta: { openapi: { enabled: true, path: '/users/{id}', method: 'PATCH' } },
+        meta: { openapi: { path: '/users/{id}', method: 'PATCH' } },
         input: z.object({ id: z.string(), name: z.string().optional() }),
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: input.id, name: input.name ?? 'name' }),
       })
       .query('deleteUser', {
-        meta: { openapi: { enabled: true, path: '/users/{id}', method: 'DELETE' } },
+        meta: { openapi: { path: '/users/{id}', method: 'DELETE' } },
         input: z.object({ id: z.string() }),
         output: z.void(),
         resolve: () => undefined,
@@ -875,7 +875,6 @@ describe('generator', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
         openapi: {
-          enabled: true,
           path: '/metadata/all',
           method: 'GET',
           summary: 'Short summary',
@@ -905,7 +904,6 @@ describe('generator', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
       meta: {
         openapi: {
-          enabled: true,
           path: '/metadata/all',
           method: 'GET',
           tag: 'tag',
@@ -930,7 +928,6 @@ describe('generator', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('protectedEndpoint', {
       meta: {
         openapi: {
-          enabled: true,
           path: '/secure/endpoint',
           method: 'POST',
           protect: true,
@@ -957,7 +954,7 @@ describe('generator', () => {
     const appRouter = trpc
       .router<any, OpenApiMeta>()
       .mutation('createUser', {
-        meta: { openapi: { enabled: true, path: '/user', method: 'POST' } },
+        meta: { openapi: { path: '/user', method: 'POST' } },
         input: z
           .object({
             id: z.string().uuid().describe('User ID'),
@@ -973,7 +970,7 @@ describe('generator', () => {
         resolve: ({ input }) => ({ id: input.id, name: 'James' }),
       })
       .query('getUser', {
-        meta: { openapi: { enabled: true, path: '/user', method: 'GET' } },
+        meta: { openapi: { path: '/user', method: 'GET' } },
         input: z
           .object({ id: z.string().uuid().describe('User ID') })
           .describe('Query string inputs'),
@@ -1152,7 +1149,7 @@ describe('generator', () => {
   test('with void', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('void', {
-        meta: { openapi: { enabled: true, path: '/void', method: 'GET' } },
+        meta: { openapi: { path: '/void', method: 'GET' } },
         input: z.void(),
         output: z.void(),
         resolve: () => undefined,
@@ -1193,7 +1190,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('void', {
-        meta: { openapi: { enabled: true, path: '/void', method: 'POST' } },
+        meta: { openapi: { path: '/void', method: 'POST' } },
         input: z.void(),
         output: z.void(),
         resolve: () => undefined,
@@ -1236,7 +1233,7 @@ describe('generator', () => {
 
   test('with null', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('null', {
-      meta: { openapi: { enabled: true, path: '/null', method: 'POST' } },
+      meta: { openapi: { path: '/null', method: 'POST' } },
       input: z.void(),
       output: z.null(),
       resolve: () => null,
@@ -1284,7 +1281,7 @@ describe('generator', () => {
 
   test('with undefined', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('undefined', {
-      meta: { openapi: { enabled: true, path: '/undefined', method: 'POST' } },
+      meta: { openapi: { path: '/undefined', method: 'POST' } },
       input: z.undefined(),
       output: z.undefined(),
       resolve: () => undefined,
@@ -1331,7 +1328,7 @@ describe('generator', () => {
 
   test('with nullish', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('nullish', {
-      meta: { openapi: { enabled: true, path: '/nullish', method: 'POST' } },
+      meta: { openapi: { path: '/nullish', method: 'POST' } },
       input: z.void(),
       output: z.string().nullish(),
       resolve: () => null,
@@ -1383,7 +1380,7 @@ describe('generator', () => {
 
   test('with never', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('never', {
-      meta: { openapi: { enabled: true, path: '/never', method: 'POST' } },
+      meta: { openapi: { path: '/never', method: 'POST' } },
       input: z.never(),
       output: z.never(),
       // @ts-expect-error - cannot return never
@@ -1430,7 +1427,7 @@ describe('generator', () => {
 
   test('with optional', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('optional', {
-      meta: { openapi: { enabled: true, path: '/optional', method: 'GET' } },
+      meta: { openapi: { path: '/optional', method: 'GET' } },
       input: z.object({ payload: z.string().optional() }),
       output: z.string().optional(),
       resolve: ({ input }) => input.payload,
@@ -1487,7 +1484,7 @@ describe('generator', () => {
 
   test('with default', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('default', {
-      meta: { openapi: { enabled: true, path: '/default', method: 'GET' } },
+      meta: { openapi: { path: '/default', method: 'GET' } },
       input: z.object({ payload: z.string().default('James') }),
       output: z.string().default('James'),
       resolve: ({ input }) => input.payload,
@@ -1547,7 +1544,7 @@ describe('generator', () => {
   test('with refine', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('refine', {
-        meta: { openapi: { enabled: true, path: '/refine', method: 'POST' } },
+        meta: { openapi: { path: '/refine', method: 'POST' } },
         input: z.object({ a: z.string().refine((arg) => arg.length > 10) }),
         output: z.null(),
         resolve: () => null,
@@ -1584,7 +1581,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().mutation('objectRefine', {
-        meta: { openapi: { enabled: true, path: '/object-refine', method: 'POST' } },
+        meta: { openapi: { path: '/object-refine', method: 'POST' } },
         input: z.object({ a: z.string(), b: z.string() }).refine((data) => data.a === data.b),
         output: z.null(),
         resolve: () => null,
@@ -1627,7 +1624,7 @@ describe('generator', () => {
 
   test('with transform', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('transform', {
-      meta: { openapi: { enabled: true, path: '/transform', method: 'GET' } },
+      meta: { openapi: { path: '/transform', method: 'GET' } },
       input: z.object({ age: z.string().transform((input) => parseInt(input)) }),
       output: z.object({ age: z.number() }),
       resolve: ({ input }) => ({ age: input.age }),
@@ -1657,7 +1654,7 @@ describe('generator', () => {
 
   test('with preprocess', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('preprocess', {
-      meta: { openapi: { enabled: true, path: '/preprocess', method: 'GET' } },
+      meta: { openapi: { path: '/preprocess', method: 'GET' } },
       input: z.object({
         payload: z.preprocess((arg) => {
           if (typeof arg === 'string') {
@@ -1723,7 +1720,7 @@ describe('generator', () => {
   test('with union', () => {
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
-        meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
+        meta: { openapi: { path: '/union', method: 'GET' } },
         input: z.object({ payload: z.string().or(z.number()) }),
         output: z.null(),
         resolve: () => null,
@@ -1739,7 +1736,7 @@ describe('generator', () => {
     }
     {
       const appRouter = trpc.router<any, OpenApiMeta>().query('union', {
-        meta: { openapi: { enabled: true, path: '/union', method: 'GET' } },
+        meta: { openapi: { path: '/union', method: 'GET' } },
         input: z.object({ payload: z.string().or(z.literal('James')) }),
         output: z.null(),
         resolve: () => null,
@@ -1780,7 +1777,7 @@ describe('generator', () => {
 
   test('with intersection', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('intersection', {
-      meta: { openapi: { enabled: true, path: '/intersection', method: 'GET' } },
+      meta: { openapi: { path: '/intersection', method: 'GET' } },
       input: z.object({
         payload: z.intersection(
           z.union([z.literal('a'), z.literal('b')]),
@@ -1848,7 +1845,7 @@ describe('generator', () => {
 
   test('with lazy', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('lazy', {
-      meta: { openapi: { enabled: true, path: '/lazy', method: 'GET' } },
+      meta: { openapi: { path: '/lazy', method: 'GET' } },
       input: z.object({ payload: z.lazy(() => z.string()) }),
       output: z.null(),
       resolve: () => null,
@@ -1878,7 +1875,7 @@ describe('generator', () => {
 
   test('with literal', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('literal', {
-      meta: { openapi: { enabled: true, path: '/literal', method: 'GET' } },
+      meta: { openapi: { path: '/literal', method: 'GET' } },
       input: z.object({ payload: z.literal('literal') }),
       output: z.null(),
       resolve: () => null,
@@ -1911,7 +1908,7 @@ describe('generator', () => {
 
   test('with enum', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('enum', {
-      meta: { openapi: { enabled: true, path: '/enum', method: 'GET' } },
+      meta: { openapi: { path: '/enum', method: 'GET' } },
       input: z.object({ name: z.enum(['James', 'jlalmes']) }),
       output: z.null(),
       resolve: () => null,
@@ -1951,7 +1948,7 @@ describe('generator', () => {
       }
 
       const appRouter = trpc.router<any, OpenApiMeta>().query('nativeEnum', {
-        meta: { openapi: { enabled: true, path: '/nativeEnum', method: 'GET' } },
+        meta: { openapi: { path: '/nativeEnum', method: 'GET' } },
         input: z.object({ name: z.nativeEnum(InvalidEnum) }),
         output: z.null(),
         resolve: () => null,
@@ -1972,7 +1969,7 @@ describe('generator', () => {
       }
 
       const appRouter = trpc.router<any, OpenApiMeta>().query('nativeEnum', {
-        meta: { openapi: { enabled: true, path: '/nativeEnum', method: 'GET' } },
+        meta: { openapi: { path: '/nativeEnum', method: 'GET' } },
         input: z.object({ name: z.nativeEnum(ValidEnum) }),
         output: z.null(),
         resolve: () => null,
@@ -2009,7 +2006,7 @@ describe('generator', () => {
     const schemas = { emails: z.array(z.string().email()) };
 
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('refs', {
-      meta: { openapi: { enabled: true, method: 'POST', path: '/refs' } },
+      meta: { openapi: { method: 'POST', path: '/refs' } },
       input: z.object({ allowed: schemas.emails, blocked: schemas.emails }),
       output: z.object({ allowed: schemas.emails, blocked: schemas.emails }),
       resolve: () => ({ allowed: [], blocked: [] }),
@@ -2110,7 +2107,6 @@ describe('generator', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('echo', {
       meta: {
         openapi: {
-          enabled: true,
           path: '/echo',
           method: 'GET',
           headers: [
@@ -2157,7 +2153,7 @@ describe('generator', () => {
 
   test('with DELETE method mutation', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('deleteThing', {
-      meta: { openapi: { enabled: true, path: '/thing/delete', method: 'DELETE' } },
+      meta: { openapi: { path: '/thing/delete', method: 'DELETE' } },
       input: z.object({ id: z.string() }),
       output: z.object({ id: z.string() }),
       resolve: ({ input }) => ({ id: input.id }),
@@ -2192,13 +2188,13 @@ describe('generator', () => {
     const appRouter = trpc
       .router<any, OpenApiMeta>()
       .query('topLevelPreprocess', {
-        meta: { openapi: { enabled: true, path: '/top-level-preprocess', method: 'GET' } },
+        meta: { openapi: { path: '/top-level-preprocess', method: 'GET' } },
         input: z.preprocess((arg) => arg, z.object({ id: z.string() })),
         output: z.preprocess((arg) => arg, z.object({ id: z.string() })),
         resolve: ({ input }) => ({ id: input.id }),
       })
       .mutation('topLevelPreprocess', {
-        meta: { openapi: { enabled: true, path: '/top-level-preprocess', method: 'POST' } },
+        meta: { openapi: { path: '/top-level-preprocess', method: 'POST' } },
         input: z.preprocess((arg) => arg, z.object({ id: z.string() })),
         output: z.preprocess((arg) => arg, z.object({ id: z.string() })),
         resolve: ({ input }) => ({ id: input.id }),

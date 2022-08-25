@@ -58,13 +58,13 @@ describe('express adapter', () => {
       router: trpc
         .router<any, OpenApiMeta>()
         .query('sayHello', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+          meta: { openapi: { method: 'GET', path: '/say-hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .mutation('sayHello', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
+          meta: { openapi: { method: 'POST', path: '/say-hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
@@ -110,7 +110,7 @@ describe('express adapter', () => {
     const { url, close } = createExpressServerWithRouter(
       {
         router: trpc.router<any, OpenApiMeta>().query('echo', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+          meta: { openapi: { method: 'GET', path: '/echo' } },
           input: z.object({ payload: z.string() }),
           output: z.object({ payload: z.string(), context: z.undefined() }),
           resolve: ({ input }) => ({ payload: input.payload }),

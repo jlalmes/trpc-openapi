@@ -75,7 +75,7 @@ describe('standalone adapter', () => {
   // Please note: validating router does not happen in `production`.
   test('with invalid router', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('invalidRoute', {
-      meta: { openapi: { enabled: true, path: '/invalid-route', method: 'GET' } },
+      meta: { openapi: { path: '/invalid-route', method: 'GET' } },
       input: z.void(),
       resolve: ({ input }) => input,
     });
@@ -88,7 +88,7 @@ describe('standalone adapter', () => {
   test('with not found path', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('ping', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+        meta: { openapi: { method: 'POST', path: '/ping' } },
         input: z.void(),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
@@ -111,7 +111,7 @@ describe('standalone adapter', () => {
   test('with not found method', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('ping', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+        meta: { openapi: { method: 'POST', path: '/ping' } },
         input: z.void(),
         output: z.literal('pong'),
         resolve: () => 'pong' as const,
@@ -134,7 +134,7 @@ describe('standalone adapter', () => {
   test('with missing content-type header', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
@@ -175,7 +175,7 @@ describe('standalone adapter', () => {
   test('with invalid content-type', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
@@ -217,7 +217,7 @@ describe('standalone adapter', () => {
   test('with missing input', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('echo', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+        meta: { openapi: { method: 'GET', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
@@ -255,7 +255,7 @@ describe('standalone adapter', () => {
   test('with wrong input type', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
@@ -297,7 +297,7 @@ describe('standalone adapter', () => {
   test('with bad output', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         // @ts-expect-error - fail on purpose
@@ -331,7 +331,7 @@ describe('standalone adapter', () => {
   test('with thrown error', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: () => {
@@ -371,13 +371,13 @@ describe('standalone adapter', () => {
       router: trpc
         .router<any, OpenApiMeta>()
         .query('sayHello', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+          meta: { openapi: { method: 'GET', path: '/say-hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .mutation('sayHello', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
+          meta: { openapi: { method: 'POST', path: '/say-hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
@@ -424,13 +424,13 @@ describe('standalone adapter', () => {
       router: trpc
         .router<any, OpenApiMeta>()
         .query('pingQuery', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+          meta: { openapi: { method: 'GET', path: '/ping' } },
           input: z.void(),
           output: z.literal('pong'),
           resolve: () => 'pong' as const,
         })
         .mutation('pingMutation', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/ping' } },
+          meta: { openapi: { method: 'POST', path: '/ping' } },
           input: z.void(),
           output: z.literal('pong'),
           resolve: () => 'pong' as const,
@@ -471,7 +471,7 @@ describe('standalone adapter', () => {
   test('with void output', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('ping', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/ping' } },
+        meta: { openapi: { method: 'GET', path: '/ping' } },
         input: z.object({ ping: z.string() }),
         output: z.void(),
         resolve: () => undefined,
@@ -496,7 +496,7 @@ describe('standalone adapter', () => {
 
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<Context, OpenApiMeta>().query('echo', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+        meta: { openapi: { method: 'GET', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string(), context: z.object({ id: z.number() }) }),
         resolve: ({ input, ctx }) => ({ payload: input.payload, context: ctx }),
@@ -525,7 +525,7 @@ describe('standalone adapter', () => {
   test('with responseMeta', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('echo', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+        meta: { openapi: { method: 'GET', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string(), context: z.undefined() }),
         resolve: ({ input, ctx }) => ({ payload: input.payload, context: ctx }),
@@ -558,7 +558,7 @@ describe('standalone adapter', () => {
         .router<any, OpenApiMeta>()
         .transformer(superjson)
         .query('echo', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+          meta: { openapi: { method: 'GET', path: '/echo' } },
           input: z.object({ payload: z.string() }),
           output: z.object({ payload: z.string(), context: z.undefined() }),
           resolve: ({ input }) => ({ payload: input.payload }),
@@ -602,7 +602,7 @@ describe('standalone adapter', () => {
   test('with invalid json', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
@@ -638,7 +638,7 @@ describe('standalone adapter', () => {
 
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echo', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/echo' } },
+        meta: { openapi: { method: 'POST', path: '/echo' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => ({ payload: input.payload }),
@@ -699,7 +699,7 @@ describe('standalone adapter', () => {
   test('with multiple input query string params', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('sayHello', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+        meta: { openapi: { method: 'GET', path: '/say-hello' } },
         input: z.object({ name: z.string() }),
         output: z.object({ greeting: z.string() }),
         resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
@@ -726,13 +726,13 @@ describe('standalone adapter', () => {
       router: trpc
         .router<any, OpenApiMeta>()
         .query('allLowerPath', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/lower' } },
+          meta: { openapi: { method: 'GET', path: '/lower' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .query('allUpperPath', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/UPPER' } },
+          meta: { openapi: { method: 'GET', path: '/UPPER' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
@@ -775,19 +775,19 @@ describe('standalone adapter', () => {
       router: trpc
         .router<any, OpenApiMeta>()
         .query('sayHelloQuery', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{name}' } },
+          meta: { openapi: { method: 'GET', path: '/say-hello/{name}' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .mutation('sayHelloMutation', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello/{name}' } },
+          meta: { openapi: { method: 'POST', path: '/say-hello/{name}' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .query('sayHelloComplex', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello/{first}/{last}' } },
+          meta: { openapi: { method: 'GET', path: '/say-hello/{first}/{last}' } },
           input: z.object({
             first: z.string(),
             last: z.string(),
@@ -856,7 +856,7 @@ describe('standalone adapter', () => {
   test('with bad output', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().query('badOutput', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/bad-output' } },
+        meta: { openapi: { method: 'GET', path: '/bad-output' } },
         input: z.void(),
         output: z.string(),
         // @ts-expect-error - intentional bad output
@@ -888,13 +888,13 @@ describe('standalone adapter', () => {
     const router = trpc
       .router<any, OpenApiMeta>()
       .query('with-void', {
-        meta: { openapi: { enabled: true, method: 'GET', path: '/with-void' } },
+        meta: { openapi: { method: 'GET', path: '/with-void' } },
         input: z.void(),
         output: z.object({ payload: z.any() }),
         resolve: ({ input }) => ({ payload: input }),
       })
       .mutation('with-void', {
-        meta: { openapi: { enabled: true, method: 'POST', path: '/with-void' } },
+        meta: { openapi: { method: 'POST', path: '/with-void' } },
         input: z.void(),
         output: z.object({ payload: z.any() }),
         resolve: ({ input }) => ({ payload: input }),
@@ -948,7 +948,7 @@ describe('standalone adapter', () => {
   test('with DELETE method mutation', async () => {
     const { url, close } = createHttpServerWithRouter({
       router: trpc.router<any, OpenApiMeta>().mutation('echoDelete', {
-        meta: { openapi: { enabled: true, method: 'DELETE', path: '/echo-delete' } },
+        meta: { openapi: { method: 'DELETE', path: '/echo-delete' } },
         input: z.object({ payload: z.string() }),
         output: z.object({ payload: z.string() }),
         resolve: ({ input }) => input,

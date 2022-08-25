@@ -66,7 +66,10 @@ const authRouter = createRouter()
     },
     input: z.object({
       email: z.string().email(),
-      passcode: z.string().regex(/^[0-9]{4}$/),
+      passcode: z.preprocess(
+        (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
+        z.number().min(1000).max(9999),
+      ),
       name: z.string().min(3),
     }),
     output: z.object({
@@ -110,7 +113,10 @@ const authRouter = createRouter()
     },
     input: z.object({
       email: z.string().email(),
-      passcode: z.string().regex(/^[0-9]{4}$/),
+      passcode: z.preprocess(
+        (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
+        z.number().min(1000).max(9999),
+      ),
     }),
     output: z.object({
       token: z.string(),

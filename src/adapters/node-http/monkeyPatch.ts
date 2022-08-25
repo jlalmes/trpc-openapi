@@ -5,8 +5,8 @@ import { getInputOutputParsers } from '../../utils/procedure';
 import { instanceofZodType, instanceofZodTypeLikeVoid } from '../../utils/zod';
 
 export const monkeyPatchProcedure = (procedure: OpenApiProcedure) => {
-  if ((procedure as any).__monkeyPatched) return;
-  (procedure as any).__monkeyPatched = true;
+  if (procedure.__monkey_patched) return;
+  procedure.__monkey_patched = true;
 
   const { inputParser } = getInputOutputParsers(procedure);
   if (instanceofZodType(inputParser)) {
@@ -14,6 +14,6 @@ export const monkeyPatchProcedure = (procedure: OpenApiProcedure) => {
       const zObject = z.object({});
       (procedure as any).parseInputFn = zObject.parseAsync.bind(zObject);
     }
-    // TODO: add out of box support for number/boolean/date etc.
+    // TODO: add out of box support for number/boolean/date etc. (https://github.com/jlalmes/trpc-openapi/issues/44)
   }
 };

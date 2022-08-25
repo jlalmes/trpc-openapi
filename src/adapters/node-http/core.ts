@@ -48,7 +48,7 @@ export const createOpenApiNodeHttpHandler = <
   }
 
   const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
-  const getCachedProcedure = createProcedureCache(router);
+  const getProcedure = createProcedureCache(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
     const sendResponse = (
@@ -70,7 +70,7 @@ export const createOpenApiNodeHttpHandler = <
     const reqUrl = req.url!;
     const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
     const path = normalizePath(url.pathname);
-    const { procedure, pathInput } = getCachedProcedure(method, path) ?? {};
+    const { procedure, pathInput } = getProcedure(method, path) ?? {};
 
     let input: any;
     let ctx: any;

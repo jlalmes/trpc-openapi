@@ -43,7 +43,9 @@ export type OpenApiProcedureRecord<TMeta = TRPCMeta> = ProcedureRecord<
   any
 >;
 
-export type OpenApiProcedure<TMeta = TRPCMeta> = OpenApiProcedureRecord<TMeta>[string];
+export type OpenApiProcedure<TMeta = TRPCMeta> = OpenApiProcedureRecord<TMeta>[string] & {
+  __monkey_patched?: boolean;
+};
 
 export type OpenApiRouter<TContext = any, TMeta = TRPCMeta> = Router<
   TContext,

@@ -144,12 +144,9 @@ export const errorResponseObject = {
     'application/json': {
       schema: zodSchemaToOpenApiSchemaObject(
         z.object({
-          ok: z.literal(false),
-          error: z.object({
-            message: z.string(),
-            code: z.string(),
-            issues: z.array(z.object({ message: z.string() })).optional(),
-          }),
+          message: z.string(),
+          code: z.string(),
+          issues: z.array(z.object({ message: z.string() })).optional(),
         }),
       ),
     },
@@ -168,12 +165,7 @@ export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject =
     description: 'Successful response',
     content: {
       'application/json': {
-        schema: zodSchemaToOpenApiSchemaObject(
-          z.object({
-            ok: z.literal(true),
-            data: schema,
-          }),
-        ),
+        schema: zodSchemaToOpenApiSchemaObject(schema),
       },
     },
   };

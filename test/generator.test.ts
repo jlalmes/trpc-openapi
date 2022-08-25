@@ -37,47 +37,31 @@ describe('generator', () => {
                   "schema": Object {
                     "additionalProperties": false,
                     "properties": Object {
-                      "error": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "code": Object {
-                            "type": "string",
-                          },
-                          "issues": Object {
-                            "items": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "message": Object {
-                                  "type": "string",
-                                },
-                              },
-                              "required": Array [
-                                "message",
-                              ],
-                              "type": "object",
-                            },
-                            "type": "array",
-                          },
-                          "message": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "message",
-                          "code",
-                        ],
-                        "type": "object",
+                      "code": Object {
+                        "type": "string",
                       },
-                      "ok": Object {
-                        "enum": Array [
-                          false,
-                        ],
-                        "type": "boolean",
+                      "issues": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "message": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "message",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "message": Object {
+                        "type": "string",
                       },
                     },
                     "required": Array [
-                      "ok",
-                      "error",
+                      "message",
+                      "code",
                     ],
                     "type": "object",
                   },
@@ -439,7 +423,7 @@ describe('generator', () => {
         output: z.object({ id: z.string(), name: z.string() }),
         resolve: ({ input }) => ({ id: input.id, name: input.name ?? 'name' }),
       })
-      .query('deleteUser', {
+      .mutation('deleteUser', {
         meta: { openapi: { path: '/users/{id}', method: 'DELETE' } },
         input: z.object({ id: z.string() }),
         output: z.void(),
@@ -463,47 +447,31 @@ describe('generator', () => {
                   "schema": Object {
                     "additionalProperties": false,
                     "properties": Object {
-                      "error": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "code": Object {
-                            "type": "string",
-                          },
-                          "issues": Object {
-                            "items": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "message": Object {
-                                  "type": "string",
-                                },
-                              },
-                              "required": Array [
-                                "message",
-                              ],
-                              "type": "object",
-                            },
-                            "type": "array",
-                          },
-                          "message": Object {
-                            "type": "string",
-                          },
-                        },
-                        "required": Array [
-                          "message",
-                          "code",
-                        ],
-                        "type": "object",
+                      "code": Object {
+                        "type": "string",
                       },
-                      "ok": Object {
-                        "enum": Array [
-                          false,
-                        ],
-                        "type": "boolean",
+                      "issues": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "message": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "message",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "message": Object {
+                        "type": "string",
                       },
                     },
                     "required": Array [
-                      "ok",
-                      "error",
+                      "message",
+                      "code",
                     ],
                     "type": "object",
                   },
@@ -537,39 +505,23 @@ describe('generator', () => {
                   "content": Object {
                     "application/json": Object {
                       "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "data": Object {
-                            "items": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "id": Object {
-                                  "type": "string",
-                                },
-                                "name": Object {
-                                  "type": "string",
-                                },
-                              },
-                              "required": Array [
-                                "id",
-                                "name",
-                              ],
-                              "type": "object",
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "id": Object {
+                              "type": "string",
                             },
-                            "type": "array",
+                            "name": Object {
+                              "type": "string",
+                            },
                           },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
+                          "required": Array [
+                            "id",
+                            "name",
+                          ],
+                          "type": "object",
                         },
-                        "required": Array [
-                          "ok",
-                          "data",
-                        ],
-                        "type": "object",
+                        "type": "array",
                       },
                     },
                   },
@@ -613,32 +565,16 @@ describe('generator', () => {
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "id": Object {
-                                "type": "string",
-                              },
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "id",
-                              "name",
-                            ],
-                            "type": "object",
+                          "id": Object {
+                            "type": "string",
                           },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
+                          "name": Object {
+                            "type": "string",
                           },
                         },
                         "required": Array [
-                          "ok",
-                          "data",
+                          "id",
+                          "name",
                         ],
                         "type": "object",
                       },
@@ -658,7 +594,7 @@ describe('generator', () => {
           "/users/{id}": Object {
             "delete": Object {
               "description": undefined,
-              "operationId": "query.deleteUser",
+              "operationId": "mutation.deleteUser",
               "parameters": Array [
                 Object {
                   "description": undefined,
@@ -674,21 +610,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
-                      "schema": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
-                          },
-                        },
-                        "required": Array [
-                          "ok",
-                        ],
-                        "type": "object",
-                      },
+                      "schema": undefined,
                     },
                   },
                   "description": "Successful response",
@@ -722,32 +644,16 @@ describe('generator', () => {
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "id": Object {
-                                "type": "string",
-                              },
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "id",
-                              "name",
-                            ],
-                            "type": "object",
+                          "id": Object {
+                            "type": "string",
                           },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
+                          "name": Object {
+                            "type": "string",
                           },
                         },
                         "required": Array [
-                          "ok",
-                          "data",
+                          "id",
+                          "name",
                         ],
                         "type": "object",
                       },
@@ -800,32 +706,16 @@ describe('generator', () => {
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
-                          "data": Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "id": Object {
-                                "type": "string",
-                              },
-                              "name": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "id",
-                              "name",
-                            ],
-                            "type": "object",
+                          "id": Object {
+                            "type": "string",
                           },
-                          "ok": Object {
-                            "enum": Array [
-                              true,
-                            ],
-                            "type": "boolean",
+                          "name": Object {
+                            "type": "string",
                           },
                         },
                         "required": Array [
-                          "ok",
-                          "data",
+                          "id",
+                          "name",
                         ],
                         "type": "object",
                       },
@@ -1028,37 +918,21 @@ describe('generator', () => {
               "application/json": Object {
                 "schema": Object {
                   "additionalProperties": false,
+                  "description": "User data",
                   "properties": Object {
-                    "data": Object {
-                      "additionalProperties": false,
-                      "description": "User data",
-                      "properties": Object {
-                        "id": Object {
-                          "description": "User ID",
-                          "format": "uuid",
-                          "type": "string",
-                        },
-                        "name": Object {
-                          "description": "User name",
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "id",
-                        "name",
-                      ],
-                      "type": "object",
+                    "id": Object {
+                      "description": "User ID",
+                      "format": "uuid",
+                      "type": "string",
                     },
-                    "ok": Object {
-                      "enum": Array [
-                        true,
-                      ],
-                      "type": "boolean",
+                    "name": Object {
+                      "description": "User name",
+                      "type": "string",
                     },
                   },
                   "required": Array [
-                    "ok",
-                    "data",
+                    "id",
+                    "name",
                   ],
                   "type": "object",
                 },
@@ -1097,37 +971,21 @@ describe('generator', () => {
               "application/json": Object {
                 "schema": Object {
                   "additionalProperties": false,
+                  "description": "User data",
                   "properties": Object {
-                    "data": Object {
-                      "additionalProperties": false,
-                      "description": "User data",
-                      "properties": Object {
-                        "id": Object {
-                          "description": "User ID",
-                          "format": "uuid",
-                          "type": "string",
-                        },
-                        "name": Object {
-                          "description": "User name",
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "id",
-                        "name",
-                      ],
-                      "type": "object",
+                    "id": Object {
+                      "description": "User ID",
+                      "format": "uuid",
+                      "type": "string",
                     },
-                    "ok": Object {
-                      "enum": Array [
-                        true,
-                      ],
-                      "type": "boolean",
+                    "name": Object {
+                      "description": "User name",
+                      "type": "string",
                     },
                   },
                   "required": Array [
-                    "ok",
-                    "data",
+                    "id",
+                    "name",
                   ],
                   "type": "object",
                 },
@@ -1167,21 +1025,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
-              "schema": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "ok": Object {
-                    "enum": Array [
-                      true,
-                    ],
-                    "type": "boolean",
-                  },
-                },
-                "required": Array [
-                  "ok",
-                ],
-                "type": "object",
-              },
+              "schema": undefined,
             },
           },
           "description": "Successful response",
@@ -1208,21 +1052,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
-            "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-              ],
-              "type": "object",
-            },
+            "schema": undefined,
           },
         },
         "description": "Successful response",
@@ -1251,26 +1081,10 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
-                  "enum": Array [
-                    "null",
-                  ],
-                  "nullable": true,
-                },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-                "data",
+              "enum": Array [
+                "null",
               ],
-              "type": "object",
+              "nullable": true,
             },
           },
         },
@@ -1302,22 +1116,7 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
-                  "not": Object {},
-                },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-              ],
-              "type": "object",
+              "not": Object {},
             },
           },
         },
@@ -1346,30 +1145,15 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
-                  "anyOf": Array [
-                    Object {
-                      "not": Object {},
-                    },
-                    Object {
-                      "type": "string",
-                    },
-                  ],
-                  "nullable": true,
+              "anyOf": Array [
+                Object {
+                  "not": Object {},
                 },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
+                Object {
+                  "type": "string",
                 },
-              },
-              "required": Array [
-                "ok",
               ],
-              "type": "object",
+              "nullable": true,
             },
           },
         },
@@ -1400,23 +1184,7 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
-                  "not": Object {},
-                },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-                "data",
-              ],
-              "type": "object",
+              "not": Object {},
             },
           },
         },
@@ -1458,22 +1226,14 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
+              "anyOf": Array [
+                Object {
+                  "not": Object {},
+                },
+                Object {
                   "type": "string",
                 },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
               ],
-              "type": "object",
             },
           },
         },
@@ -1516,23 +1276,8 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
-                  "default": "James",
-                  "type": "string",
-                },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-              ],
-              "type": "object",
+              "default": "James",
+              "type": "string",
             },
           },
         },
@@ -1692,23 +1437,7 @@ describe('generator', () => {
         "content": Object {
           "application/json": Object {
             "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "data": Object {
-                  "type": "number",
-                },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
-                },
-              },
-              "required": Array [
-                "ok",
-                "data",
-              ],
-              "type": "object",
+              "type": "number",
             },
           },
         },
@@ -2059,40 +1788,24 @@ describe('generator', () => {
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
-                "data": Object {
-                  "additionalProperties": false,
-                  "properties": Object {
-                    "allowed": Object {
-                      "items": Object {
-                        "format": "email",
-                        "type": "string",
-                      },
-                      "type": "array",
-                    },
-                    "blocked": Object {
-                      "items": Object {
-                        "format": "email",
-                        "type": "string",
-                      },
-                      "type": "array",
-                    },
+                "allowed": Object {
+                  "items": Object {
+                    "format": "email",
+                    "type": "string",
                   },
-                  "required": Array [
-                    "allowed",
-                    "blocked",
-                  ],
-                  "type": "object",
+                  "type": "array",
                 },
-                "ok": Object {
-                  "enum": Array [
-                    true,
-                  ],
-                  "type": "boolean",
+                "blocked": Object {
+                  "items": Object {
+                    "format": "email",
+                    "type": "string",
+                  },
+                  "type": "array",
                 },
               },
               "required": Array [
-                "ok",
-                "data",
+                "allowed",
+                "blocked",
               ],
               "type": "object",
             },

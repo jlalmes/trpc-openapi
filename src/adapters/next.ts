@@ -44,8 +44,8 @@ export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
       const body: OpenApiErrorResponse = {
-        ok: false,
-        error: { message: error.message, code: error.code },
+        message: error.message,
+        code: error.code,
       };
       res.end(JSON.stringify(body));
 

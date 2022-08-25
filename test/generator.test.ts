@@ -789,31 +789,6 @@ describe('generator', () => {
     expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tagA', 'tagB']);
   });
 
-  // @deprecated
-  test('with single tag', () => {
-    const appRouter = trpc.router<any, OpenApiMeta>().query('all.metadata', {
-      meta: {
-        openapi: {
-          path: '/metadata/all',
-          method: 'GET',
-          tag: 'tag',
-        },
-      },
-      input: z.object({ name: z.string() }),
-      output: z.object({ name: z.string() }),
-      resolve: ({ input }) => ({ name: input.name }),
-    });
-
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
-    });
-
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tag']);
-  });
-
   test('with security', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().mutation('protectedEndpoint', {
       meta: {

@@ -34,7 +34,7 @@ export const getOpenApiPathsObject = (
 
   forEachOpenApiProcedure(procedures, ({ path: operationId, procedure, openapi }) => {
     try {
-      const { method, protect, summary, description, tags, tag, headers } = openapi;
+      const { method, protect, summary, description, tags, headers } = openapi;
 
       const path = normalizePath(openapi.path);
       const pathParameters = getPathParameters(path);
@@ -61,7 +61,7 @@ export const getOpenApiPathsObject = (
           operationId,
           summary,
           description,
-          tags: tags ?? (tag ? [tag] : undefined),
+          tags: tags,
           security: protect ? [{ Authorization: [] }] : undefined,
           ...(acceptsRequestBody(method)
             ? {

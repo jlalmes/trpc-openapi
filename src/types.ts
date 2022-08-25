@@ -18,19 +18,9 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
     summary?: string;
     description?: string;
     protect?: boolean;
+    tags?: string[];
     headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
-  } & (
-    | {
-        tags?: never;
-        /** @deprecated Use `tags` instead */
-        tag?: string;
-      }
-    | {
-        tags?: string[];
-        /** @deprecated Use `tags` instead */
-        tag?: never;
-      }
-  );
+  };
 };
 
 export type OpenApiProcedureRecord<TMeta = TRPCMeta> = ProcedureRecord<

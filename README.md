@@ -122,7 +122,7 @@ Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parame
 
 A procedure can accept a set of inputs via URL path parameters. You can add a path parameter to any OpenAPI enabled procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 
-#### Query parameters
+### Query parameters
 
 Query & path parameter inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
@@ -144,7 +144,7 @@ const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
-#### Request body
+### Request body
 
 ```typescript
 // Router

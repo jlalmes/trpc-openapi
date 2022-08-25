@@ -72,18 +72,18 @@ describe('standalone adapter', () => {
     teardownMock.mockClear();
   });
 
-  // removed becuase we no longer validate router on handler setup
-  // test('with invalid router', () => {
-  //   const appRouter = trpc.router<any, OpenApiMeta>().query('invalidRoute', {
-  //     meta: { openapi: { enabled: true, path: '/invalid-route', method: 'GET' } },
-  //     input: z.void(),
-  //     resolve: ({ input }) => input,
-  //   });
+  // Please note: validating router does not happen in `production`.
+  test('with invalid router', () => {
+    const appRouter = trpc.router<any, OpenApiMeta>().query('invalidRoute', {
+      meta: { openapi: { enabled: true, path: '/invalid-route', method: 'GET' } },
+      input: z.void(),
+      resolve: ({ input }) => input,
+    });
 
-  //   expect(() => createOpenApiHttpHandler({ router: appRouter })).toThrowError(
-  //     '[query.invalidRoute] - Output parser expects a Zod validator',
-  //   );
-  // });
+    expect(() => createOpenApiHttpHandler({ router: appRouter })).toThrowError(
+      '[query.invalidRoute] - Output parser expects a Zod validator',
+    );
+  });
 
   test('with not found path', async () => {
     const { url, close } = createHttpServerWithRouter({

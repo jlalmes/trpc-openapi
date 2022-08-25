@@ -4,9 +4,11 @@ import { OpenApiProcedure } from '../../types';
 import { getInputOutputParsers } from '../../utils/procedure';
 import { instanceofZodType, instanceofZodTypeLikeVoid } from '../../utils/zod';
 
-export const monkeyPatchProcedure = (procedure: OpenApiProcedure) => {
-  if (procedure.__monkey_patched) return;
-  procedure.__monkey_patched = true;
+type MonkeyPatchedOpenApiProcedure = OpenApiProcedure & { __MONKEY_PATCHED__?: boolean };
+
+export const monkeyPatchProcedure = (procedure: MonkeyPatchedOpenApiProcedure) => {
+  if (procedure.__MONKEY_PATCHED__) return;
+  procedure.__MONKEY_PATCHED__ = true;
 
   const { inputParser } = getInputOutputParsers(procedure);
   if (instanceofZodType(inputParser)) {

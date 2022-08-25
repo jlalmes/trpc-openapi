@@ -20,7 +20,7 @@ import { normalizePath } from '../../utils/path';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
 import { monkeyPatchProcedure } from './monkeyPatch';
-import { createGetRouterProcedure } from './procedures';
+import { createProcedureCache } from './procedures';
 
 export type CreateOpenApiNodeHttpHandlerOptions<
   TRouter extends OpenApiRouter,
@@ -48,7 +48,7 @@ export const createOpenApiNodeHttpHandler = <
   }
 
   const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
-  const getRouterProcedure = createGetRouterProcedure(router);
+  const getCachedProcedure = createProcedureCache(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
     const sendResponse = (
@@ -70,7 +70,7 @@ export const createOpenApiNodeHttpHandler = <
     const reqUrl = req.url!;
     const url = new URL(reqUrl.startsWith('/') ? `http://127.0.0.1${reqUrl}` : reqUrl);
     const path = normalizePath(url.pathname);
-    const { procedure, pathInput } = getRouterProcedure(method, path) ?? {};
+    const { procedure, pathInput } = getCachedProcedure(method, path) ?? {};
 
     let input: any;
     let ctx: any;

@@ -2187,4 +2187,64 @@ describe('generator', () => {
       ]
     `);
   });
+
+  test('with top-level preprocess', () => {
+    const appRouter = trpc
+      .router<any, OpenApiMeta>()
+      .query('topLevelPreprocess', {
+        meta: { openapi: { enabled: true, path: '/top-level-preprocess', method: 'GET' } },
+        input: z.preprocess((arg) => arg, z.object({ id: z.string() })),
+        output: z.preprocess((arg) => arg, z.object({ id: z.string() })),
+        resolve: ({ input }) => ({ id: input.id }),
+      })
+      .mutation('topLevelPreprocess', {
+        meta: { openapi: { enabled: true, path: '/top-level-preprocess', method: 'POST' } },
+        input: z.preprocess((arg) => arg, z.object({ id: z.string() })),
+        output: z.preprocess((arg) => arg, z.object({ id: z.string() })),
+        resolve: ({ input }) => ({ id: input.id }),
+      });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/top-level-preprocess']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "id",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/top-level-preprocess']!.post!.requestBody)
+      .toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "id": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "id",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
+  });
 });

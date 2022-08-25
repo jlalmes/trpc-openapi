@@ -88,7 +88,7 @@ server.listen(3000);
 ```typescript
 // client.ts
 const res = await fetch('http://localhost:3000/say-hello?name=James', { method: 'GET' });
-const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
+const body = await res.json(); /* { greeting: 'Hello James!' } */
 ```
 
 ## Requirements
@@ -140,7 +140,7 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
 const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /* 👈 */, {
   method: 'GET',
 });
-const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
+const body = await res.json(); /* { greeting: 'Hello James!' } */
 ```
 
 #### Request body
@@ -162,7 +162,7 @@ const res = await fetch('http://localhost:3000/say-hello/James' /* 👈 */, {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ greeting: 'Hello' }),
 });
-const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
+const body = await res.json(); /* { greeting: 'Hello James!' } */
 ```
 
 ### Custom headers
@@ -171,8 +171,6 @@ Any custom headers can be specified in the `meta.openapi.headers` array, these h
 
 ## HTTP Responses
 
-Inspired by [Slack Web API](https://api.slack.com/web).
-
 Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`.
 
 You can modify the status code or headers for any response using the `responseMeta` function.
@@ -180,20 +178,14 @@ You can modify the status code or headers for any response using the `responseMe
 Please see [error status codes here](src/adapters/node-http/errors.ts).
 
 ```jsonc
-{
-  "ok": true,
-  "data": "This is good" /* Output from tRPC procedure */
-}
+"This is good" /* Output from tRPC procedure */
 ```
 
 ```jsonc
 {
-  "ok": false,
-  "error": {
-    "message": "This is bad", /* Message from TRPCError */,
-    "code": "BAD_REQUEST", /* Code from TRPCError */
-    "issues": [...] /* (optional) ZodIssues[] from TRPCError */
-  }
+  "message": "This is bad", /* Message from TRPCError */,
+  "code": "BAD_REQUEST", /* Code from TRPCError */
+  "issues": [...] /* (optional) ZodIssues[] from TRPCError */
 }
 ```
 
@@ -249,7 +241,7 @@ const res = await fetch('http://localhost:3000/say-hello', {
   method: 'GET',
   headers: { Authorization: 'Bearer usr_123' } /* 👈 */,
 });
-const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
+const body = await res.json(); /* { greeting: 'Hello James!' } */
 ```
 
 ## Examples

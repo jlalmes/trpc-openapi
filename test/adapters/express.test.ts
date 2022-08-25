@@ -73,10 +73,10 @@ describe('express adapter', () => {
 
     {
       const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' });
-      const body = (await res.json()) as OpenApiSuccessResponse;
+      const body = await res.json();
 
       expect(res.status).toBe(200);
-      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(body).toEqual({ greeting: 'Hello James!' });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
@@ -93,10 +93,10 @@ describe('express adapter', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'James' }),
       });
-      const body = (await res.json()) as OpenApiSuccessResponse;
+      const body = await res.json();
 
       expect(res.status).toBe(200);
-      expect(body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(body).toEqual({ greeting: 'Hello James!' });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
@@ -120,14 +120,11 @@ describe('express adapter', () => {
     );
 
     const res = await fetch(`${url}/open-api/echo?payload=jlalmes`, { method: 'GET' });
-    const body = (await res.json()) as OpenApiSuccessResponse;
+    const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body).toEqual({
-      ok: true,
-      data: {
-        payload: 'jlalmes',
-      },
+      payload: 'jlalmes',
     });
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);

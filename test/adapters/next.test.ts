@@ -100,7 +100,7 @@ describe('next adapter', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(res.body).toEqual({ greeting: 'Hello James!' });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
@@ -119,7 +119,7 @@ describe('next adapter', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(res.body).toEqual({ greeting: 'Hello James!' });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
@@ -137,7 +137,7 @@ describe('next adapter', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({ ok: true, data: { greeting: 'Hello James!' } });
+      expect(res.body).toEqual({ greeting: 'Hello James!' });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
@@ -157,11 +157,8 @@ describe('next adapter', () => {
 
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
-      ok: false,
-      error: {
-        message: 'Query "trpc" not found - is the `trpc-openapi` file named `[...trpc].ts`?',
-        code: 'INTERNAL_SERVER_ERROR',
-      },
+      message: 'Query "trpc" not found - is the `trpc-openapi` file named `[...trpc].ts`?',
+      code: 'INTERNAL_SERVER_ERROR',
     });
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(0);

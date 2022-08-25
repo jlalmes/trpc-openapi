@@ -116,10 +116,7 @@ export const createOpenApiNodeHttpHandler = <
 
       const statusCode = meta?.status ?? 200;
       const headers = meta?.headers ?? {};
-      const body: OpenApiSuccessResponse = {
-        ok: true as const,
-        data,
-      };
+      const body: OpenApiSuccessResponse<typeof data> = data;
       sendResponse(statusCode, headers, body);
     } catch (cause) {
       const error = getErrorFromUnknown(cause);
@@ -149,12 +146,9 @@ export const createOpenApiNodeHttpHandler = <
       const statusCode = meta?.status ?? TRPC_ERROR_CODE_HTTP_STATUS[error.code] ?? 500;
       const headers = meta?.headers ?? {};
       const body: OpenApiErrorResponse = {
-        ok: false,
-        error: {
-          message: isInputValidationError ? 'Input validation failed' : error.message,
-          code: error.code,
-          issues: isInputValidationError ? (error.cause as ZodError).errors : undefined,
-        },
+        message: isInputValidationError ? 'Input validation failed' : error.message,
+        code: error.code,
+        issues: isInputValidationError ? (error.cause as ZodError).errors : undefined,
       };
       sendResponse(statusCode, headers, body);
     }

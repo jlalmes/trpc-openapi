@@ -55,18 +55,12 @@ export type OpenApiRouter<TContext = any, TMeta = TRPCMeta> = Router<
   DefaultErrorShape
 >;
 
-export type OpenApiSuccessResponse<D = any> = {
-  ok: true;
-  data: D;
-};
+export type OpenApiSuccessResponse<D = any> = D;
 
 export type OpenApiErrorResponse = {
-  ok: false;
-  error: {
-    message: string;
-    code: TRPC_ERROR_CODE_KEY;
-    issues?: ZodIssue[];
-  };
+  message: string;
+  code: TRPC_ERROR_CODE_KEY;
+  issues?: ZodIssue[];
 };
 
 export type OpenApiResponse<D = any> = OpenApiSuccessResponse<D> | OpenApiErrorResponse;

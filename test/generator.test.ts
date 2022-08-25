@@ -2188,7 +2188,7 @@ describe('generator', () => {
     `);
   });
 
-  test.only('with top-level preprocess', () => {
+  test('with top-level preprocess', () => {
     const appRouter = trpc
       .router<any, OpenApiMeta>()
       .query('topLevelPreprocess', {

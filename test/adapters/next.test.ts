@@ -74,19 +74,19 @@ describe('next adapter', () => {
       router: trpc
         .router<any, OpenApiMeta>()
         .query('sayHello', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/say-hello' } },
+          meta: { openapi: { method: 'GET', path: '/say-hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .mutation('sayHello', {
-          meta: { openapi: { enabled: true, method: 'POST', path: '/say-hello' } },
+          meta: { openapi: { method: 'POST', path: '/say-hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
         })
         .query('sayHelloSplit', {
-          meta: { openapi: { enabled: true, method: 'GET', path: '/say/hello' } },
+          meta: { openapi: { method: 'GET', path: '/say/hello' } },
           input: z.object({ name: z.string() }),
           output: z.object({ greeting: z.string() }),
           resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),

@@ -1,61 +1,59 @@
-import { OpenApiRouter } from '../../types';
+import { OpenApiMethod, OpenApiProcedure, OpenApiRouter } from '../../types';
 import { getPathRegExp, normalizePath } from '../../utils/path';
 import { forEachOpenApiProcedure } from '../../utils/procedure';
 
-type Procedure = { type: 'query' | 'mutation'; path: string };
+type CachedProcedure = {
+  type: 'query' | 'mutation';
+  path: string;
+  procedure: OpenApiProcedure;
+};
 
-const getMethodPathProcedureMap = (appRouter: OpenApiRouter) => {
-  const map = new Map<string, Map<RegExp, Procedure>>();
+export const createProcedureCache = (router: OpenApiRouter) => {
+  const procedureCache = new Map<OpenApiMethod, Map<RegExp, CachedProcedure>>();
 
-  const { queries, mutations } = appRouter._def;
+  const { queries, mutations } = router._def;
 
   forEachOpenApiProcedure(queries, ({ path: queryPath, procedure, openapi }) => {
     const { method } = openapi;
-    if (!map.has(method)) {
-      map.set(method, new Map());
+    if (!procedureCache.has(method)) {
+      procedureCache.set(method, new Map());
     }
     const path = normalizePath(openapi.path);
     const pathRegExp = getPathRegExp(path);
-    map.get(method)!.set(pathRegExp, {
+    procedureCache.get(method)!.set(pathRegExp, {
       type: 'query',
       path: queryPath,
+      procedure,
     });
   });
 
   forEachOpenApiProcedure(mutations, ({ path: mutationPath, procedure, openapi }) => {
     const { method } = openapi;
-    if (!map.has(method)) {
-      map.set(method, new Map());
+    if (!procedureCache.has(method)) {
+      procedureCache.set(method, new Map());
     }
     const path = normalizePath(openapi.path);
     const pathRegExp = getPathRegExp(path);
-    map.get(method)!.set(pathRegExp, {
+    procedureCache.get(method)!.set(pathRegExp, {
       type: 'mutation',
       path: mutationPath,
+      procedure,
     });
   });
 
-  return map;
-};
-
-export const createMatchProcedureFn = (router: OpenApiRouter) => {
-  const methodPathProcedureMap = getMethodPathProcedureMap(router);
-
-  return (method: string, path: string) => {
-    const pathProcedureMap = methodPathProcedureMap.get(method);
-    if (!pathProcedureMap) {
+  return (method: OpenApiMethod, path: string) => {
+    const procedureMethodCache = procedureCache.get(method);
+    if (!procedureMethodCache) {
       return undefined;
     }
 
-    const matchingRegExp = Array.from(pathProcedureMap.keys()).find((regExp) => {
-      return regExp.test(path);
-    });
-    if (!matchingRegExp) {
+    const procedureRegExp = Array.from(procedureMethodCache.keys()).find((re) => re.test(path));
+    if (!procedureRegExp) {
       return undefined;
     }
 
-    const procedure = pathProcedureMap.get(matchingRegExp)!;
-    const pathInput = matchingRegExp.exec(path)?.groups ?? {};
+    const procedure = procedureMethodCache.get(procedureRegExp)!;
+    const pathInput = procedureRegExp.exec(path)?.groups ?? {};
 
     return { procedure, pathInput };
   };

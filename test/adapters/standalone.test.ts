@@ -72,6 +72,7 @@ describe('standalone adapter', () => {
     teardownMock.mockClear();
   });
 
+  // Please note: validating router does not happen in `production`.
   test('with invalid router', () => {
     const appRouter = trpc.router<any, OpenApiMeta>().query('invalidRoute', {
       meta: { openapi: { enabled: true, path: '/invalid-route', method: 'GET' } },
@@ -940,6 +941,30 @@ describe('standalone adapter', () => {
         ]"
       `);
     }
+
+    close();
+  });
+
+  test('with DELETE method mutation', async () => {
+    const { url, close } = createHttpServerWithRouter({
+      router: trpc.router<any, OpenApiMeta>().mutation('echoDelete', {
+        meta: { openapi: { enabled: true, method: 'DELETE', path: '/echo-delete' } },
+        input: z.object({ payload: z.string() }),
+        output: z.object({ payload: z.string() }),
+        resolve: ({ input }) => input,
+      }),
+    });
+
+    const res = await fetch(`${url}/echo-delete?payload=jlalmes`, { method: 'DELETE' });
+    const body = (await res.json()) as OpenApiSuccessResponse;
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({
+      ok: true,
+      data: {
+        payload: 'jlalmes',
+      },
+    });
 
     close();
   });

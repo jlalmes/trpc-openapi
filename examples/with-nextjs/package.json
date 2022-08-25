@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@trpc/server": "^9.27.1",
+    "@trpc/server": "^9.27.2",
     "jsonwebtoken": "^8.5.1",
     "next": "12.2.5",
     "nextjs-cors": "^2.1.1",
@@ -20,8 +20,8 @@
     "zod": "^3.18.0"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^8.5.8",
-    "@types/node": "18.7.9",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/node": "18.7.13",
     "@types/react": "18.0.17",
     "@types/react-dom": "18.0.6",
     "@types/swagger-ui-react": "^4.11.0",

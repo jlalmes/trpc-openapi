@@ -24,7 +24,7 @@
     "build": "rimraf dist && tsc -p tsconfig.build.json"
   },
   "peerDependencies": {
-    "@trpc/server": "10.0.0-proxy-alpha.72",
+    "@trpc/server": "^10.0.0-proxy-alpha.72",
     "zod": "^3.14.4"
   },
   "dependencies": {

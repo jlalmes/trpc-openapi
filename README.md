@@ -21,9 +21,9 @@
 
 ```bash
 # npm
-npm install trpc-openapi
+npm install trpc-openapi@alpha
 # yarn
-yarn add trpc-openapi
+yarn add trpc-openapi@alpha
 ```
 
 **2. Add `OpenApiMeta` to your tRPC instance.**
@@ -125,13 +125,14 @@ Query & path parameter inputs are always accepted as a `string`, if you wish to 
 
 ```typescript
 // Router
-export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
-  input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input }) => {
-    return { greeting: `${input.greeting} ${input.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: { method: 'GET', path: '/say-hello/{name}' /* 👈 */ } })
+    .input(z.object({ name: z.string() /* 👈 */, greeting: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .query(({ input }) => {
+      return { greeting: `${input.greeting} ${input.name}!` };
+    });
 });
 
 // Client
@@ -145,13 +146,14 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 
 ```typescript
 // Router
-export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello', {
-  meta: { openapi: { method: 'POST', path: '/say-hello/{name}' /* 👈 */ } },
-  input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input }) => {
-    return { greeting: `${input.greeting} ${input.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: { method: 'POST', path: '/say-hello/{name}' /* 👈 */ } })
+    .input(z.object({ name: z.string() /* 👈 */, greeting: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .mutation(({ input }) => {
+      return { greeting: `${input.greeting} ${input.name}!` };
+    });
 });
 
 // Client
@@ -198,6 +200,8 @@ const users: User[] = [
 
 export type Context = { user: User | null };
 
+const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
+
 export const createContext = async ({ req, res }): Promise<Context> => {
   let user: User | null = null;
   if (req.headers.authorization) {
@@ -207,16 +211,17 @@ export const createContext = async ({ req, res }): Promise<Context> => {
   return { user };
 };
 
-export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } },
-  input: z.void(), // no input expected
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input, ctx }) => {
-    if (!ctx.user) {
-      throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
-    }
-    return { greeting: `Hello ${ctx.user.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } })
+    .input(z.void()) // no input expected
+    .output(z.object({ greeting: z.string() }))
+    .query(({ input, ctx }) => {
+      if (!ctx.user) {
+        throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
+      }
+      return { greeting: `Hello ${ctx.user.name}!` };
+    }),
 });
 ```
 
@@ -287,7 +292,7 @@ Please see [full typings here](src/types.ts).
 
 | Property      | Type                | Description                                                                                                  | Required | Default     |
 | ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
-| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`   | `true`     |
+| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`  | `true`      |
 | `method`      | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined` |
 | `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined` |
 | `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`     |

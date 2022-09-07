@@ -26,7 +26,7 @@ npm install trpc-openapi
 yarn add trpc-openapi
 ```
 
-**2. Add `OpenApiMeta` to your tRPC router.**
+**2. Add `OpenApiMeta` to your tRPC instance.**
 
 ```typescript
 import { initTRPC } from '@trpc/server';
@@ -49,7 +49,7 @@ export const appRouter = t.router({
 });
 ```
 
-**4. Generate OpenAPI v3 document.**
+**4. Generate an OpenAPI document.**
 
 ```typescript
 import { generateOpenApiDocument } from 'trpc-openapi';
@@ -307,6 +307,8 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 | `responseMeta`  | `Function` | Returns any modifications to statusCode & headers.     | `false`  |
 | `onError`       | `Function` | Called if error occurs inside handler.                 | `false`  |
 | `maxBodySize`   | `number`   | Maximum request body size in bytes (default: 100kb).   | `false`  |
+
+Still using tRPC v9? See the legacy branch 👉 TODO: insert link here
 
 ---
 

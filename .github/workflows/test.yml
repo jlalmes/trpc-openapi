@@ -1,6 +1,6 @@
 name: Test
 on: [push]
-jobs: 
+jobs:
   test:
     runs-on: ubuntu-latest
     steps:
@@ -9,11 +9,11 @@ jobs:
 
       - name: Setup node
         uses: actions/setup-node@v3
-        with: 
+        with:
           node-version: 16
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --force
 
       - name: Run tests
         run: npm test

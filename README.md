@@ -15,8 +15,6 @@
 - Perfect for incremental adoption.
 - OpenAPI version 3.0.3.
 
-**_Still using tRPC v9? See our `v0` branch._**
-
 ## Usage
 
 **1. Install `trpc-openapi`.**
@@ -316,6 +314,8 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 | `maxBodySize`   | `number`   | Maximum request body size in bytes (default: 100kb).   | `false`  |
 
 ---
+
+**_Still using tRPC v9? See our `v0` branch._**
 
 ## License
 

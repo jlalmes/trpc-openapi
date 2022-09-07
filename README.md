@@ -108,6 +108,7 @@ For a procedure to support OpenAPI the following _must_ be true:
 Please note:
 
 - Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
+- tRPC v9 `.interop()` routers are not supported.
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
 

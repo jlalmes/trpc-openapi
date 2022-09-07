@@ -14,13 +14,11 @@ import {
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
-const teardownMock = jest.fn();
 
 const clearMocks = () => {
   createContextMock.mockClear();
   responseMetaMock.mockClear();
   onErrorMock.mockClear();
-  teardownMock.mockClear();
 };
 
 const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
@@ -32,7 +30,6 @@ const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
     createContext: handlerOpts.createContext ?? createContextMock,
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
-    teardown: handlerOpts.teardown ?? teardownMock,
     maxBodySize: handlerOpts.maxBodySize,
   } as any);
 
@@ -90,7 +87,6 @@ describe('express adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -107,7 +103,6 @@ describe('express adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -120,7 +115,6 @@ describe('express adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -150,7 +144,6 @@ describe('express adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });

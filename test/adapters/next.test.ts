@@ -14,13 +14,11 @@ import {
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
-const teardownMock = jest.fn();
 
 const clearMocks = () => {
   createContextMock.mockClear();
   responseMetaMock.mockClear();
   onErrorMock.mockClear();
-  teardownMock.mockClear();
 };
 
 const createOpenApiNextHandlerCaller = <TRouter extends OpenApiRouter>(
@@ -31,7 +29,6 @@ const createOpenApiNextHandlerCaller = <TRouter extends OpenApiRouter>(
     createContext: handlerOpts.createContext ?? createContextMock,
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
-    teardown: handlerOpts.teardown ?? teardownMock,
   } as any);
 
   return (req: { method: string; query: Record<string, any>; body?: any }) => {
@@ -109,7 +106,6 @@ describe('next adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -125,7 +121,6 @@ describe('next adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -140,7 +135,6 @@ describe('next adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
   });
 
@@ -164,6 +158,5 @@ describe('next adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(0);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
   });
 });

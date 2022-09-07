@@ -21,13 +21,11 @@ global.fetch = fetch;
 const createContextMock = jest.fn();
 const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
-const teardownMock = jest.fn();
 
 const clearMocks = () => {
   createContextMock.mockClear();
   responseMetaMock.mockClear();
   onErrorMock.mockClear();
-  teardownMock.mockClear();
 };
 
 const createHttpServerWithRouter = <TRouter extends OpenApiRouter>(
@@ -38,7 +36,6 @@ const createHttpServerWithRouter = <TRouter extends OpenApiRouter>(
     createContext: handlerOpts.createContext ?? createContextMock,
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
-    teardown: handlerOpts.teardown ?? teardownMock,
     maxBodySize: handlerOpts.maxBodySize,
   } as any);
   const httpHandler = createHTTPHandler<TRouter>({
@@ -46,7 +43,6 @@ const createHttpServerWithRouter = <TRouter extends OpenApiRouter>(
     createContext: handlerOpts.createContext ?? createContextMock,
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
-    teardown: handlerOpts.teardown ?? teardownMock,
     maxBodySize: handlerOpts.maxBodySize,
   } as any);
 
@@ -113,7 +109,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -139,7 +134,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -180,7 +174,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -222,7 +215,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -260,7 +252,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -302,7 +293,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -336,7 +326,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -374,7 +363,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -406,7 +394,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -423,7 +410,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -456,7 +442,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -469,7 +454,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -501,7 +485,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -534,7 +517,6 @@ describe('standalone adapter', () => {
     });
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -564,7 +546,6 @@ describe('standalone adapter', () => {
     });
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -596,7 +577,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -614,7 +594,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(0);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -648,7 +627,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(0);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -684,7 +662,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -704,7 +681,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(0);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(1);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -732,7 +708,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -765,7 +740,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -778,7 +752,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -824,7 +797,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -841,7 +813,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -856,7 +827,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -887,7 +857,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -921,7 +890,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
 
@@ -942,7 +910,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(1);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -953,7 +920,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
 
@@ -974,7 +940,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(1);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -1001,7 +966,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -1031,7 +995,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -1073,7 +1036,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(1);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -1089,7 +1051,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(1);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -1137,7 +1098,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(1);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });
@@ -1178,7 +1138,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -1191,7 +1150,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -1204,7 +1162,6 @@ describe('standalone adapter', () => {
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
-      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
@@ -1232,7 +1189,6 @@ describe('standalone adapter', () => {
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);
-    expect(teardownMock).toHaveBeenCalledTimes(1);
 
     close();
   });

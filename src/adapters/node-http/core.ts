@@ -28,7 +28,7 @@ export type CreateOpenApiNodeHttpHandlerOptions<
   TResponse extends NodeHTTPResponse,
 > = Pick<
   NodeHTTPHandlerOptions<TRouter, TRequest, TResponse>,
-  'router' | 'createContext' | 'responseMeta' | 'onError' | 'teardown' | 'maxBodySize'
+  'router' | 'createContext' | 'responseMeta' | 'onError' | 'maxBodySize'
 >;
 
 export type OpenApiNextFunction = () => void;
@@ -47,7 +47,7 @@ export const createOpenApiNodeHttpHandler = <
     generateOpenApiDocument(router, { title: '', version: '', baseUrl: '' });
   }
 
-  const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
+  const { createContext, responseMeta, onError, maxBodySize } = opts;
   const getProcedure = createProcedureCache(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
@@ -85,7 +85,7 @@ export const createOpenApiNodeHttpHandler = <
         // Can be used for warmup
         if (method === 'HEAD') {
           sendResponse(204, {}, undefined);
-          return await teardown?.();
+          return;
         }
 
         throw new TRPCError({
@@ -162,7 +162,5 @@ export const createOpenApiNodeHttpHandler = <
       };
       sendResponse(statusCode, headers, body);
     }
-
-    await teardown?.();
   };
 };

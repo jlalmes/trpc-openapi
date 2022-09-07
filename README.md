@@ -320,7 +320,6 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 | `createContext` | `Function` | Passes contextual (`ctx`) data to procedure resolvers. | `false`  |
 | `responseMeta`  | `Function` | Returns any modifications to statusCode & headers.     | `false`  |
 | `onError`       | `Function` | Called if error occurs inside handler.                 | `false`  |
-| `teardown`      | `Function` | Called after each request is completed.                | `false`  |
 | `maxBodySize`   | `number`   | Maximum request body size in bytes (default: 100kb).   | `false`  |
 
 ---

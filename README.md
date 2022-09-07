@@ -29,25 +29,23 @@ yarn add trpc-openapi
 **2. Add `OpenApiMeta` to your tRPC router.**
 
 ```typescript
-import * as trpc from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
-export const appRouter = trpc.router<any, OpenApiMeta /* 👈 */>();
+const t = initTRPC.meta<OpenApiMeta>().create(); /* 👈 */
 ```
 
 **3. Enable `openapi` support for a procedure.**
 
 ```typescript
-import * as trpc from '@trpc/server';
-import { OpenApiMeta } from 'trpc-openapi';
-
-export const appRouter = trpc.router<any, OpenApiMeta>().query('sayHello', {
-  meta: { /* 👉 */ openapi: { method: 'GET', path: '/say-hello' } },
-  input: z.object({ name: z.string() }),
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input }) => {
-    return { greeting: `Hello ${input.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ /* 👉 */ openapi: { method: 'GET', path: '/say-hello' } })
+    .input(z.object({ name: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .query(({ input }) => {
+      return { greeting: `Hello ${input.name}!` };
+    });
 });
 ```
 
@@ -95,7 +93,7 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 
 Peer dependencies:
 
-- [`tRPC`](https://github.com/trpc/trpc) Server v9 (`@trpc/server@^9.23.0`) must be installed.
+- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server@^10.0.0-proxy-alpha.72`) must be installed.
 - [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed.
 
 For a procedure to support OpenAPI the following _must_ be true:
@@ -176,18 +174,6 @@ Status codes will be `200` by default for any successful requests. In the case o
 You can modify the status code or headers for any response using the `responseMeta` function.
 
 Please see [error status codes here](src/adapters/node-http/errors.ts).
-
-```jsonc
-"This is good" /* Output from tRPC procedure */
-```
-
-```jsonc
-{
-  "message": "This is bad", /* Message from TRPCError */,
-  "code": "BAD_REQUEST", /* Code from TRPCError */
-  "issues": [...] /* (optional) ZodIssues[] from TRPCError */
-}
-```
 
 ## Authorization
 

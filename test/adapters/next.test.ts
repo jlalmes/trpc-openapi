@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import * as trpc from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { z } from 'zod';
 
@@ -16,16 +16,23 @@ const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
 const teardownMock = jest.fn();
 
+const clearMocks = () => {
+  createContextMock.mockClear();
+  responseMetaMock.mockClear();
+  onErrorMock.mockClear();
+  teardownMock.mockClear();
+};
+
 const createOpenApiNextHandlerCaller = <TRouter extends OpenApiRouter>(
   handlerOpts: CreateOpenApiNextHandlerOptions<TRouter>,
 ) => {
   const openApiNextHandler = createOpenApiNextHandler({
     router: handlerOpts.router,
-    createContext: handlerOpts.createContext ?? (createContextMock as any),
-    responseMeta: handlerOpts.responseMeta ?? (responseMetaMock as any),
-    onError: handlerOpts.onError ?? (onErrorMock as any),
-    teardown: handlerOpts.teardown ?? (teardownMock as any),
-  });
+    createContext: handlerOpts.createContext ?? createContextMock,
+    responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
+    onError: handlerOpts.onError ?? onErrorMock,
+    teardown: handlerOpts.teardown ?? teardownMock,
+  } as any);
 
   return (req: { method: string; query: Record<string, any>; body?: any }) => {
     return new Promise<{
@@ -61,36 +68,34 @@ const createOpenApiNextHandlerCaller = <TRouter extends OpenApiRouter>(
   };
 };
 
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create();
+
 describe('next adapter', () => {
   afterEach(() => {
-    createContextMock.mockClear();
-    responseMetaMock.mockClear();
-    onErrorMock.mockClear();
-    teardownMock.mockClear();
+    clearMocks();
   });
 
   test('with valid routes', async () => {
+    const appRouter = t.router({
+      sayHelloQuery: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/say-hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+      sayHelloMutation: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/say-hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+      sayHelloSlash: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/say/hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+    });
+
     const openApiNextHandlerCaller = createOpenApiNextHandlerCaller({
-      router: trpc
-        .router<any, OpenApiMeta>()
-        .query('sayHello', {
-          meta: { openapi: { method: 'GET', path: '/say-hello' } },
-          input: z.object({ name: z.string() }),
-          output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-        })
-        .mutation('sayHello', {
-          meta: { openapi: { method: 'POST', path: '/say-hello' } },
-          input: z.object({ name: z.string() }),
-          output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-        })
-        .query('sayHelloSplit', {
-          meta: { openapi: { method: 'GET', path: '/say/hello' } },
-          input: z.object({ name: z.string() }),
-          output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-        }),
+      router: appRouter,
     });
 
     {
@@ -106,10 +111,7 @@ describe('next adapter', () => {
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
 
-      createContextMock.mockClear();
-      responseMetaMock.mockClear();
-      onErrorMock.mockClear();
-      teardownMock.mockClear();
+      clearMocks();
     }
     {
       const res = await openApiNextHandlerCaller({
@@ -125,10 +127,7 @@ describe('next adapter', () => {
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
 
-      createContextMock.mockClear();
-      responseMetaMock.mockClear();
-      onErrorMock.mockClear();
-      teardownMock.mockClear();
+      clearMocks();
     }
     {
       const res = await openApiNextHandlerCaller({
@@ -146,8 +145,10 @@ describe('next adapter', () => {
   });
 
   test('with invalid path', async () => {
+    const appRouter = t.router({});
+
     const openApiNextHandlerCaller = createOpenApiNextHandlerCaller({
-      router: trpc.router(),
+      router: appRouter,
     });
 
     const res = await openApiNextHandlerCaller({

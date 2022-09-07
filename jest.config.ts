@@ -1,4 +1,4 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/** @type {import('jest').Config} */
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
@@ -7,5 +7,9 @@ module.exports = {
     'ts-jest': {
       tsconfig: './tsconfig.json',
     },
+  },
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
   },
 };

@@ -1,39 +1,29 @@
 import { TRPCError } from '@trpc/server';
 import { OpenAPIV3 } from 'openapi-types';
 
-import { OpenApiRouter } from '../types';
+import { OpenApiProcedureRecord, OpenApiRouter } from '../types';
 import { acceptsRequestBody } from '../utils/method';
 import { getPathParameters, normalizePath } from '../utils/path';
-import {
-  forEachOpenApiProcedure,
-  getInputOutputParsers,
-  mergeProcedureRecords,
-} from '../utils/procedure';
+import { forEachOpenApiProcedure, getInputOutputParsers } from '../utils/procedure';
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from './schema';
 
 export const getOpenApiPathsObject = (
   appRouter: OpenApiRouter,
   pathsObject: OpenAPIV3.PathsObject,
 ): OpenAPIV3.PathsObject => {
-  const { queries, mutations, subscriptions } = appRouter._def;
+  const procedures = appRouter._def.procedures as OpenApiProcedureRecord;
 
-  forEachOpenApiProcedure(subscriptions, ({ path: subscriptionPath }) => {
+  forEachOpenApiProcedure(procedures, ({ path: procedurePath, type, procedure, openapi }) => {
+    const operationId = `${type}.${procedurePath}`;
+
     try {
-      throw new TRPCError({
-        message: 'Subscriptions are not supported by OpenAPI v3',
-        code: 'INTERNAL_SERVER_ERROR',
-      });
-    } catch (error: any) {
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      error.message = `[subscription.${subscriptionPath}] - ${error.message}`;
-      throw error;
-    }
-  });
+      if (type === 'subscription') {
+        throw new TRPCError({
+          message: 'Subscriptions are not supported by OpenAPI v3',
+          code: 'INTERNAL_SERVER_ERROR',
+        });
+      }
 
-  const procedures = mergeProcedureRecords(queries, mutations);
-
-  forEachOpenApiProcedure(procedures, ({ path: operationId, procedure, openapi }) => {
-    try {
       const { method, protect, summary, description, tags, headers } = openapi;
 
       const path = normalizePath(openapi.path);
@@ -72,6 +62,7 @@ export const getOpenApiPathsObject = (
                 ],
               }
             : {
+                requestBody: undefined,
                 parameters: [
                   ...headerParameters,
                   ...(getParameterObjects(inputParser, pathParameters, 'all') || []),

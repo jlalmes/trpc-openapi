@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import * as trpc from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import express from 'express';
 import fetch from 'node-fetch';
 import { z } from 'zod';
@@ -8,7 +8,6 @@ import {
   CreateOpenApiExpressMiddlewareOptions,
   OpenApiMeta,
   OpenApiRouter,
-  OpenApiSuccessResponse,
   createOpenApiExpressMiddleware,
 } from '../../src';
 
@@ -17,18 +16,25 @@ const responseMetaMock = jest.fn();
 const onErrorMock = jest.fn();
 const teardownMock = jest.fn();
 
+const clearMocks = () => {
+  createContextMock.mockClear();
+  responseMetaMock.mockClear();
+  onErrorMock.mockClear();
+  teardownMock.mockClear();
+};
+
 const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
   handlerOpts: CreateOpenApiExpressMiddlewareOptions<TRouter>,
   serverOpts?: { basePath?: `/${string}` },
 ) => {
   const openApiExpressMiddleware = createOpenApiExpressMiddleware({
     router: handlerOpts.router,
-    createContext: handlerOpts.createContext ?? (createContextMock as any),
-    responseMeta: handlerOpts.responseMeta ?? (responseMetaMock as any),
-    onError: handlerOpts.onError ?? (onErrorMock as any),
-    teardown: handlerOpts.teardown ?? (teardownMock as any),
+    createContext: handlerOpts.createContext ?? createContextMock,
+    responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
+    onError: handlerOpts.onError ?? onErrorMock,
+    teardown: handlerOpts.teardown ?? teardownMock,
     maxBodySize: handlerOpts.maxBodySize,
-  });
+  } as any);
 
   const app = express();
 
@@ -45,30 +51,34 @@ const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
   };
 };
 
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create();
+
 describe('express adapter', () => {
   afterEach(() => {
-    createContextMock.mockClear();
-    responseMetaMock.mockClear();
-    onErrorMock.mockClear();
-    teardownMock.mockClear();
+    clearMocks();
   });
 
   test('with valid routes', async () => {
+    const appRouter = t.router({
+      sayHelloQuery: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/say-hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+      sayHelloMutation: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/say-hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+      sayHelloSlash: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/say/hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+    });
+
     const { url, close } = createExpressServerWithRouter({
-      router: trpc
-        .router<any, OpenApiMeta>()
-        .query('sayHello', {
-          meta: { openapi: { method: 'GET', path: '/say-hello' } },
-          input: z.object({ name: z.string() }),
-          output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-        })
-        .mutation('sayHello', {
-          meta: { openapi: { method: 'POST', path: '/say-hello' } },
-          input: z.object({ name: z.string() }),
-          output: z.object({ greeting: z.string() }),
-          resolve: ({ input }) => ({ greeting: `Hello ${input.name}!` }),
-        }),
+      router: appRouter,
     });
 
     {
@@ -82,10 +92,7 @@ describe('express adapter', () => {
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
 
-      createContextMock.mockClear();
-      responseMetaMock.mockClear();
-      onErrorMock.mockClear();
-      teardownMock.mockClear();
+      clearMocks();
     }
     {
       const res = await fetch(`${url}/say-hello`, {
@@ -101,21 +108,35 @@ describe('express adapter', () => {
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
       expect(teardownMock).toHaveBeenCalledTimes(1);
+
+      clearMocks();
+    }
+    {
+      const res = await fetch(`${url}/say/hello?name=James`, { method: 'GET' });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ greeting: 'Hello James!' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(teardownMock).toHaveBeenCalledTimes(1);
     }
 
     close();
   });
 
   test('with basePath', async () => {
+    const appRouter = t.router({
+      echo: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/echo' } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string(), context: z.undefined() }))
+        .query(({ input }) => ({ payload: input.payload })),
+    });
+
     const { url, close } = createExpressServerWithRouter(
-      {
-        router: trpc.router<any, OpenApiMeta>().query('echo', {
-          meta: { openapi: { method: 'GET', path: '/echo' } },
-          input: z.object({ payload: z.string() }),
-          output: z.object({ payload: z.string(), context: z.undefined() }),
-          resolve: ({ input }) => ({ payload: input.payload }),
-        }),
-      },
+      { router: appRouter },
       { basePath: '/open-api' },
     );
 

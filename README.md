@@ -263,7 +263,7 @@ app.listen(3000);
 Please see [full example here](examples/with-nextjs).
 
 ```typescript
-// pages/api/[trpc].ts
+// pages/api/[...trpc].ts
 import { createOpenApiNextHandler } from 'trpc-openapi';
 
 import { appRouter } from '../../server/appRouter';
@@ -315,7 +315,7 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 
 ---
 
-Still using tRPC v9? See the legacy branch 👉 TODO: insert link here
+**_Still using tRPC v9? See our `v0` branch._**
 
 ---
 

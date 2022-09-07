@@ -308,6 +308,8 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 | `onError`       | `Function` | Called if error occurs inside handler.                 | `false`  |
 | `maxBodySize`   | `number`   | Maximum request body size in bytes (default: 100kb).   | `false`  |
 
+---
+
 Still using tRPC v9? See the legacy branch 👉 TODO: insert link here
 
 ---

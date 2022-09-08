@@ -17,14 +17,15 @@
   "typings": "dist/index.d.ts",
   "workspaces": [
     ".",
-    "examples/*"
+    "examples/with-nextjs",
+    "examples/with-express"
   ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",
     "build": "rimraf dist && tsc -p tsconfig.build.json"
   },
   "peerDependencies": {
-    "@trpc/server": "^10.0.0-proxy-alpha.72",
+    "@trpc/server": "^10.0.0-proxy-alpha.73",
     "zod": "^3.14.4"
   },
   "dependencies": {
@@ -35,7 +36,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
-    "@trpc/client": "10.0.0-proxy-alpha.72",
+    "@trpc/client": "10.0.0-proxy-alpha.73",
     "@types/co-body": "^6.1.0",
     "@types/express": "^4.17.13",
     "@types/jest": "^29.0.0",

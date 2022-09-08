@@ -93,7 +93,7 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 
 Peer dependencies:
 
-- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server@^10.0.0-proxy-alpha.72`) must be installed.
+- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server@next`) must be installed.
 - [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed.
 
 For a procedure to support OpenAPI the following _must_ be true:

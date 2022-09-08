@@ -21,37 +21,35 @@
 
 ```bash
 # npm
-npm install trpc-openapi
+npm install trpc-openapi@alpha
 # yarn
-yarn add trpc-openapi
+yarn add trpc-openapi@alpha
 ```
 
-**2. Add `OpenApiMeta` to your tRPC router.**
+**2. Add `OpenApiMeta` to your tRPC instance.**
 
 ```typescript
-import * as trpc from '@trpc/server';
+import { initTRPC } from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
-export const appRouter = trpc.router<any, OpenApiMeta /* 👈 */>();
+const t = initTRPC.meta<OpenApiMeta>().create(); /* 👈 */
 ```
 
 **3. Enable `openapi` support for a procedure.**
 
 ```typescript
-import * as trpc from '@trpc/server';
-import { OpenApiMeta } from 'trpc-openapi';
-
-export const appRouter = trpc.router<any, OpenApiMeta>().query('sayHello', {
-  meta: { /* 👉 */ openapi: { method: 'GET', path: '/say-hello' } },
-  input: z.object({ name: z.string() }),
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input }) => {
-    return { greeting: `Hello ${input.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ /* 👉 */ openapi: { method: 'GET', path: '/say-hello' } })
+    .input(z.object({ name: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .query(({ input }) => {
+      return { greeting: `Hello ${input.name}!` };
+    });
 });
 ```
 
-**4. Generate OpenAPI v3 document.**
+**4. Generate an OpenAPI document.**
 
 ```typescript
 import { generateOpenApiDocument } from 'trpc-openapi';
@@ -95,7 +93,7 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 
 Peer dependencies:
 
-- [`tRPC`](https://github.com/trpc/trpc) Server v9 (`@trpc/server@^9.23.0`) must be installed.
+- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server@^10.0.0-proxy-alpha.72`) must be installed.
 - [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed.
 
 For a procedure to support OpenAPI the following _must_ be true:
@@ -110,6 +108,7 @@ For a procedure to support OpenAPI the following _must_ be true:
 Please note:
 
 - Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
+- tRPC v9 `.interop()` routers are not supported.
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
 
@@ -127,13 +126,14 @@ Query & path parameter inputs are always accepted as a `string`, if you wish to 
 
 ```typescript
 // Router
-export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { method: 'GET', path: '/say-hello/{name}' /* 👈 */ } },
-  input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input }) => {
-    return { greeting: `${input.greeting} ${input.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: { method: 'GET', path: '/say-hello/{name}' /* 👈 */ } })
+    .input(z.object({ name: z.string() /* 👈 */, greeting: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .query(({ input }) => {
+      return { greeting: `${input.greeting} ${input.name}!` };
+    });
 });
 
 // Client
@@ -147,13 +147,14 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 
 ```typescript
 // Router
-export const appRouter = trpc.router<Context, OpenApiMeta>().mutation('sayHello', {
-  meta: { openapi: { method: 'POST', path: '/say-hello/{name}' /* 👈 */ } },
-  input: z.object({ name: z.string() /* 👈 */, greeting: z.string() }),
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input }) => {
-    return { greeting: `${input.greeting} ${input.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: { method: 'POST', path: '/say-hello/{name}' /* 👈 */ } })
+    .input(z.object({ name: z.string() /* 👈 */, greeting: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .mutation(({ input }) => {
+      return { greeting: `${input.greeting} ${input.name}!` };
+    });
 });
 
 // Client
@@ -176,18 +177,6 @@ Status codes will be `200` by default for any successful requests. In the case o
 You can modify the status code or headers for any response using the `responseMeta` function.
 
 Please see [error status codes here](src/adapters/node-http/errors.ts).
-
-```jsonc
-"This is good" /* Output from tRPC procedure */
-```
-
-```jsonc
-{
-  "message": "This is bad", /* Message from TRPCError */,
-  "code": "BAD_REQUEST", /* Code from TRPCError */
-  "issues": [...] /* (optional) ZodIssues[] from TRPCError */
-}
-```
 
 ## Authorization
 
@@ -212,6 +201,8 @@ const users: User[] = [
 
 export type Context = { user: User | null };
 
+const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
+
 export const createContext = async ({ req, res }): Promise<Context> => {
   let user: User | null = null;
   if (req.headers.authorization) {
@@ -221,16 +212,17 @@ export const createContext = async ({ req, res }): Promise<Context> => {
   return { user };
 };
 
-export const appRouter = trpc.router<Context, OpenApiMeta>().query('sayHello', {
-  meta: { openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } },
-  input: z.void(), // no input expected
-  output: z.object({ greeting: z.string() }),
-  resolve: ({ input, ctx }) => {
-    if (!ctx.user) {
-      throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
-    }
-    return { greeting: `Hello ${ctx.user.name}!` };
-  },
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } })
+    .input(z.void()) // no input expected
+    .output(z.object({ greeting: z.string() }))
+    .query(({ input, ctx }) => {
+      if (!ctx.user) {
+        throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
+      }
+      return { greeting: `Hello ${ctx.user.name}!` };
+    }),
 });
 ```
 
@@ -272,7 +264,7 @@ app.listen(3000);
 Please see [full example here](examples/with-nextjs).
 
 ```typescript
-// pages/api/[trpc].ts
+// pages/api/[...trpc].ts
 import { createOpenApiNextHandler } from 'trpc-openapi';
 
 import { appRouter } from '../../server/appRouter';
@@ -301,7 +293,7 @@ Please see [full typings here](src/types.ts).
 
 | Property      | Type                | Description                                                                                                  | Required | Default     |
 | ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
-| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`   | `true`     |
+| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`  | `true`      |
 | `method`      | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined` |
 | `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined` |
 | `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`     |
@@ -320,10 +312,11 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 | `createContext` | `Function` | Passes contextual (`ctx`) data to procedure resolvers. | `false`  |
 | `responseMeta`  | `Function` | Returns any modifications to statusCode & headers.     | `false`  |
 | `onError`       | `Function` | Called if error occurs inside handler.                 | `false`  |
-| `teardown`      | `Function` | Called after each request is completed.                | `false`  |
 | `maxBodySize`   | `number`   | Maximum request body size in bytes (default: 100kb).   | `false`  |
 
 ---
+
+_Still using tRPC v9? See our [`v0`](https://github.com/jlalmes/trpc-openapi/tree/v0) branch._
 
 ## License
 

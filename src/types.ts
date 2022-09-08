@@ -1,14 +1,11 @@
-import { ProcedureRecord } from '@trpc/server';
-// eslint-disable-next-line import/no-unresolved
-import { DefaultErrorShape, Router } from '@trpc/server/dist/declarations/src/router';
-// eslint-disable-next-line import/no-unresolved
-import { TRPC_ERROR_CODE_KEY } from '@trpc/server/dist/declarations/src/rpc';
+import { Procedure, Router, RouterDef } from '@trpc/server';
+import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
 import { OpenAPIV3 } from 'openapi-types';
 import { ZodIssue } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
-type TRPCMeta = Record<string, any>;
+type TRPCMeta = Record<string, unknown>;
 
 export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
   openapi?: {
@@ -23,27 +20,20 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
   };
 };
 
-export type OpenApiProcedureRecord<TMeta = TRPCMeta> = ProcedureRecord<
-  any,
-  any,
-  OpenApiMeta<TMeta> | undefined,
-  any,
-  any,
-  any,
-  any
->;
+export type OpenApiProcedure<TMeta = TRPCMeta> = Procedure<{
+  _config: any;
+  _meta: OpenApiMeta<TMeta>;
+  _ctx_in: any;
+  _ctx_out: any;
+  _input_in: any;
+  _input_out: any;
+  _output_in: any;
+  _output_out: any;
+}>;
 
-export type OpenApiProcedure<TMeta = TRPCMeta> = OpenApiProcedureRecord<TMeta>[string];
+export type OpenApiProcedureRecord<TMeta = TRPCMeta> = Record<string, OpenApiProcedure<TMeta>>;
 
-export type OpenApiRouter<TContext = any, TMeta = TRPCMeta> = Router<
-  TContext,
-  TContext,
-  OpenApiMeta<TMeta>,
-  OpenApiProcedureRecord<TMeta>,
-  OpenApiProcedureRecord<TMeta>,
-  ProcedureRecord<any, any, TMeta | undefined, any, any, any, any>,
-  DefaultErrorShape
->;
+export type OpenApiRouter<TMeta = TRPCMeta> = Router<RouterDef<any, any, OpenApiMeta<TMeta>, any>>;
 
 export type OpenApiSuccessResponse<D = any> = D;
 

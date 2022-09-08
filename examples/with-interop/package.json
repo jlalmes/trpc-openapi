@@ -1,0 +1,14 @@
+{
+  "name": "with-interop",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@trpc/server": "^10.0.0-proxy-alpha.73",
+    "trpc-openapi": "^0.7.0",
+    "zod": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.7.16",
+    "typescript": "4.8.2"
+  }
+}

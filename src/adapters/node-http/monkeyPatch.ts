@@ -1,3 +1,4 @@
+import { createInputMiddleware } from '@trpc/server';
 import { z } from 'zod';
 
 import { OpenApiProcedure } from '../../types';
@@ -14,7 +15,12 @@ export const monkeyPatchProcedure = (procedure: MonkeyPatchedOpenApiProcedure) =
   if (instanceofZodType(inputParser)) {
     if (instanceofZodTypeLikeVoid(inputParser)) {
       const zObject = z.object({});
-      (procedure as any).parseInputFn = zObject.parseAsync.bind(zObject);
+      procedure._def.middlewares = procedure._def.middlewares.map((middleware) => {
+        if (middleware._type === 'input') {
+          return createInputMiddleware(zObject.parseAsync.bind(zObject));
+        }
+        return middleware;
+      });
     }
     // TODO: add out of box support for number/boolean/date etc. (https://github.com/jlalmes/trpc-openapi/issues/44)
   }

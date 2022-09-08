@@ -1,6 +1,5 @@
 import { TRPCError } from '@trpc/server';
-// eslint-disable-next-line import/no-unresolved
-import { NodeHTTPRequest } from '@trpc/server/dist/declarations/src/adapters/node-http';
+import { NodeHTTPRequest } from '@trpc/server/dist/adapters/node-http';
 import parse from 'co-body';
 
 export const getQuery = (req: NodeHTTPRequest, url: URL): Record<string, string> => {
@@ -50,18 +49,24 @@ export const getBody = async (req: NodeHTTPRequest, maxBodySize = BODY_100_KB): 
         returnRawBody: true,
       });
       req.body = raw ? parsed : undefined;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'PayloadTooLargeError') {
+    } catch (cause) {
+      if (cause instanceof Error && cause.name === 'PayloadTooLargeError') {
         throw new TRPCError({
           message: 'Request body too large',
           code: 'PAYLOAD_TOO_LARGE',
-          cause: error,
+          cause: cause,
         });
       }
+
+      let errorCause: Error | undefined = undefined;
+      if (cause instanceof Error) {
+        errorCause = cause;
+      }
+
       throw new TRPCError({
         message: 'Failed to parse request body',
         code: 'PARSE_ERROR',
-        cause: error,
+        cause: errorCause,
       });
     }
   }

@@ -2,8 +2,8 @@ import { TRPCError } from '@trpc/server';
 import {
   NodeHTTPHandlerOptions,
   NodeHTTPRequest,
-  NodeHTTPResponse, // eslint-disable-next-line import/no-unresolved
-} from '@trpc/server/dist/declarations/src/adapters/node-http';
+  NodeHTTPResponse,
+} from '@trpc/server/dist/adapters/node-http';
 import cloneDeep from 'lodash.clonedeep';
 import { ZodError } from 'zod';
 
@@ -28,7 +28,7 @@ export type CreateOpenApiNodeHttpHandlerOptions<
   TResponse extends NodeHTTPResponse,
 > = Pick<
   NodeHTTPHandlerOptions<TRouter, TRequest, TResponse>,
-  'router' | 'createContext' | 'responseMeta' | 'onError' | 'teardown' | 'maxBodySize'
+  'router' | 'createContext' | 'responseMeta' | 'onError' | 'maxBodySize'
 >;
 
 export type OpenApiNextFunction = () => void;
@@ -47,7 +47,7 @@ export const createOpenApiNodeHttpHandler = <
     generateOpenApiDocument(router, { title: '', version: '', baseUrl: '' });
   }
 
-  const { createContext, responseMeta, onError, teardown, maxBodySize } = opts;
+  const { createContext, responseMeta, onError, maxBodySize } = opts;
   const getProcedure = createProcedureCache(router);
 
   return async (req: TRequest, res: TResponse, next?: OpenApiNextFunction) => {
@@ -85,7 +85,7 @@ export const createOpenApiNodeHttpHandler = <
         // Can be used for warmup
         if (method === 'HEAD') {
           sendResponse(204, {}, undefined);
-          return await teardown?.();
+          return;
         }
 
         throw new TRPCError({
@@ -130,6 +130,14 @@ export const createOpenApiNodeHttpHandler = <
         req,
       });
 
+      const errorShape = router.getErrorShape({
+        error,
+        type: procedure?.type ?? 'unknown',
+        path: procedure?.path,
+        input,
+        ctx,
+      });
+
       const meta = responseMeta?.({
         type: procedure?.type ?? 'unknown',
         paths: procedure?.path ? [procedure?.path] : undefined,
@@ -146,13 +154,13 @@ export const createOpenApiNodeHttpHandler = <
       const statusCode = meta?.status ?? TRPC_ERROR_CODE_HTTP_STATUS[error.code] ?? 500;
       const headers = meta?.headers ?? {};
       const body: OpenApiErrorResponse = {
-        message: isInputValidationError ? 'Input validation failed' : error.message,
+        message: isInputValidationError
+          ? 'Input validation failed'
+          : errorShape?.message ?? error.message ?? 'An error occurred',
         code: error.code,
         issues: isInputValidationError ? (error.cause as ZodError).errors : undefined,
       };
       sendResponse(statusCode, headers, body);
     }
-
-    await teardown?.();
   };
 };

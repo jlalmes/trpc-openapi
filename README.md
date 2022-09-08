@@ -334,6 +334,8 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 
 ---
 
+_Are you using tRPC v10? See our [`next`](https://github.com/jlalmes/trpc-openapi/tree/next) branch._
+
 ## License
 
 Distributed under the MIT License. See LICENSE for more information.

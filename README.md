@@ -144,6 +144,31 @@ const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /
 const body = await res.json(); /* { ok: true, data: { greeting: 'Hello James!' } } */
 ```
 
+### Query parameters With primitives such as `number`, `boolean`, `Date`
+
+```typescript
+// Router
+export const appRouter = trpc.router<Context, OpenApiMeta>().query('getRecoards', {
+  meta: { openapi: { enabled: true, method: 'GET', path: '/getRecoards' /* 👈 */ } },
+  input: z.object({ 
+    search: z.string().default("") /* 👈 */,
+    limit: z.preprocess(  /* takes Int */
+	(arg) => (typeof arg === "string" ? parseInt(arg) : arg),
+	z.number().min(1).max(50)),
+    fromDate: z.preprocess(  /* takes Iso Date String */
+	(arg) => (typeof arg === "string" ? new Date(arg) : arg),
+	z.date()),
+    isActive: z.preprocess(  /* takes boolean */
+	(arg) => {
+           if (!(typeof arg === "string")) return arg;
+	   if (["true", "1"].includes(arg)) return true;
+	   if (["false", "0"].includes(arg)) return false;
+	   return arg;
+         },z.date()),
+  }),
+});
+```
+
 ### Request body
 
 ```typescript

@@ -160,10 +160,10 @@ export const appRouter = trpc.router<Context, OpenApiMeta>().query('getRecoards'
 	z.date()),
     isActive: z.preprocess(  /* takes boolean */
 	(arg) => {
-         if (!(typeof arg === "string")) return arg;
-	 if (["true", "1"].includes(arg)) return true;
-	 if (["false", "0"].includes(arg)) return false;
-	 return arg;
+           if (!(typeof arg === "string")) return arg;
+	   if (["true", "1"].includes(arg)) return true;
+	   if (["false", "0"].includes(arg)) return false;
+	   return arg;
          },z.date()),
   }),
 });

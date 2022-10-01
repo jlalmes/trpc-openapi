@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { createTRPCProxyClient } from '@trpc/client';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { createHTTPHandler } from '@trpc/server/adapters/standalone';
 import { Server } from 'http';
@@ -881,7 +881,9 @@ describe('standalone adapter', () => {
     });
 
     type AppRouter = typeof appRouter;
-    const client = createTRPCProxyClient<AppRouter>({ url: `${url}/trpc` });
+    const client = createTRPCProxyClient<AppRouter>({
+      links: [httpLink({ url: `${url}/trpc` })],
+    });
 
     {
       const res = await client.withVoidQuery.query();
@@ -1073,7 +1075,7 @@ describe('standalone adapter', () => {
       });
 
     const appRouter = t2.router({
-      customFormttedError: t2.procedure
+      customFormattedError: t2.procedure
         .meta({ openapi: { method: 'POST', path: '/custom-formatted-error' } })
         .input(z.void())
         .output(z.void())

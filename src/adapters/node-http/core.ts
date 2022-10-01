@@ -1,4 +1,4 @@
-import { TRPCError } from '@trpc/server';
+import { AnyProcedure, AnyRouter, TRPCError } from '@trpc/server';
 import {
   NodeHTTPHandlerOptions,
   NodeHTTPRequest,
@@ -104,7 +104,14 @@ export const createOpenApiNodeHttpHandler = <
 
       monkeyPatchProcedure(procedure.procedure);
 
-      data = await caller[procedure.type](procedure.path, input);
+      // Reduce the path from dot notation to the actual procedure function
+      // as v10 does not have caller level query/mutation methods anymore
+      const path = procedure.path.split('.');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unnecessary-type-assertion, @typescript-eslint/no-unsafe-return
+      const fn = path.reduce((acc, curr) => acc[curr] as any, caller as any);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument
+      data = await (fn as AnyProcedure)(input);
 
       const meta = responseMeta?.({
         type: procedure.type,

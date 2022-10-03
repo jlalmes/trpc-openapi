@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@trpc/server": "^10.0.0-proxy-beta.13",
-    "trpc-openapi": "^0.7.0",
     "zod": "^3.19.1"
   },
   "devDependencies": {

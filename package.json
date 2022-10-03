@@ -1,6 +1,6 @@
 {
   "name": "trpc-openapi",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "tRPC OpenAPI",
   "author": "James Berry <jb@jamesbe.com>",
   "private": false,
@@ -18,7 +18,8 @@
   "workspaces": [
     ".",
     "examples/with-nextjs",
-    "examples/with-express"
+    "examples/with-express",
+    "examples/with-interop"
   ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",

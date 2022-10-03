@@ -1,4 +1,4 @@
-import { TRPCError } from '@trpc/server';
+import { AnyProcedure, TRPCError } from '@trpc/server';
 import {
   NodeHTTPHandlerOptions,
   NodeHTTPRequest,
@@ -104,7 +104,10 @@ export const createOpenApiNodeHttpHandler = <
 
       monkeyPatchProcedure(procedure.procedure);
 
-      data = await caller[procedure.type](procedure.path, input);
+      const segments = procedure.path.split('.');
+      const procedureFn = segments.reduce((acc, curr) => acc[curr], caller as any) as AnyProcedure;
+
+      data = await procedureFn(input);
 
       const meta = responseMeta?.({
         type: procedure.type,

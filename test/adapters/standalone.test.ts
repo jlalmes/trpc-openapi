@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { createTRPCProxyClient } from '@trpc/client';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { TRPCError, initTRPC } from '@trpc/server';
 import { createHTTPHandler } from '@trpc/server/adapters/standalone';
 import { Server } from 'http';
@@ -881,7 +881,9 @@ describe('standalone adapter', () => {
     });
 
     type AppRouter = typeof appRouter;
-    const client = createTRPCProxyClient<AppRouter>({ url: `${url}/trpc` });
+    const client = createTRPCProxyClient<AppRouter>({
+      links: [httpBatchLink({ url: `${url}/trpc` })],
+    });
 
     {
       const res = await client.withVoidQuery.query();

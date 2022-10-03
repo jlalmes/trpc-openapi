@@ -1,4 +1,4 @@
-import { Procedure, Router, RouterDef } from '@trpc/server';
+import { Procedure, ProcedureParams, Router, RouterDef } from '@trpc/server';
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
 import { OpenAPIV3 } from 'openapi-types';
 import { ZodIssue } from 'zod';
@@ -20,16 +20,24 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
   };
 };
 
-export type OpenApiProcedure<TMeta = TRPCMeta> = Procedure<{
-  _config: any;
-  _meta: OpenApiMeta<TMeta>;
-  _ctx_in: any;
-  _ctx_out: any;
-  _input_in: any;
-  _input_out: any;
-  _output_in: any;
-  _output_out: any;
-}>;
+export type OpenApiProcedure<TMeta = TRPCMeta> = Procedure<
+  'query' | 'mutation',
+  ProcedureParams<
+    {
+      transformer: any;
+      errorShape: any;
+      ctx: any;
+      meta: OpenApiMeta<TMeta>;
+    },
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    OpenApiMeta<TMeta>
+  >
+>;
 
 export type OpenApiProcedureRecord<TMeta = TRPCMeta> = Record<string, OpenApiProcedure<TMeta>>;
 

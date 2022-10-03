@@ -18,7 +18,8 @@
   "workspaces": [
     ".",
     "examples/with-nextjs",
-    "examples/with-express"
+    "examples/with-express",
+    "examples/with-interop"
   ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",

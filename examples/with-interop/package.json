@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@trpc/server": "^10.0.0-proxy-beta.13",
+    "@trpc/server": "^10.0.0-proxy-beta.18",
     "zod": "^3.19.1"
   },
   "devDependencies": {

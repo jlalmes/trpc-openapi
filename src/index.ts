@@ -1,8 +1,8 @@
 import {
+  CreateOpenApiAwsLambdaHandlerOptions,
   CreateOpenApiExpressMiddlewareOptions,
   CreateOpenApiHttpHandlerOptions,
   CreateOpenApiNextHandlerOptions,
-  CreateOpenAwsLambdaHandlerOptions,
   createOpenApiAwsLambdaHandler,
   createOpenApiExpressMiddleware,
   createOpenApiHttpHandler,
@@ -24,7 +24,7 @@ import {
 import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
 
 export {
-  CreateOpenAwsLambdaHandlerOptions,
+  CreateOpenApiAwsLambdaHandlerOptions,
   CreateOpenApiExpressMiddlewareOptions,
   CreateOpenApiHttpHandlerOptions,
   CreateOpenApiNextHandlerOptions,

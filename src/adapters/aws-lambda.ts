@@ -17,11 +17,11 @@ import type { IncomingMessage, ServerResponse } from 'http';
 import type { Body, RequestMethod } from 'node-mocks-http';
 import { createRequest, createResponse } from 'node-mocks-http';
 
-import type { OpenApiRouter } from '../../types';
+import type { OpenApiRouter } from '../types';
 import {
   CreateOpenApiNodeHttpHandlerOptions,
   createOpenApiNodeHttpHandler,
-} from '../node-http/core';
+} from './node-http/core';
 
 type AWSLambdaCreateContextFn<TRouter extends OpenApiRouter, TEvent extends APIGatewayEvent> = ({
   event,
@@ -30,7 +30,7 @@ type AWSLambdaCreateContextFn<TRouter extends OpenApiRouter, TEvent extends APIG
   | TRouter['_def']['_config']['$types']['ctx']
   | Promise<TRouter['_def']['_config']['$types']['ctx']>;
 
-export type CreateOpenAwsLambdaHandlerOptions<
+export type CreateOpenApiAwsLambdaHandlerOptions<
   TRouter extends OpenApiRouter,
   TEvent extends APIGatewayEvent,
 > = Omit<
@@ -101,7 +101,7 @@ export const createOpenApiAwsLambdaHandler = <
   TRouter extends OpenApiRouter,
   TEvent extends APIGatewayEvent,
 >(
-  opts: CreateOpenAwsLambdaHandlerOptions<TRouter, TEvent>,
+  opts: CreateOpenApiAwsLambdaHandlerOptions<TRouter, TEvent>,
 ) => {
   return async (event: TEvent, context: APIGWContext) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return

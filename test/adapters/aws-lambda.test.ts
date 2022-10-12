@@ -202,7 +202,6 @@ describe('v1', () => {
       }),
       ctx,
     );
-    console.log({ rawBody });
     const body = JSON.parse(rawBody);
 
     expect(statusCode).toBe(400);
@@ -225,7 +224,6 @@ describe('v1', () => {
       { version: 'asdf' },
       ctx,
     );
-    console.log({ rawBody });
     const body = JSON.parse(rawBody);
 
     expect(statusCode).toBe(500);
@@ -395,7 +393,6 @@ describe('v2', () => {
       }),
       ctx,
     );
-    console.log({ rawBody });
     const body = JSON.parse(rawBody);
 
     expect(statusCode).toBe(400);
@@ -418,7 +415,6 @@ describe('v2', () => {
       { version: 'asdf' },
       ctx,
     );
-    console.log({ rawBody });
     const body = JSON.parse(rawBody);
 
     expect(statusCode).toBe(500);

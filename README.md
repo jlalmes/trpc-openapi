@@ -276,13 +276,12 @@ export default createOpenApiNextHandler({ router: appRouter });
 
 Please see [full example here](examples/with-aws-lambda).
 
-
 ```typescript
 import { createOpenApiAwsLambdaHandler } from 'trpc-openapi';
 
 import { appRouter } from './appRouter';
 
-export default createOpenApiAwsLambdaHandler({ router: appRouter });
+export const openApi = createOpenApiAwsLambdaHandler({ router: appRouter });
 ```
 
 ## Types

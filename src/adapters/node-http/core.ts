@@ -133,20 +133,20 @@ export const createOpenApiNodeHttpHandler = <
         req,
       });
 
-      const errorShape = router.getErrorShape({
-        error,
-        type: procedure?.type ?? 'unknown',
-        path: procedure?.path,
-        input,
-        ctx,
-      });
-
       const meta = responseMeta?.({
         type: procedure?.type ?? 'unknown',
         paths: procedure?.path ? [procedure?.path] : undefined,
         ctx,
         data: [data],
         errors: [error],
+      });
+
+      const errorShape = router.getErrorShape({
+        error,
+        type: procedure?.type ?? 'unknown',
+        path: procedure?.path,
+        input,
+        ctx,
       });
 
       const isInputValidationError =

@@ -5,8 +5,12 @@ This example uses [SST](https://sst.dev/) to deploy both tRPC and OpenAPI API la
 First make sure your [AWS Credentials are configured](https://docs.sst.dev/advanced/iam-credentials)
 
 Then from within the the `with-sst` folder run the following to deploy your application in live lambda dev mode
+
 ```bash
-npm run start
+cd frontend/api-docs
+npm i
+cd ../../
+npm start
 ```
 
 You will be prompted for a stage, enter whatever you like here. Generally your name works well.

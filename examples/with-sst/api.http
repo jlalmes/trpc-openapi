@@ -1,0 +1,79 @@
+
+# Sample requests for VSCode's Rest Client
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# 👇 Add your OpenAPI URL here 👇
+@url = __YOUR_OPENAPI_URL__
+@contentType = application/json
+
+###
+# @prompt name User's name (min 3 chars)
+# @prompt email Email for user
+# @prompt passcode passcode for user (4 digits)
+POST {{url}}/auth/register HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "name": "{{name}}",
+  "email": "{{email}}",
+  "passcode": "{{passcode}}"
+}
+
+###
+# @name login
+# @prompt email Email for user
+# @prompt passcode passcode for user (4 digits)
+POST {{url}}/auth/login HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "email": "{{email}}",
+  "passcode": "{{passcode}}"
+}
+
+###
+GET {{url}}/users HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+# @prompt id User ID to get
+GET {{url}}/users/{{id}} HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+GET {{url}}/posts HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+# @prompt id Post ID to get
+GET {{url}}/posts/{{id}} HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+@token = {{login.response.body.$.token}}
+# @prompt content Content for a new post
+POST {{url}}/posts HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+  
+{
+  "content": "{{content}}"
+}
+
+###
+@token = {{login.response.body.$.token}}
+# @prompt id Post ID to update
+# @prompt content Content to update in post
+PUT {{url}}/posts/{{id}} HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+  
+{
+  "content": "{{content}}"
+}
+
+###
+@token = {{login.response.body.$.token}}
+# @prompt id Post ID to delete
+DELETE {{url}}/posts/{{id}} HTTP/1.1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}

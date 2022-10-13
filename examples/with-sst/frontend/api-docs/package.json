@@ -1,0 +1,17 @@
+{
+  "name": "api-docs",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "sst-env -- vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@serverless-stack/static-site-env": "^1.15.13",
+    "vite": "^2.8.0"
+  },
+  "dependencies": {
+    "swagger-ui": "^4.14.3"
+  }
+}

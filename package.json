@@ -20,7 +20,10 @@
     "examples/with-nextjs",
     "examples/with-express",
     "examples/with-interop",
-    "examples/with-aws-lambda"
+    "examples/with-aws-lambda",
+    "examples/with-sst",
+    "examples/with-sst/services",
+    "examples/with-sst/frontend/*"
   ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",

@@ -1,5 +1,5 @@
 import { TRPCError, initTRPC } from '@trpc/server';
-import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import jwt from 'jsonwebtoken';
 import { OpenApiMeta } from 'trpc-openapi';
 import { v4 as uuid } from 'uuid';
@@ -28,17 +28,24 @@ const t = initTRPC
 
 export const createContext = async ({
   req,
-  res,
+  reply,
 }: // eslint-disable-next-line @typescript-eslint/require-await
-CreateExpressContextOptions): Promise<Context> => {
+CreateFastifyContextOptions): Promise<Context> => {
   const requestId = uuid();
-  res.setHeader('x-request-id', requestId);
+  try {
+    console.log({ reply });
+    // this throws an error and fails since the reply object is undefined
+    // when though it is defined in the type
+    reply.header('x-request-id', requestId);
+  } catch (error) {
+    console.log(error);
+  }
 
   let user: User | null = null;
 
   try {
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1];
+    if (req.raw.headers.authorization) {
+      const token = req.raw.headers.authorization.split(' ')[1];
       const userId = jwt.verify(token, jwtSecret) as string;
       if (userId) {
         user = database.users.find((_user) => _user.id === userId) ?? null;

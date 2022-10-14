@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-floating-promises, @typescript-eslint/ban-ts-comment */
 import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import jwt from 'jsonwebtoken';
@@ -28,18 +29,30 @@ const t = initTRPC
 
 export const createContext = async ({
   req,
-  reply,
+  res,
 }: // eslint-disable-next-line @typescript-eslint/require-await
 CreateFastifyContextOptions): Promise<Context> => {
   const requestId = uuid();
   try {
-    console.log({ reply });
-    // this throws an error and fails since the reply object is undefined
-    // when though it is defined in the type
-    reply.header('x-request-id', requestId);
-  } catch (error) {
-    console.log(error);
+    // @ts-expect-error - res.setHeader is not typed
+    if (res.setHeader) {
+      // this is a problem, where req object in the context options from the trpc openapi plugin
+      // has .setHeader(), but does not have .header() func which is from fastify
+
+      // @ts-expect-error - res.setHeader is not typed
+      res.setHeader('x-request-id', requestId);
+    } else {
+      // this is the inverse, req object in the context options from the trpc fastify plugin
+      // has .header(), but does not have .setHeader() func
+      res.header('x-request-id', requestId);
+
+      // ideally we would only access the .header() method from the req object which is a FastifyRequest
+    }
+  } catch (cause) {
+    console.error(cause);
   }
+  // req.headers is available in the context options from the trpc fastify plugin but not from the trpc openapi fastify plugin
+  // console.log(req.headers);
 
   let user: User | null = null;
 

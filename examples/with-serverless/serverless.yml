@@ -1,4 +1,4 @@
-service: with-aws-lambda
+service: with-serverless
 frameworkVersion: '3'
 
 provider:

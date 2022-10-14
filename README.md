@@ -274,7 +274,7 @@ export default createOpenApiNextHandler({ router: appRouter });
 
 #### With AWS Lambda
 
-Please see [full example here](examples/with-aws-lambda).
+Please see [full example here](examples/with-serverless).
 
 ```typescript
 import { createOpenApiAwsLambdaHandler } from 'trpc-openapi';

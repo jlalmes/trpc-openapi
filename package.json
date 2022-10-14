@@ -20,7 +20,7 @@
     "examples/with-nextjs",
     "examples/with-express",
     "examples/with-interop",
-    "examples/with-sls",
+    "examples/with-serverless",
     "examples/with-sst",
     "examples/with-sst/services"
   ],

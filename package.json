@@ -22,7 +22,8 @@
     "examples/with-interop",
     "examples/with-serverless",
     "examples/with-sst",
-    "examples/with-sst/services"
+    "examples/with-sst/services",
+    "examples/with-sst/frontend/api-docs"
   ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",

@@ -1,12 +1,14 @@
 import {
   CreateOpenApiAwsLambdaHandlerOptions,
   CreateOpenApiExpressMiddlewareOptions,
+  CreateOpenApiFastifyPluginOptions,
   CreateOpenApiHttpHandlerOptions,
   CreateOpenApiNextHandlerOptions,
   createOpenApiAwsLambdaHandler,
   createOpenApiExpressMiddleware,
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
+  fastifyTRPCOpenApiPlugin,
 } from './adapters';
 import {
   GenerateOpenApiDocumentOptions,
@@ -28,10 +30,12 @@ export {
   CreateOpenApiExpressMiddlewareOptions,
   CreateOpenApiHttpHandlerOptions,
   CreateOpenApiNextHandlerOptions,
+  CreateOpenApiFastifyPluginOptions,
   createOpenApiExpressMiddleware,
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
   createOpenApiAwsLambdaHandler,
+  fastifyTRPCOpenApiPlugin,
   openApiVersion,
   generateOpenApiDocument,
   GenerateOpenApiDocumentOptions,

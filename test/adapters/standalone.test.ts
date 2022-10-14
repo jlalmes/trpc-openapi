@@ -1075,7 +1075,7 @@ describe('standalone adapter', () => {
       });
 
     const appRouter = t2.router({
-      customFormttedError: t2.procedure
+      customFormattedError: t2.procedure
         .meta({ openapi: { method: 'POST', path: '/custom-formatted-error' } })
         .input(z.void())
         .output(z.void())

@@ -1,0 +1,30 @@
+service: with-serverless
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+functions:
+  openApiJson:
+    handler: handler.openApiJson
+    events:
+      - httpApi:
+          path: /api/openapi.json
+          method: GET
+  trpcApi:
+    handler: handler.trpcHandler
+    events:
+      - httpApi:
+          path: /api/trpc/{trpc+}
+          method: any
+  openApi:
+    handler: handler.trpcOpenApiHandler
+    events:
+      - httpApi:
+          path: /api/{trpc+}
+          method: any
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline

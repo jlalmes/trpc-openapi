@@ -272,6 +272,18 @@ import { appRouter } from '../../server/appRouter';
 export default createOpenApiNextHandler({ router: appRouter });
 ```
 
+#### With AWS Lambda
+
+Please see [full example here](examples/with-serverless).
+
+```typescript
+import { createOpenApiAwsLambdaHandler } from 'trpc-openapi';
+
+import { appRouter } from './appRouter';
+
+export const openApi = createOpenApiAwsLambdaHandler({ router: appRouter });
+```
+
 ## Types
 
 #### GenerateOpenApiDocumentOptions

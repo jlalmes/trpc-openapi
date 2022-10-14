@@ -13,6 +13,7 @@ export const createOpenApiExpressMiddleware = <TRouter extends OpenApiRouter>(
   opts: CreateOpenApiExpressMiddlewareOptions<TRouter>,
 ) => {
   const openApiHttpHandler = createOpenApiNodeHttpHandler(opts);
+
   return async (req: Request, res: Response) => {
     await openApiHttpHandler(req, res);
   };

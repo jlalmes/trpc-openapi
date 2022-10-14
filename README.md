@@ -284,6 +284,29 @@ import { appRouter } from './appRouter';
 export const openApi = createOpenApiAwsLambdaHandler({ router: appRouter });
 ```
 
+#### With Fastify
+
+Please see [full example here](examples/with-fastify).
+
+```typescript
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import Fastify from 'fastify';
+import { fastifyTRPCOpenApiPlugin } from 'trpc-openapi';
+
+import { appRouter } from './router';
+
+const fastify = Fastify();
+
+async function main() {
+  await fastify.register(fastifyTRPCPlugin, { router: appRouter });
+  await fastify.register(fastifyTRPCOpenApiPlugin, { router: appRouter }); /* 👈 */
+
+  await fastify.listen({ port: 3000 });
+}
+
+main();
+```
+
 ## Types
 
 #### GenerateOpenApiDocumentOptions

@@ -38,7 +38,7 @@ export function fastifyTRPCOpenApiPlugin<TRouter extends AnyRouter>(
             return reply;
           }
 
-          return reply.header(key, `${value as string | number}`);
+          return reply.header(key, value);
         },
         end: (body: any) => reply.send(body),
       },

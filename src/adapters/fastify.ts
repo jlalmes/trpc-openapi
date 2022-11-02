@@ -28,10 +28,10 @@ export function fastifyTRPCOpenApiPlugin<TRouter extends AnyRouter>(
 
   fastify.all(`${prefix}/*`, async (request, reply) => {
     const prefixRemovedFromUrl = request.url.replace(prefix, '');
+    request.raw.url = prefixRemovedFromUrl;
     return await openApiHttpHandler(
-      { ...request, url: prefixRemovedFromUrl, method: request.method },
-      {
-        ...(reply as any),
+      request,
+      Object.assign(reply, {
         setHeader: (key: string, value: string | number | readonly string[]) => {
           if (Array.isArray(value)) {
             value.forEach((v) => reply.header(key, v));
@@ -40,8 +40,8 @@ export function fastifyTRPCOpenApiPlugin<TRouter extends AnyRouter>(
 
           return reply.header(key, value);
         },
-        end: (body: any) => reply.send(body),
-      },
+        end: (body: any) => reply.send(body), // eslint-disable-line @typescript-eslint/no-explicit-any
+      }),
     );
   });
 

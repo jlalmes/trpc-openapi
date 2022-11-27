@@ -328,7 +328,7 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 
 ---
 
-_Still using tRPC v9? See our [`master`](https://github.com/jlalmes/trpc-openapi/tree/master) branch._
+_Still using tRPC v9? See our [`.interop()`](examples/with-interop) example._
 
 ## License
 

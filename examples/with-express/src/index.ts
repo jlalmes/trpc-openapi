@@ -22,6 +22,6 @@ app.use('/api', createOpenApiExpressMiddleware({ router: appRouter, createContex
 app.use('/', swaggerUi.serve);
 app.get('/', swaggerUi.setup(openApiDocument));
 
-app.listen(3001, () => {
-  console.log('Server started on http://localhost:3001');
+app.listen(3000, () => {
+  console.log('Server started on http://localhost:3000');
 });

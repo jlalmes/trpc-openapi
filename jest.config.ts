@@ -1,11 +1,12 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+// @ts-check
+
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   rootDir: './test',
-  globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.json',
-    },
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
   },
 };

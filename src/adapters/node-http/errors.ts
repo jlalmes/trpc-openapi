@@ -13,21 +13,31 @@ export const TRPC_ERROR_CODE_HTTP_STATUS: Record<TRPCError['code'], number> = {
   PRECONDITION_FAILED: 412,
   PAYLOAD_TOO_LARGE: 413,
   METHOD_NOT_SUPPORTED: 405,
+  TOO_MANY_REQUESTS: 429,
 };
 
 export function getErrorFromUnknown(cause: unknown): TRPCError {
   if (cause instanceof Error && cause.name === 'TRPCError') {
     return cause as TRPCError;
   }
-  const err = new TRPCError({
+
+  let errorCause: Error | undefined = undefined;
+  let stack: string | undefined = undefined;
+
+  if (cause instanceof Error) {
+    errorCause = cause;
+    stack = cause.stack;
+  }
+
+  const error = new TRPCError({
     message: 'Internal server error',
     code: 'INTERNAL_SERVER_ERROR',
-    cause,
+    cause: errorCause,
   });
 
-  // take stack trace from cause
-  if (cause instanceof Error) {
-    err.stack = cause.stack;
+  if (stack) {
+    error.stack = stack;
   }
-  return err;
+
+  return error;
 }

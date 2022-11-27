@@ -1,5 +1,5 @@
 import { TRPCError, initTRPC } from '@trpc/server';
-import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import { APIGatewayEvent, CreateAWSLambdaContextOptions } from '@trpc/server/adapters/aws-lambda';
 import jwt from 'jsonwebtoken';
 import { OpenApiMeta } from 'trpc-openapi';
 import { v4 as uuid } from 'uuid';
@@ -27,18 +27,17 @@ const t = initTRPC
   });
 
 export const createContext = async ({
-  req,
-  res,
+  event,
+  context,
 }: // eslint-disable-next-line @typescript-eslint/require-await
-CreateExpressContextOptions): Promise<Context> => {
+CreateAWSLambdaContextOptions<APIGatewayEvent>): Promise<Context> => {
   const requestId = uuid();
-  res.setHeader('x-request-id', requestId);
 
   let user: User | null = null;
 
   try {
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1];
+    if (event.headers.authorization) {
+      const token = event.headers.authorization.split(' ')[1];
       const userId = jwt.verify(token, jwtSecret) as string;
       if (userId) {
         user = database.users.find((_user) => _user.id === userId) ?? null;
@@ -75,12 +74,9 @@ const authRouter = t.router({
     .input(
       z.object({
         email: z.string().email(),
-        passcode: z.preprocess(
-          (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
-          z.number().min(1000).max(9999),
-        ),
+        passcode: z.string().regex(/^[0-9]{4}$/),
         name: z.string().min(3),
-      })
+      }),
     )
     .output(
       z.object({
@@ -124,10 +120,7 @@ const authRouter = t.router({
     .input(
       z.object({
         email: z.string().email(),
-        passcode: z.preprocess(
-          (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
-          z.number().min(1000).max(9999),
-        )
+        passcode: z.string().regex(/^[0-9]{4}$/),
       }),
     )
     .output(

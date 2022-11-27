@@ -1,5 +1,4 @@
-import * as trpc from '@trpc/server';
-import { TRPCError } from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import jwt from 'jsonwebtoken';
 import { OpenApiMeta } from 'trpc-openapi';
@@ -14,6 +13,18 @@ export type Context = {
   user: User | null;
   requestId: string;
 };
+
+const t = initTRPC
+  .context<Context>()
+  .meta<OpenApiMeta>()
+  .create({
+    errorFormatter: ({ error, shape }) => {
+      if (error.code === 'INTERNAL_SERVER_ERROR' && process.env.NODE_ENV === 'production') {
+        return { ...shape, message: 'Internal server error' };
+      }
+      return shape;
+    },
+  });
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export const createContext = async ({ req, res }: CreateNextContextOptions): Promise<Context> => {
@@ -37,49 +48,47 @@ export const createContext = async ({ req, res }: CreateNextContextOptions): Pro
   return { user, requestId };
 };
 
-const createRouter = () => {
-  return trpc.router<Context, OpenApiMeta>();
-};
+const publicProcedure = t.procedure;
+const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new TRPCError({
+      message: 'User not found',
+      code: 'UNAUTHORIZED',
+    });
+  }
+  return next({ ctx: { ...ctx, user: ctx.user } });
+});
 
-const createProtectedRouter = () => {
-  return createRouter().middleware(({ ctx, next }) => {
-    if (!ctx.user) {
-      throw new TRPCError({
-        message: 'User not found',
-        code: 'UNAUTHORIZED',
-      });
-    }
-    return next({ ctx: { ...ctx, user: ctx.user } });
-  });
-};
-
-const authRouter = createRouter()
-  .mutation('register', {
-    meta: {
+const authRouter = t.router({
+  register: publicProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'POST',
         path: '/auth/register',
         tags: ['auth'],
         summary: 'Register as a new user',
       },
-    },
-    input: z.object({
-      email: z.string().email(),
-      passcode: z.preprocess(
-        (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
-        z.number().min(1000).max(9999),
-      ),
-      name: z.string().min(3),
-    }),
-    output: z.object({
-      user: z.object({
-        id: z.string().uuid(),
+    })
+    .input(
+      z.object({
         email: z.string().email(),
+        passcode: z.preprocess(
+          (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
+          z.number().min(1000).max(9999),
+        ),
         name: z.string().min(3),
+      })
+    )
+    .output(
+      z.object({
+        user: z.object({
+          id: z.string().uuid(),
+          email: z.string().email(),
+          name: z.string().min(3),
+        }),
       }),
-    }),
-    resolve: ({ input }) => {
+    )
+    .mutation(({ input }) => {
       let user = database.users.find((_user) => _user.email === input.email);
 
       if (user) {
@@ -99,29 +108,31 @@ const authRouter = createRouter()
       database.users.push(user);
 
       return { user: { id: user.id, email: user.email, name: user.name } };
-    },
-  })
-  .mutation('login', {
-    meta: {
+    }),
+  login: publicProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'POST',
         path: '/auth/login',
         tags: ['auth'],
         summary: 'Login as an existing user',
       },
-    },
-    input: z.object({
-      email: z.string().email(),
-      passcode: z.preprocess(
-        (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
-        z.number().min(1000).max(9999),
-      ),
-    }),
-    output: z.object({
-      token: z.string(),
-    }),
-    resolve: ({ input }) => {
+    })
+    .input(
+      z.object({
+        email: z.string().email(),
+        passcode: z.preprocess(
+          (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
+          z.number().min(1000).max(9999),
+        )
+      }),
+    )
+    .output(
+      z.object({
+        token: z.string(),
+      }),
+    )
+    .mutation(({ input }) => {
       const user = database.users.find((_user) => _user.email === input.email);
 
       if (!user) {
@@ -140,31 +151,32 @@ const authRouter = createRouter()
       return {
         token: jwt.sign(user.id, jwtSecret),
       };
-    },
-  });
+    }),
+});
 
-const usersRouter = createRouter()
-  .query('getUsers', {
-    meta: {
+const usersRouter = t.router({
+  getUsers: publicProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/users',
         tags: ['users'],
         summary: 'Read all users',
       },
-    },
-    input: z.void(),
-    output: z.object({
-      users: z.array(
-        z.object({
-          id: z.string().uuid(),
-          email: z.string().email(),
-          name: z.string(),
-        }),
-      ),
-    }),
-    resolve: () => {
+    })
+    .input(z.void())
+    .output(
+      z.object({
+        users: z.array(
+          z.object({
+            id: z.string().uuid(),
+            email: z.string().email(),
+            name: z.string(),
+          }),
+        ),
+      }),
+    )
+    .query(() => {
       const users = database.users.map((user) => ({
         id: user.id,
         email: user.email,
@@ -172,29 +184,31 @@ const usersRouter = createRouter()
       }));
 
       return { users };
-    },
-  })
-  .query('getUserById', {
-    meta: {
+    }),
+  getUserById: publicProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/users/{id}',
         tags: ['users'],
         summary: 'Read a user by id',
       },
-    },
-    input: z.object({
-      id: z.string().uuid(),
-    }),
-    output: z.object({
-      user: z.object({
+    })
+    .input(
+      z.object({
         id: z.string().uuid(),
-        email: z.string().email(),
-        name: z.string(),
       }),
-    }),
-    resolve: ({ input }) => {
+    )
+    .output(
+      z.object({
+        user: z.object({
+          id: z.string().uuid(),
+          email: z.string().email(),
+          name: z.string(),
+        }),
+      }),
+    )
+    .query(({ input }) => {
       const user = database.users.find((_user) => _user.id === input.id);
 
       if (!user) {
@@ -205,33 +219,36 @@ const usersRouter = createRouter()
       }
 
       return { user };
-    },
-  });
+    }),
+});
 
-const postsRouter = createRouter()
-  .query('getPosts', {
-    meta: {
+const postsRouter = t.router({
+  getPosts: publicProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/posts',
         tags: ['posts'],
         summary: 'Read all posts',
       },
-    },
-    input: z.object({
-      userId: z.string().uuid().optional(),
-    }),
-    output: z.object({
-      posts: z.array(
-        z.object({
-          id: z.string().uuid(),
-          content: z.string(),
-          userId: z.string().uuid(),
-        }),
-      ),
-    }),
-    resolve: ({ input }) => {
+    })
+    .input(
+      z.object({
+        userId: z.string().uuid().optional(),
+      }),
+    )
+    .output(
+      z.object({
+        posts: z.array(
+          z.object({
+            id: z.string().uuid(),
+            content: z.string(),
+            userId: z.string().uuid(),
+          }),
+        ),
+      }),
+    )
+    .query(({ input }) => {
       let posts: Post[] = database.posts;
 
       if (input.userId) {
@@ -241,29 +258,31 @@ const postsRouter = createRouter()
       }
 
       return { posts };
-    },
-  })
-  .query('getPostById', {
-    meta: {
+    }),
+  getPostById: publicProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'GET',
         path: '/posts/{id}',
         tags: ['posts'],
         summary: 'Read a post by id',
       },
-    },
-    input: z.object({
-      id: z.string().uuid(),
-    }),
-    output: z.object({
-      post: z.object({
+    })
+    .input(
+      z.object({
         id: z.string().uuid(),
-        content: z.string(),
-        userId: z.string().uuid(),
       }),
-    }),
-    resolve: ({ input }) => {
+    )
+    .output(
+      z.object({
+        post: z.object({
+          id: z.string().uuid(),
+          content: z.string(),
+          userId: z.string().uuid(),
+        }),
+      }),
+    )
+    .query(({ input }) => {
       const post = database.posts.find((_post) => _post.id === input.id);
 
       if (!post) {
@@ -274,32 +293,32 @@ const postsRouter = createRouter()
       }
 
       return { post };
-    },
-  });
-
-const postsProtectedRouter = createProtectedRouter()
-  .mutation('createPost', {
-    meta: {
+    }),
+  createPost: protectedProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'POST',
         path: '/posts',
         tags: ['posts'],
         protect: true,
         summary: 'Create a new post',
       },
-    },
-    input: z.object({
-      content: z.string().min(1).max(140),
-    }),
-    output: z.object({
-      post: z.object({
-        id: z.string().uuid(),
-        content: z.string(),
-        userId: z.string().uuid(),
+    })
+    .input(
+      z.object({
+        content: z.string().min(1).max(140),
       }),
-    }),
-    resolve: ({ input, ctx }) => {
+    )
+    .output(
+      z.object({
+        post: z.object({
+          id: z.string().uuid(),
+          content: z.string(),
+          userId: z.string().uuid(),
+        }),
+      }),
+    )
+    .mutation(({ input, ctx }) => {
       const post: Post = {
         id: uuid(),
         content: input.content,
@@ -309,31 +328,33 @@ const postsProtectedRouter = createProtectedRouter()
       database.posts.push(post);
 
       return { post };
-    },
-  })
-  .mutation('updatePostById', {
-    meta: {
+    }),
+  updatePostById: protectedProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'PUT',
         path: '/posts/{id}',
         tags: ['posts'],
         protect: true,
         summary: 'Update an existing post',
       },
-    },
-    input: z.object({
-      id: z.string().uuid(),
-      content: z.string().min(1),
-    }),
-    output: z.object({
-      post: z.object({
+    })
+    .input(
+      z.object({
         id: z.string().uuid(),
-        content: z.string(),
-        userId: z.string().uuid(),
+        content: z.string().min(1),
       }),
-    }),
-    resolve: ({ input, ctx }) => {
+    )
+    .output(
+      z.object({
+        post: z.object({
+          id: z.string().uuid(),
+          content: z.string(),
+          userId: z.string().uuid(),
+        }),
+      }),
+    )
+    .mutation(({ input, ctx }) => {
       const post = database.posts.find((_post) => _post.id === input.id);
 
       if (!post) {
@@ -352,24 +373,24 @@ const postsProtectedRouter = createProtectedRouter()
       post.content = input.content;
 
       return { post };
-    },
-  })
-  .mutation('deletePostById', {
-    meta: {
+    }),
+  deletePostById: protectedProcedure
+    .meta({
       openapi: {
-        enabled: true,
         method: 'DELETE',
         path: '/posts/{id}',
         tags: ['posts'],
         protect: true,
         summary: 'Delete a post',
       },
-    },
-    input: z.object({
-      id: z.string().uuid(),
-    }),
-    output: z.null(),
-    resolve: ({ input, ctx }) => {
+    })
+    .input(
+      z.object({
+        id: z.string().uuid(),
+      }),
+    )
+    .output(z.null())
+    .mutation(({ input, ctx }) => {
       const post = database.posts.find((_post) => _post.id === input.id);
 
       if (!post) {
@@ -388,13 +409,13 @@ const postsProtectedRouter = createProtectedRouter()
       database.posts = database.posts.filter((_post) => _post !== post);
 
       return null;
-    },
-  });
+    }),
+});
 
-export const appRouter = createRouter()
-  .merge(authRouter)
-  .merge(usersRouter)
-  .merge(postsRouter)
-  .merge(postsProtectedRouter);
+export const appRouter = t.router({
+  auth: authRouter,
+  users: usersRouter,
+  posts: postsRouter,
+});
 
 export type AppRouter = typeof appRouter;

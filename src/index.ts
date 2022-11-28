@@ -7,6 +7,7 @@ import {
   createOpenApiExpressMiddleware,
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
+  createOpenApiNuxtHandler,
 } from './adapters';
 import {
   GenerateOpenApiDocumentOptions,
@@ -31,6 +32,7 @@ export {
   createOpenApiExpressMiddleware,
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
+  createOpenApiNuxtHandler,
   createOpenApiAwsLambdaHandler,
   openApiVersion,
   generateOpenApiDocument,

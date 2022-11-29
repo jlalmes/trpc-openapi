@@ -1,5 +1,12 @@
 import { TRPCError } from '@trpc/server';
-import { NodeIncomingMessage, NodeServerResponse, defineEventHandler, getQuery } from 'h3';
+import {
+  NodeIncomingMessage,
+  NodeServerResponse,
+  createError,
+  defineEventHandler,
+  getQuery,
+  sendError,
+} from 'h3';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
 import { normalizePath } from '../utils/path';
@@ -32,12 +39,14 @@ export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
         req: event.node.req,
       });
 
+      event.node.res.statusCode = 500;
+      event.node.res.setHeader('Content-Type', 'application/json');
       const body: OpenApiErrorResponse = {
         message: error.message,
         code: error.code,
       };
-      event.node.res.statusCode = 500;
-      return body;
+      event.node.res.end(JSON.stringify(body));
+      return;
     }
     const nuxtReq: NuxtIncomingMessage = event.node.req;
     nuxtReq.query = getQuery(event);

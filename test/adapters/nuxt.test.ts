@@ -40,9 +40,13 @@ const createOpenApiNuxtHandlerCaller = <TRouter extends OpenApiRouter>(
       /* eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor */
     }>(async (resolve, reject) => {
       const headers = new Map();
+      let body: any;
       const res: any = {
         statusCode: undefined,
         setHeader: (key: string, value: any) => headers.set(key, value),
+        end: (data: string) => {
+          body = JSON.parse(data);
+        },
       };
 
       try {
@@ -57,11 +61,11 @@ const createOpenApiNuxtHandlerCaller = <TRouter extends OpenApiRouter>(
             },
           },
         } as unknown as H3Event;
-        const response = await openApiNuxtHandler(event);
+        await openApiNuxtHandler(event);
         resolve({
           statusCode: res.statusCode,
           headers: Object.fromEntries(headers.entries()),
-          body: response,
+          body,
         });
       } catch (error) {
         reject(error);
@@ -77,73 +81,73 @@ describe('nuxt adapter', () => {
     clearMocks();
   });
 
-  // test('with valid routes', async () => {
-  //   const appRouter = t.router({
-  //     sayHelloQuery: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/say-hello' } })
-  //       .input(z.object({ name: z.string() }))
-  //       .output(z.object({ greeting: z.string() }))
-  //       .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-  //     sayHelloMutation: t.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/say-hello' } })
-  //       .input(z.object({ name: z.string() }))
-  //       .output(z.object({ greeting: z.string() }))
-  //       .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-  //     sayHelloSlash: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/say/hello' } })
-  //       .input(z.object({ name: z.string() }))
-  //       .output(z.object({ greeting: z.string() }))
-  //       .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-  //   });
-  //
-  //   const openApiNuxtHandlerCaller = createOpenApiNuxtHandlerCaller({
-  //     router: appRouter,
-  //   });
-  //
-  //   {
-  //     const res = await openApiNuxtHandlerCaller({
-  //       method: 'GET',
-  //       url: '/api/say-hello?name=James',
-  //       query: { trpc: 'say-hello', name: 'James' },
-  //     });
-  //
-  //     expect(res.statusCode).toBe(200);
-  //     expect(res.body).toEqual({ greeting: 'Hello James!' });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-  //
-  //     clearMocks();
-  //   }
-  //   {
-  //     const res = await openApiNuxtHandlerCaller({
-  //       method: 'POST',
-  //       query: { trpc: 'say-hello' },
-  //       body: { name: 'James' },
-  //     });
-  //
-  //     expect(res.statusCode).toBe(200);
-  //     expect(res.body).toEqual({ greeting: 'Hello James!' });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-  //
-  //     clearMocks();
-  //   }
-  //   {
-  //     const res = await openApiNuxtHandlerCaller({
-  //       method: 'GET',
-  //       url: '/api/say/hello?name=James',
-  //       query: { trpc: 'say/hello' },
-  //     });
-  //
-  //     expect(res.statusCode).toBe(200);
-  //     expect(res.body).toEqual({ greeting: 'Hello James!' });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-  //   }
-  // });
+  test('with valid routes', async () => {
+    const appRouter = t.router({
+      sayHelloQuery: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/say-hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+      sayHelloMutation: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/say-hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+      sayHelloSlash: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/say/hello' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ greeting: z.string() }))
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+    });
+
+    const openApiNuxtHandlerCaller = createOpenApiNuxtHandlerCaller({
+      router: appRouter,
+    });
+
+    {
+      const res = await openApiNuxtHandlerCaller({
+        method: 'GET',
+        url: '/api/say-hello?name=James',
+        query: { trpc: 'say-hello', name: 'James' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ greeting: 'Hello James!' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+    {
+      const res = await openApiNuxtHandlerCaller({
+        method: 'POST',
+        query: { trpc: 'say-hello' },
+        body: { name: 'James' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ greeting: 'Hello James!' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+    {
+      const res = await openApiNuxtHandlerCaller({
+        method: 'GET',
+        url: '/api/say/hello?name=James',
+        query: { trpc: 'say/hello' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({ greeting: 'Hello James!' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+    }
+  });
 
   test('with invalid path', async () => {
     const appRouter = t.router({});

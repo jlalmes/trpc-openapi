@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { initTRPC } from '@trpc/server';
-import { query } from 'express';
 import { H3Event, NodeIncomingMessage, NodeServerResponse } from 'h3';
-import { any, z } from 'zod';
+import { z } from 'zod';
 
 import {
   CreateOpenApiNuxtHandlerOptions,

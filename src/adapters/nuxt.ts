@@ -8,11 +8,11 @@ import {
   createOpenApiNodeHttpHandler,
 } from './node-http/core';
 
-export type CreateOpenApiNuxtMiddlewareOptions<TRouter extends OpenApiRouter> =
+export type CreateOpenApiNuxtHandlerOptions<TRouter extends OpenApiRouter> =
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NodeIncomingMessage, NodeServerResponse>;
 
 export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
-  opts: CreateOpenApiNuxtMiddlewareOptions<TRouter>,
+  opts: CreateOpenApiNuxtHandlerOptions<TRouter>,
 ) => {
   return defineEventHandler(async (event) => {
     const context = event.context as Context;
@@ -22,6 +22,16 @@ export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
         message: 'Query "trpc" not found - is the `trpc-openapi` file named `[...trpc].ts`?',
         code: 'INTERNAL_SERVER_ERROR',
       });
+
+      opts.onError?.({
+        error,
+        type: 'unknown',
+        path: undefined,
+        input: undefined,
+        ctx: undefined,
+        req: event.node.req,
+      });
+
       const body: OpenApiErrorResponse = {
         message: error.message,
         code: error.code,

@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/uuid": "^8.3.4",
+    "nuxt": "3.0.0"
+  },
+  "dependencies": {
+    "@trpc/server": "^10.0.0-rc.7",
+    "jsonwebtoken": "^8.5.1",
+    "trpc-nuxt": "^0.4.3",
+    "uuid": "^9.0.0"
+  }
+}

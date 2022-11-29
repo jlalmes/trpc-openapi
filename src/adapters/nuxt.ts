@@ -1,12 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import {
-  NodeIncomingMessage,
-  NodeServerResponse,
-  createError,
-  defineEventHandler,
-  getQuery,
-  sendError,
-} from 'h3';
+import { NodeIncomingMessage, NodeServerResponse, defineEventHandler, getQuery } from 'h3';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
 import { normalizePath } from '../utils/path';

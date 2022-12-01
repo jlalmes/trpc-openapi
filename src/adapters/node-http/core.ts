@@ -4,7 +4,6 @@ import {
   NodeHTTPRequest,
   NodeHTTPResponse,
 } from '@trpc/server/dist/adapters/node-http';
-import cloneDeep from 'lodash.clonedeep';
 import { ZodError } from 'zod';
 
 import { generateOpenApiDocument } from '../../generator';

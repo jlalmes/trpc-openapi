@@ -675,7 +675,7 @@ describe('standalone adapter', () => {
 
       expect(res.status).toBe(413);
       expect(body).toEqual({
-        message: 'Request body too large',
+        message: 'Payload too large',
         code: 'PAYLOAD_TOO_LARGE',
       });
       expect(createContextMock).toHaveBeenCalledTimes(0);

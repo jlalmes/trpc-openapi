@@ -1,6 +1,52 @@
 import { TRPCError } from '@trpc/server';
 import { NodeHTTPRequest } from '@trpc/server/dist/adapters/node-http';
-import parse from 'co-body';
+
+// taken straight from trpc sauce
+function getPostBody(opts: { req: NodeHTTPRequest; maxBodySize?: number }) {
+  const { req, maxBodySize = Infinity } = opts;
+  return new Promise<{ ok: true; data: unknown } | { ok: false; error: TRPCError }>((resolve) => {
+    if (req.body !== undefined) {
+      resolve({ ok: true, data: req.body });
+      return;
+    }
+    let body = '';
+    let hasBody = false;
+    req.on('data', function (data) {
+      body += data;
+      hasBody = true;
+      if (body.length > maxBodySize) {
+        resolve({
+          ok: false,
+          error: new TRPCError({ code: 'PAYLOAD_TOO_LARGE', message: 'Payload too large' }),
+        });
+      }
+    });
+    req.on('end', () => {
+      resolve({
+        ok: true,
+        data: hasBody ? body : undefined,
+      });
+    });
+  });
+}
+
+async function getPostBodyJSON(opts: { req: NodeHTTPRequest; maxBodySize?: number }) {
+  const res = await getPostBody(opts);
+
+  if (!res.ok) {
+    throw res.error;
+  }
+
+  if (typeof res.data !== 'string') {
+    return res.data;
+  }
+
+  try {
+    return JSON.parse(res.data);
+  } catch {
+    throw new TRPCError({ code: 'PARSE_ERROR', message: 'Failed to parse request body' });
+  }
+}
 
 export const getQuery = (req: NodeHTTPRequest, url: URL): Record<string, string> => {
   const query: Record<string, string> = {};
@@ -43,19 +89,11 @@ export const getBody = async (req: NodeHTTPRequest, maxBodySize = BODY_100_KB): 
 
   if (req.headers['content-type'] === 'application/json') {
     try {
-      const { raw, parsed } = await parse.json(req, {
-        limit: maxBodySize,
-        strict: false,
-        returnRawBody: true,
-      });
-      req.body = raw ? parsed : undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      req.body = await getPostBodyJSON({ req, maxBodySize });
     } catch (cause) {
-      if (cause instanceof Error && cause.name === 'PayloadTooLargeError') {
-        throw new TRPCError({
-          message: 'Request body too large',
-          code: 'PAYLOAD_TOO_LARGE',
-          cause: cause,
-        });
+      if (cause instanceof Error && cause.name === 'TRPCError') {
+        throw cause;
       }
 
       let errorCause: Error | undefined = undefined;

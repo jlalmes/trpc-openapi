@@ -40,7 +40,7 @@ export const createOpenApiNodeHttpHandler = <
 >(
   opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>,
 ) => {
-  const router = cloneDeep(opts.router);
+  const router = structuredClone(opts.router);
 
   // Validate router
   if (process.env.NODE_ENV !== 'production') {

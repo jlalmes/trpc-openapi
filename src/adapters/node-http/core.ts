@@ -181,11 +181,9 @@ export const createOpenApiNodeHttpHandler = <
       const statusCode = meta?.status ?? TRPC_ERROR_CODE_HTTP_STATUS[error.code] ?? 500;
       const headers = meta?.headers ?? {};
       const body: OpenApiErrorResponse = {
-        message:
-          errorShape?.message ??
-          (isInputValidationError
-            ? 'Input validation failed'
-            : error.message ?? 'An error occurred'),
+        message: isInputValidationError
+          ? 'Input validation failed'
+          : errorShape?.message ?? error.message ?? 'An error occurred',
         code: error.code,
         issues: isInputValidationError ? (error.cause as ZodError).errors : undefined,
       };

@@ -9,6 +9,7 @@ import {
   generateOpenApiDocument,
   openApiVersion,
 } from '../src';
+import * as zodUtils from '../src/utils/zod';
 
 // TODO: test for duplicate paths (using getPathRegExp)
 
@@ -251,6 +252,12 @@ describe('generator', () => {
   });
 
   test('with object non-string input', () => {
+    // only applies when zod does not support (below version v3.20.0)
+
+    // @ts-expect-error - hack to disable zodSupportsCoerce
+    // eslint-disable-next-line import/namespace
+    zodUtils.zodSupportsCoerce = false;
+
     {
       const appRouter = t.router({
         badInput: t.procedure
@@ -308,6 +315,10 @@ describe('generator', () => {
         }
       `);
     }
+
+    // @ts-expect-error - hack to re-enable zodSupportsCoerce
+    // eslint-disable-next-line import/namespace
+    zodUtils.zodSupportsCoerce = true;
   });
 
   test('with bad method', () => {
@@ -1691,7 +1702,7 @@ describe('generator', () => {
       const appRouter = t.router({
         union: t.procedure
           .meta({ openapi: { method: 'GET', path: '/union' } })
-          .input(z.object({ payload: z.string().or(z.number()) }))
+          .input(z.object({ payload: z.string().or(z.object({})) }))
           .output(z.null())
           .query(() => null),
       });

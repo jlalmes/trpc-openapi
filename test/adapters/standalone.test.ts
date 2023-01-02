@@ -14,6 +14,7 @@ import {
   OpenApiRouter,
   createOpenApiHttpHandler,
 } from '../../src';
+import * as zodUtils from '../../src/utils/zod';
 
 // @ts-expect-error - global fetch
 global.fetch = fetch;
@@ -1096,7 +1097,7 @@ describe('standalone adapter', () => {
 
     {
       const res = await fetch(`${url}/procedure?payload=one`, { method: 'GET' });
-      const body = (await res.json()) as OpenApiErrorResponse;
+      const body = await res.json();
 
       expect(res.status).toBe(200);
       expect(body).toEqual({ payload: 'one' });
@@ -1108,7 +1109,7 @@ describe('standalone adapter', () => {
     }
     {
       const res = await fetch(`${url}/router/procedure?payload=two`, { method: 'GET' });
-      const body = (await res.json()) as OpenApiErrorResponse;
+      const body = await res.json();
 
       expect(res.status).toBe(200);
       expect(body).toEqual({ payload: 'two' });
@@ -1120,7 +1121,7 @@ describe('standalone adapter', () => {
     }
     {
       const res = await fetch(`${url}/router/router/procedure?payload=three`, { method: 'GET' });
-      const body = (await res.json()) as OpenApiErrorResponse;
+      const body = await res.json();
 
       expect(res.status).toBe(200);
       expect(body).toEqual({ payload: 'three' });
@@ -1147,10 +1148,106 @@ describe('standalone adapter', () => {
     });
 
     const res = await fetch(`${url}/multi-input?firstName=James&lastName=Berry`, { method: 'GET' });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body).toEqual({ fullName: 'James Berry' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+    close();
+  });
+
+  test('with preprocess', async () => {
+    const appRouter = t.router({
+      preprocess: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/preprocess' } })
+        .input(
+          z.object({
+            value: z.preprocess((arg) => [arg, arg], z.array(z.string())),
+          }),
+        )
+        .output(z.object({ result: z.string() }))
+        .query(({ input }) => ({ result: input.value.join('XXX') })),
+    });
+
+    const { url, close } = createHttpServerWithRouter({
+      router: appRouter,
+    });
+
+    const res = await fetch(`${url}/preprocess?value=lol`, { method: 'GET' });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ result: 'lolXXXlol' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+    close();
+  });
+
+  test('with non-coerce preprocess', async () => {
+    // only applies when zod does not support (below version v3.20.0)
+
+    // @ts-expect-error - hack to disable zodSupportsCoerce
+    // eslint-disable-next-line import/namespace
+    zodUtils.zodSupportsCoerce = false;
+    {
+      const appRouter = t.router({
+        plusOne: t.procedure
+          .meta({ openapi: { method: 'GET', path: '/plus-one' } })
+          .input(
+            z.object({
+              number: z.preprocess(
+                (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
+                z.number(),
+              ),
+            }),
+          )
+          .output(z.object({ result: z.number() }))
+          .query(({ input }) => ({ result: input.number + 1 })),
+      });
+
+      const { url, close } = createHttpServerWithRouter({
+        router: appRouter,
+      });
+
+      const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: 10 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      close();
+    }
+    // @ts-expect-error - hack to re-enable zodSupportsCoerce
+    // eslint-disable-next-line import/namespace
+    zodUtils.zodSupportsCoerce = true;
+  });
+
+  test('with coerce', async () => {
+    const appRouter = t.router({
+      plusOne: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/plus-one' } })
+        .input(z.object({ number: z.number() }))
+        .output(z.object({ result: z.number() }))
+        .query(({ input }) => ({ result: input.number + 1 })),
+    });
+
+    const { url, close } = createHttpServerWithRouter({
+      router: appRouter,
+    });
+
+    const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ result: 10 });
     expect(createContextMock).toHaveBeenCalledTimes(1);
     expect(responseMetaMock).toHaveBeenCalledTimes(1);
     expect(onErrorMock).toHaveBeenCalledTimes(0);

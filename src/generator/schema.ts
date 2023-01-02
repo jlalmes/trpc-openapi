@@ -5,11 +5,13 @@ import zodToJsonSchema from 'zod-to-json-schema';
 
 import {
   instanceofZodType,
+  instanceofZodTypeCoercible,
   instanceofZodTypeLikeString,
   instanceofZodTypeLikeVoid,
   instanceofZodTypeObject,
   instanceofZodTypeOptional,
   unwrapZodType,
+  zodSupportsCoerce,
 } from '../utils/zod';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
@@ -71,10 +73,19 @@ export const getParameterObjects = (
       const isPathParameter = pathParameters.includes(shapeKey);
 
       if (!instanceofZodTypeLikeString(shapeSchema)) {
-        throw new TRPCError({
-          message: `Input parser key: "${shapeKey}" must be ZodString`,
-          code: 'INTERNAL_SERVER_ERROR',
-        });
+        if (zodSupportsCoerce) {
+          if (!instanceofZodTypeCoercible(shapeSchema)) {
+            throw new TRPCError({
+              message: `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`,
+              code: 'INTERNAL_SERVER_ERROR',
+            });
+          }
+        } else {
+          throw new TRPCError({
+            message: `Input parser key: "${shapeKey}" must be ZodString`,
+            code: 'INTERNAL_SERVER_ERROR',
+          });
+        }
       }
 
       if (instanceofZodTypeOptional(shapeSchema)) {

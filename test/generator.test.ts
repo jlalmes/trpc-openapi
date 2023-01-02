@@ -1,6 +1,7 @@
 import { initTRPC } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import openAPISchemaValidator from 'openapi-schema-validator';
+import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 
 import {
@@ -2497,5 +2498,82 @@ describe('generator', () => {
         "required": true,
       }
     `);
+  });
+
+  test('with content types', () => {
+    {
+      const appRouter = t.router({
+        withNone: t.procedure
+          .meta({ openapi: { method: 'POST', path: '/with-none', contentTypes: [] } })
+          .input(z.object({ payload: z.string() }))
+          .output(z.object({ payload: z.string() }))
+          .mutation(({ input }) => ({ payload: input.payload })),
+      });
+
+      expect(() => {
+        generateOpenApiDocument(appRouter, defaultDocOpts);
+      }).toThrowError('[mutation.withNone] - At least one content type must be specified');
+    }
+    {
+      const appRouter = t.router({
+        withUrlencoded: t.procedure
+          .meta({
+            openapi: {
+              method: 'POST',
+              path: '/with-urlencoded',
+              contentTypes: ['application/x-www-form-urlencoded'],
+            },
+          })
+          .input(z.object({ payload: z.string() }))
+          .output(z.object({ payload: z.string() }))
+          .mutation(({ input }) => ({ payload: input.payload })),
+        withJson: t.procedure
+          .meta({
+            openapi: { method: 'POST', path: '/with-json', contentTypes: ['application/json'] },
+          })
+          .input(z.object({ payload: z.string() }))
+          .output(z.object({ payload: z.string() }))
+          .mutation(({ input }) => ({ payload: input.payload })),
+        withAll: t.procedure
+          .meta({
+            openapi: {
+              method: 'POST',
+              path: '/with-all',
+              contentTypes: ['application/json', 'application/x-www-form-urlencoded'],
+            },
+          })
+          .input(z.object({ payload: z.string() }))
+          .output(z.object({ payload: z.string() }))
+          .mutation(({ input }) => ({ payload: input.payload })),
+        withDefault: t.procedure
+          .meta({ openapi: { method: 'POST', path: '/with-default' } })
+          .input(z.object({ payload: z.string() }))
+          .output(z.object({ payload: z.string() }))
+          .mutation(({ input }) => ({ payload: input.payload })),
+      });
+
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(
+        Object.keys((openApiDocument.paths['/with-urlencoded']!.post!.requestBody as any).content),
+      ).toEqual(['application/x-www-form-urlencoded']);
+      expect(
+        Object.keys((openApiDocument.paths['/with-json']!.post!.requestBody as any).content),
+      ).toEqual(['application/json']);
+      expect(
+        Object.keys((openApiDocument.paths['/with-all']!.post!.requestBody as any).content),
+      ).toEqual(['application/json', 'application/x-www-form-urlencoded']);
+      expect(
+        (openApiDocument.paths['/with-all']!.post!.requestBody as any).content['application/json'],
+      ).toEqual(
+        (openApiDocument.paths['/with-all']!.post!.requestBody as any).content[
+          'application/x-www-form-urlencoded'
+        ],
+      );
+      expect(
+        Object.keys((openApiDocument.paths['/with-default']!.post!.requestBody as any).content),
+      ).toEqual(['application/json']);
+    }
   });
 });

@@ -66,9 +66,9 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 
 **5. Add an `trpc-openapi` handler to your app.**
 
-We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/) & [`node:http`](https://nodejs.org/api/http.html).
+We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
 
-[`Fastify`](https://www.fastify.io/) & more soon™, PRs are welcomed 🙌.
+[`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/), [`Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
 
 ```typescript
 import http from 'http';
@@ -94,16 +94,16 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 Peer dependencies:
 
 - [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server`) must be installed.
-- [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed.
+- [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed (recommended `^3.20.2`).
 
 For a procedure to support OpenAPI the following _must_ be true:
 
 - Both `input` and `output` parsers are present AND use `Zod` validation.
-- Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
+- Query `input` parsers extend `ZodObject<{ [string]: ZodString | ZodNumber | ZodBigInt | ZodDate }>` or `ZodVoid`.
 - Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
 - `meta.openapi.method` is `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.
 - `meta.openapi.path` is a string starting with `/`.
-- `meta.openapi.path` parameters exist in `input` parser as `ZodString`
+- `meta.openapi.path` parameters exist in `input` parser as `ZodString | ZodNumber | ZodBigInt | ZodDate`
 
 Please note:
 

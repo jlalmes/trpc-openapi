@@ -29,6 +29,7 @@ export const getOpenApiPathsObject = (
       const path = normalizePath(openapi.path);
       const pathParameters = getPathParameters(path);
       const headerParameters = headers?.map((header) => ({ ...header, in: 'header' })) || [];
+
       const httpMethod = OpenAPIV3.HttpMethods[method];
       if (!httpMethod) {
         throw new TRPCError({
@@ -36,9 +37,18 @@ export const getOpenApiPathsObject = (
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
+
       if (pathsObject[path]?.[httpMethod]) {
         throw new TRPCError({
           message: `Duplicate procedure defined for route ${method} ${path}`,
+          code: 'INTERNAL_SERVER_ERROR',
+        });
+      }
+
+      const contentTypes = openapi.contentTypes || ['application/json'];
+      if (contentTypes.length === 0) {
+        throw new TRPCError({
+          message: 'At least one content type must be specified',
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
@@ -55,7 +65,7 @@ export const getOpenApiPathsObject = (
           security: protect ? [{ Authorization: [] }] : undefined,
           ...(acceptsRequestBody(method)
             ? {
-                requestBody: getRequestBodyObject(inputParser, pathParameters),
+                requestBody: getRequestBodyObject(inputParser, pathParameters, contentTypes),
                 parameters: [
                   ...headerParameters,
                   ...(getParameterObjects(inputParser, pathParameters, 'path') || []),

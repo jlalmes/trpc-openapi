@@ -1697,6 +1697,45 @@ describe('generator', () => {
     `);
   });
 
+  test('with coerce', () => {
+    const appRouter = t.router({
+      transform: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/coerce' } })
+        .input(z.object({ payload: z.number() }))
+        .output(z.number())
+        .query(({ input }) => input.payload),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/coerce']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "payload",
+          "required": true,
+          "schema": Object {
+            "type": "number",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/coerce']!.get!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "type": "number",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+  });
+
   test('with union', () => {
     {
       const appRouter = t.router({

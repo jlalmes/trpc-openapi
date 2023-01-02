@@ -1254,4 +1254,39 @@ describe('standalone adapter', () => {
 
     close();
   });
+
+  test('with x-www-form-urlencoded', async () => {
+    const appRouter = t.router({
+      echo: t.procedure
+        .meta({
+          openapi: {
+            method: 'POST',
+            path: '/echo',
+            contentTypes: ['application/x-www-form-urlencoded'],
+          },
+        })
+        .input(z.object({ payload: z.array(z.string()) }))
+        .output(z.object({ result: z.string() }))
+        .query(({ input }) => ({ result: input.payload.join(' ') })),
+    });
+
+    const { url, close } = createHttpServerWithRouter({
+      router: appRouter,
+    });
+
+    const res = await fetch(`${url}/echo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'payload=Hello&payload=World',
+    });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ result: 'Hello World' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+    close();
+  });
 });

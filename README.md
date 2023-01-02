@@ -66,9 +66,9 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 
 **5. Add an `trpc-openapi` handler to your app.**
 
-We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/) & [`node:http`](https://nodejs.org/api/http.html).
+We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
 
-[`Fastify`](https://www.fastify.io/) & more soon™, PRs are welcomed 🙌.
+[`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/), [`Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
 
 ```typescript
 import http from 'http';
@@ -94,16 +94,16 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 Peer dependencies:
 
 - [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server`) must be installed.
-- [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed.
+- [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed (recommended `^3.20.2`).
 
 For a procedure to support OpenAPI the following _must_ be true:
 
 - Both `input` and `output` parsers are present AND use `Zod` validation.
-- Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
-- Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
+- Query `input` parsers extend `Object<{ [string]: String | Number | BigInt | Date }>` or `Void`.
+- Mutation `input` parsers extend `Object<{ [string]: AnyType }>` or `Void`.
 - `meta.openapi.method` is `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.
 - `meta.openapi.path` is a string starting with `/`.
-- `meta.openapi.path` parameters exist in `input` parser as `ZodString`
+- `meta.openapi.path` parameters exist in `input` parser as `String | Number | BigInt | Date`
 
 Please note:
 
@@ -113,7 +113,7 @@ Please note:
 
 ## HTTP Requests
 
-Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parameters`. Procedures with a `POST`/`PATCH`/`PUT` method will accept inputs via the `request body` with a `application/json` or `application/x-www-form-urlencoded` content type.
+Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parameters`. Procedures with a `POST`/`PATCH`/`PUT` method will accept inputs via the `request body` with a `application/json` content type.
 
 ### Path parameters
 
@@ -186,7 +186,7 @@ Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 #### Server
 
 ```typescript
-import * as trpc from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
 type User = { id: string; name: string };
@@ -200,8 +200,6 @@ const users: User[] = [
 
 export type Context = { user: User | null };
 
-const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
-
 export const createContext = async ({ req, res }): Promise<Context> => {
   let user: User | null = null;
   if (req.headers.authorization) {
@@ -211,6 +209,8 @@ export const createContext = async ({ req, res }): Promise<Context> => {
   return { user };
 };
 
+const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
+
 export const appRouter = t.router({
   sayHello: t.procedure
     .meta({ openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } })
@@ -218,7 +218,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input, ctx }) => {
       if (!ctx.user) {
-        throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
+        throw new TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
       }
       return { greeting: `Hello ${ctx.user.name}!` };
     }),

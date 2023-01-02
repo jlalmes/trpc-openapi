@@ -186,7 +186,7 @@ Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 #### Server
 
 ```typescript
-import * as trpc from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
 type User = { id: string; name: string };
@@ -200,8 +200,6 @@ const users: User[] = [
 
 export type Context = { user: User | null };
 
-const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
-
 export const createContext = async ({ req, res }): Promise<Context> => {
   let user: User | null = null;
   if (req.headers.authorization) {
@@ -211,6 +209,8 @@ export const createContext = async ({ req, res }): Promise<Context> => {
   return { user };
 };
 
+const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
+
 export const appRouter = t.router({
   sayHello: t.procedure
     .meta({ openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } })
@@ -218,7 +218,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input, ctx }) => {
       if (!ctx.user) {
-        throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
+        throw new TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
       }
       return { greeting: `Hello ${ctx.user.name}!` };
     }),

@@ -3,6 +3,7 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
+import { OpenApiContentType } from '../types';
 import {
   instanceofZodType,
   instanceofZodTypeCoercible,
@@ -113,6 +114,7 @@ export const getParameterObjects = (
 export const getRequestBodyObject = (
   schema: unknown,
   pathParameters: string[],
+  contentTypes: OpenApiContentType[],
 ): OpenAPIV3.RequestBodyObject | undefined => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({
@@ -142,13 +144,17 @@ export const getRequestBodyObject = (
   });
   const dedupedSchema = unwrappedSchema.omit(mask);
 
+  const openApiSchemaObject = zodSchemaToOpenApiSchemaObject(dedupedSchema);
+  const content: OpenAPIV3.RequestBodyObject['content'] = {};
+  for (const contentType of contentTypes) {
+    content[contentType] = {
+      schema: openApiSchemaObject,
+    };
+  }
+
   return {
     required: isRequired,
-    content: {
-      'application/json': {
-        schema: zodSchemaToOpenApiSchemaObject(dedupedSchema),
-      },
-    },
+    content,
   };
 };
 

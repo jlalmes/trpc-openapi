@@ -659,7 +659,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
-                      "schema": undefined,
+                      "schema": Object {},
                     },
                   },
                   "description": "Successful response",
@@ -1037,7 +1037,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
-              "schema": undefined,
+              "schema": Object {},
             },
           },
           "description": "Successful response",
@@ -1065,7 +1065,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
-            "schema": undefined,
+            "schema": Object {},
           },
         },
         "description": "Successful response",
@@ -1194,24 +1194,79 @@ describe('generator', () => {
     `);
   });
 
-  test('with optional', () => {
+  test('with optional query param', () => {
     const appRouter = t.router({
-      optional: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/optional' } })
-        .input(z.object({ payload: z.string().optional() }))
+      optionalParam: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/optional-param' } })
+        .input(z.object({ one: z.string().optional(), two: z.string() }))
         .output(z.string().optional())
-        .query(({ input }) => input.payload),
+        .query(({ input }) => input.one),
+      optionalObject: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/optional-object' } })
+        .input(z.object({ one: z.string().optional(), two: z.string() }).optional())
+        .output(z.string().optional())
+        .query(({ input }) => input?.two),
     });
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/optional']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths['/optional-param']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
           "in": "query",
-          "name": "payload",
+          "name": "one",
+          "required": false,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "two",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/optional-param']!.get!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "anyOf": Array [
+                Object {
+                  "not": Object {},
+                },
+                Object {
+                  "type": "string",
+                },
+              ],
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+    expect(openApiDocument.paths['/optional-object']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "one",
+          "required": false,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+        Object {
+          "description": undefined,
+          "in": "query",
+          "name": "two",
           "required": false,
           "schema": Object {
             "type": "string",
@@ -1219,7 +1274,112 @@ describe('generator', () => {
         },
       ]
     `);
-    expect(openApiDocument.paths['/optional']!.get!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths['/optional-object']!.get!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "anyOf": Array [
+                Object {
+                  "not": Object {},
+                },
+                Object {
+                  "type": "string",
+                },
+              ],
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+  });
+
+  test('with optional request body', () => {
+    const appRouter = t.router({
+      optionalParam: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/optional-param' } })
+        .input(z.object({ one: z.string().optional(), two: z.string() }))
+        .output(z.string().optional())
+        .query(({ input }) => input.one),
+      optionalObject: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/optional-object' } })
+        .input(z.object({ one: z.string().optional(), two: z.string() }).optional())
+        .output(z.string().optional())
+        .query(({ input }) => input?.two),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/optional-param']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "one": Object {
+                  "type": "string",
+                },
+                "two": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "two",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
+    expect(openApiDocument.paths['/optional-param']!.post!.responses[200]).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "anyOf": Array [
+                Object {
+                  "not": Object {},
+                },
+                Object {
+                  "type": "string",
+                },
+              ],
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+    expect(openApiDocument.paths['/optional-object']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "one": Object {
+                  "type": "string",
+                },
+                "two": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "two",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "required": false,
+      }
+    `);
+    expect(openApiDocument.paths['/optional-object']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {

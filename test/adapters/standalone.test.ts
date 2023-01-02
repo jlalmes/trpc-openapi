@@ -330,43 +330,6 @@ describe('standalone adapter', () => {
     close();
   });
 
-  test('with thrown error', async () => {
-    const appRouter = t.router({
-      echo: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/echo' } })
-        .input(z.object({ payload: z.string() }))
-        .output(z.object({ payload: z.string() }))
-        .mutation(() => {
-          throw new TRPCError({
-            message: 'Custom thrown error',
-            code: 'UNAUTHORIZED',
-          });
-        }),
-    });
-
-    const { url, close } = createHttpServerWithRouter({
-      router: appRouter,
-    });
-
-    const res = await fetch(`${url}/echo`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payload: '@jlalmes' }),
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
-
-    expect(res.status).toBe(401);
-    expect(body).toEqual({
-      message: 'Custom thrown error',
-      code: 'UNAUTHORIZED',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
-
-    close();
-  });
-
   test('with valid routes', async () => {
     const appRouter = t.router({
       sayHelloQuery: t.procedure

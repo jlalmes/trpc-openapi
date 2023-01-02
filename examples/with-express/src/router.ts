@@ -80,7 +80,7 @@ const authRouter = t.router({
           z.number().min(1000).max(9999),
         ),
         name: z.string().min(3),
-      })
+      }),
     )
     .output(
       z.object({
@@ -127,7 +127,7 @@ const authRouter = t.router({
         passcode: z.preprocess(
           (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
           z.number().min(1000).max(9999),
-        )
+        ),
       }),
     )
     .output(

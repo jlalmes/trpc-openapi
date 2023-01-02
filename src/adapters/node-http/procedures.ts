@@ -2,14 +2,18 @@ import { OpenApiMethod, OpenApiProcedure, OpenApiRouter } from '../../types';
 import { getPathRegExp, normalizePath } from '../../utils/path';
 import { forEachOpenApiProcedure } from '../../utils/procedure';
 
-type CachedProcedure = {
-  type: 'query' | 'mutation';
-  path: string;
-  procedure: OpenApiProcedure;
-};
-
 export const createProcedureCache = (router: OpenApiRouter) => {
-  const procedureCache = new Map<OpenApiMethod, Map<RegExp, CachedProcedure>>();
+  const procedureCache = new Map<
+    OpenApiMethod,
+    Map<
+      RegExp,
+      {
+        type: 'query' | 'mutation';
+        path: string;
+        procedure: OpenApiProcedure;
+      }
+    >
+  >();
 
   const { queries, mutations } = router._def;
 

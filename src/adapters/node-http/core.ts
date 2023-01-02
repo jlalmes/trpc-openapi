@@ -5,7 +5,7 @@ import {
   NodeHTTPResponse,
 } from '@trpc/server/dist/adapters/node-http';
 import cloneDeep from 'lodash.clonedeep';
-import { ZodError } from 'zod';
+import { ZodError, z } from 'zod';
 
 import { generateOpenApiDocument } from '../../generator';
 import {
@@ -17,9 +17,16 @@ import {
 } from '../../types';
 import { acceptsRequestBody } from '../../utils/method';
 import { normalizePath } from '../../utils/path';
+import { getInputOutputParsers } from '../../utils/procedure';
+import {
+  instanceofZodTypeCoercible,
+  instanceofZodTypeLikeVoid,
+  instanceofZodTypeObject,
+  unwrapZodType,
+  zodSupportsCoerce,
+} from '../../utils/zod';
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from './errors';
 import { getBody, getQuery } from './input';
-import { monkeyPatchProcedure } from './monkeyPatch';
 import { createProcedureCache } from './procedures';
 
 export type CreateOpenApiNodeHttpHandlerOptions<
@@ -72,9 +79,9 @@ export const createOpenApiNodeHttpHandler = <
     const path = normalizePath(url.pathname);
     const { procedure, pathInput } = getProcedure(method, path) ?? {};
 
-    let input: any;
-    let ctx: any;
-    let data: any;
+    let input: any = undefined;
+    let ctx: any = undefined;
+    let data: any = undefined;
 
     try {
       if (!procedure) {
@@ -94,15 +101,32 @@ export const createOpenApiNodeHttpHandler = <
         });
       }
 
-      input = {
-        ...(acceptsRequestBody(method) ? await getBody(req, maxBodySize) : getQuery(req, url)),
-        ...pathInput,
-      };
+      const useBody = acceptsRequestBody(method);
+      const schema = getInputOutputParsers(procedure.procedure).inputParser as z.ZodTypeAny;
+      const unwrappedSchema = unwrapZodType(schema, true);
+
+      // input should stay undefined if z.void()
+      if (!instanceofZodTypeLikeVoid(unwrappedSchema)) {
+        input = {
+          ...(useBody ? await getBody(req, maxBodySize) : getQuery(req, url)),
+          ...pathInput,
+        };
+      }
+
+      // if query & supported, coerce all string values to correct types
+      if (!useBody && zodSupportsCoerce) {
+        if (instanceofZodTypeObject(unwrappedSchema)) {
+          Object.values(unwrappedSchema.shape).forEach((shapeSchema) => {
+            const unwrappedShapeSchema = unwrapZodType(shapeSchema, false);
+            if (instanceofZodTypeCoercible(unwrappedShapeSchema)) {
+              unwrappedShapeSchema._def.coerce = true;
+            }
+          });
+        }
+      }
 
       ctx = await createContext?.({ req, res });
       const caller = router.createCaller(ctx);
-
-      monkeyPatchProcedure(procedure.procedure);
 
       const segments = procedure.path.split('.');
       const procedureFn = segments.reduce((acc, curr) => acc[curr], caller as any) as AnyProcedure;

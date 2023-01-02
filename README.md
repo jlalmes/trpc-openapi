@@ -99,8 +99,8 @@ Peer dependencies:
 For a procedure to support OpenAPI the following _must_ be true:
 
 - Both `input` and `output` parsers are present AND use `Zod` validation.
-- Query `input` parsers extend `ZodObject<{ [string]: String | Number | BigInt | Date }>` or `ZodVoid`.
-- Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
+- Query `input` parsers extend `Object<{ [string]: String | Number | BigInt | Date }>` or `Void`.
+- Mutation `input` parsers extend `Object<{ [string]: AnyType }>` or `Void`.
 - `meta.openapi.method` is `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.
 - `meta.openapi.path` is a string starting with `/`.
 - `meta.openapi.path` parameters exist in `input` parser as `String | Number | BigInt | Date`

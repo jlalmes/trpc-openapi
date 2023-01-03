@@ -41,7 +41,8 @@ export const getBody = async (req: NodeHTTPRequest, maxBodySize = BODY_100_KB): 
 
   req.body = undefined;
 
-  if (req.headers['content-type']) {
+  const contentType = req.headers['content-type'];
+  if (contentType === 'application/json' || contentType === 'application/x-www-form-urlencoded') {
     try {
       const { raw, parsed } = await parse(req, {
         limit: maxBodySize,

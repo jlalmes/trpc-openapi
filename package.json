@@ -1,6 +1,6 @@
 {
   "name": "trpc-openapi",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "tRPC OpenAPI",
   "author": "James Berry <jb@jamesbe.com>",
   "private": false,

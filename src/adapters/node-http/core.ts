@@ -113,8 +113,8 @@ export const createOpenApiNodeHttpHandler = <
         };
       }
 
-      // if query & supported, coerce all string values to correct types
-      if (!useBody && zodSupportsCoerce) {
+      // if supported, coerce all string values to correct types
+      if (zodSupportsCoerce) {
         if (instanceofZodTypeObject(unwrappedSchema)) {
           Object.values(unwrappedSchema.shape).forEach((shapeSchema) => {
             const unwrappedShapeSchema = unwrapZodType(shapeSchema, false);

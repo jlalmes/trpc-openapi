@@ -1232,8 +1232,18 @@ describe('standalone adapter', () => {
 
   test('with coerce', async () => {
     const appRouter = t.router({
-      plusOne: t.procedure
+      getPlusOne: t.procedure
         .meta({ openapi: { method: 'GET', path: '/plus-one' } })
+        .input(z.object({ number: z.number() }))
+        .output(z.object({ result: z.number() }))
+        .query(({ input }) => ({ result: input.number + 1 })),
+      postPlusOne: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/plus-one' } })
+        .input(z.object({ date: z.date() }))
+        .output(z.object({ result: z.number() }))
+        .mutation(({ input }) => ({ result: input.date.getTime() + 1 })),
+      pathPlusOne: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/plus-one/{number}' } })
         .input(z.object({ number: z.number() }))
         .output(z.object({ result: z.number() }))
         .query(({ input }) => ({ result: input.number + 1 })),
@@ -1243,14 +1253,47 @@ describe('standalone adapter', () => {
       router: appRouter,
     });
 
-    const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
-    const body = await res.json();
+    {
+      const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
+      const body = await res.json();
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ result: 10 });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: 10 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+    {
+      const date = new Date();
+
+      const res = await fetch(`${url}/plus-one`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: date.getTime() + 1 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+
+    {
+      const res = await fetch(`${url}/plus-one/9`, { method: 'GET' });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: 10 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+    }
 
     close();
   });

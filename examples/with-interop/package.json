@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@trpc/server": "^10.0.0-proxy-beta.18",
-    "zod": "^3.19.1"
+    "@trpc/server": "^10.9.0",
+    "zod": "^3.20.2"
   },
   "devDependencies": {
-    "@types/node": "18.8.5",
-    "typescript": "4.8.4"
+    "@types/node": "^18.11.18",
+    "typescript": "^4.9.4"
   }
 }

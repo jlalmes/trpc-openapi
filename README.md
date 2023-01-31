@@ -21,9 +21,9 @@
 
 ```bash
 # npm
-npm install trpc-openapi@alpha
+npm install trpc-openapi
 # yarn
-yarn add trpc-openapi@alpha
+yarn add trpc-openapi
 ```
 
 **2. Add `OpenApiMeta` to your tRPC instance.**
@@ -66,9 +66,9 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 
 **5. Add an `trpc-openapi` handler to your app.**
 
-We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/) & [`node:http`](https://nodejs.org/api/http.html).
+We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
 
-[`Fastify`](https://www.fastify.io/) & [`Serverless`](https://www.serverless.com/) soon™, PRs are welcomed 🙌.
+[`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/), [`Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
 
 ```typescript
 import http from 'http';
@@ -93,36 +93,35 @@ const body = await res.json(); /* { greeting: 'Hello James!' } */
 
 Peer dependencies:
 
-- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server@next`) must be installed.
-- [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed.
+- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server`) must be installed.
+- [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed (recommended `^3.20.0`).
 
 For a procedure to support OpenAPI the following _must_ be true:
 
 - Both `input` and `output` parsers are present AND use `Zod` validation.
-- Query `input` parsers extend `ZodObject<{ [string]: ZodString }>` or `ZodVoid`.
-- Mutation `input` parsers extend `ZodObject<{ [string]: ZodAnyType }>` or `ZodVoid`.
+- Query `input` parsers extend `Object<{ [string]: String | Number | BigInt | Date }>` or `Void`.
+- Mutation `input` parsers extend `Object<{ [string]: AnyType }>` or `Void`.
 - `meta.openapi.method` is `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.
 - `meta.openapi.path` is a string starting with `/`.
-- `meta.openapi.path` parameters exist in `input` parser as `ZodString`
+- `meta.openapi.path` parameters exist in `input` parser as `String | Number | BigInt | Date`
 
 Please note:
 
-- Data [`transformers`](https://trpc.io/docs/data-transformers) are ignored.
-- tRPC v9 `.interop()` routers are not supported.
+- Data [`transformers`](https://trpc.io/docs/data-transformers) (such as `superjson`) are ignored.
 - Trailing slashes are ignored.
 - Routing is case-insensitive.
 
 ## HTTP Requests
 
-Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parameters`. Procedures with a `POST`/`PATCH`/`PUT` method will accept inputs via the `request body` with a `application/json` content type.
+Procedures with a `GET`/`DELETE` method will accept inputs via URL `query parameters`. Procedures with a `POST`/`PATCH`/`PUT` method will accept inputs via the `request body` with a `application/json` or `application/x-www-form-urlencoded` content type.
 
 ### Path parameters
 
 A procedure can accept a set of inputs via URL path parameters. You can add a path parameter to any OpenAPI procedure by using curly brackets around an input name as a path segment in the `meta.openapi.path` field.
 
-#### Query parameters
+### Query parameters
 
-Query & path parameter inputs are always accepted as a `string`, if you wish to support other primitives such as `number`, `boolean`, `Date` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
+Query & path parameter inputs are always accepted as a `string`. This library will attempt to [coerce](https://github.com/colinhacks/zod#coercion-for-primitives) your input values to the following primitive types out of the box: `number`, `boolean`, `bigint` and `date`. If you wish to support others such as `object`, `array` etc. please use [`z.preprocess()`](https://github.com/colinhacks/zod#preprocess).
 
 ```typescript
 // Router
@@ -143,7 +142,7 @@ const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /
 const body = await res.json(); /* { greeting: 'Hello James!' } */
 ```
 
-#### Request body
+### Request body
 
 ```typescript
 // Router
@@ -187,7 +186,7 @@ Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 #### Server
 
 ```typescript
-import * as trpc from '@trpc/server';
+import { TRPCError, initTRPC } from '@trpc/server';
 import { OpenApiMeta } from 'trpc-openapi';
 
 type User = { id: string; name: string };
@@ -201,8 +200,6 @@ const users: User[] = [
 
 export type Context = { user: User | null };
 
-const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
-
 export const createContext = async ({ req, res }): Promise<Context> => {
   let user: User | null = null;
   if (req.headers.authorization) {
@@ -212,6 +209,8 @@ export const createContext = async ({ req, res }): Promise<Context> => {
   return { user };
 };
 
+const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
+
 export const appRouter = t.router({
   sayHello: t.procedure
     .meta({ openapi: { method: 'GET', path: '/say-hello', protect: true /* 👈 */ } })
@@ -219,7 +218,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input, ctx }) => {
       if (!ctx.user) {
-        throw new trpc.TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
+        throw new TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
       }
       return { greeting: `Hello ${ctx.user.name}!` };
     }),
@@ -326,16 +325,17 @@ Please see [full typings here](src/generator/index.ts).
 
 Please see [full typings here](src/types.ts).
 
-| Property      | Type                | Description                                                                                                  | Required | Default     |
-| ------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ----------- |
-| `enabled`     | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`  | `true`      |
-| `method`      | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined` |
-| `path`        | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined` |
-| `protect`     | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`     |
-| `summary`     | `string`            | A short summary of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined` |
-| `description` | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                      | `false`  | `undefined` |
-| `tags`        | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                               | `false`  | `undefined` |
-| `headers`     | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                 | `false`  | `undefined` |
+| Property       | Type                | Description                                                                                                  | Required | Default                |
+| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
+| `enabled`      | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`  | `true`                 |
+| `method`       | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined`            |
+| `path`         | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined`            |
+| `protect`      | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`                |
+| `summary`      | `string`            | A short summary of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined`            |
+| `description`  | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                      | `false`  | `undefined`            |
+| `tags`         | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                               | `false`  | `undefined`            |
+| `headers`      | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                 | `false`  | `undefined`            |
+| `contentTypes` | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                        | `false`  | `['application/json']` |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 
@@ -351,7 +351,7 @@ Please see [full typings here](src/adapters/node-http/core.ts).
 
 ---
 
-_Still using tRPC v9? See our [`master`](https://github.com/jlalmes/trpc-openapi/tree/master) branch._
+_Still using tRPC v9? See our [`.interop()`](examples/with-interop) example._
 
 ## License
 

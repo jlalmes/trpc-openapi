@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-floating-promises, @typescript-eslint/ban-ts-comment */
 import { TRPCError, initTRPC } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
+import { type FastifyReply, type FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { OpenApiMeta } from 'trpc-openapi';
 import { v4 as uuid } from 'uuid';
@@ -13,6 +14,8 @@ const jwtSecret = uuid();
 export type Context = {
   user: User | null;
   requestId: string;
+  req: FastifyRequest;
+  res: FastifyReply;
 };
 
 const t = initTRPC
@@ -33,13 +36,13 @@ export const createContext = async ({
 }: // eslint-disable-next-line @typescript-eslint/require-await
 CreateFastifyContextOptions): Promise<Context> => {
   const requestId = uuid();
-  res.raw.setHeader('x-request-id', requestId);
+  res.header('x-request-id', requestId);
 
   let user: User | null = null;
 
   try {
-    if (req.raw.headers.authorization) {
-      const token = req.raw.headers.authorization.split(' ')[1];
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(' ')[1];
       const userId = jwt.verify(token, jwtSecret) as string;
       if (userId) {
         user = database.users.find((_user) => _user.id === userId) ?? null;
@@ -49,7 +52,7 @@ CreateFastifyContextOptions): Promise<Context> => {
     console.error(cause);
   }
 
-  return { user, requestId };
+  return { req, res, user, requestId };
 };
 
 const publicProcedure = t.procedure;

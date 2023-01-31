@@ -22,7 +22,10 @@ const clearMocks = () => {
 
 const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
   handler: CreateOpenApiFastifyPluginOptions<TRouter>,
-  serverOpts?: { basePath?: `/${string}` },
+  opts?: {
+    serverOpts?: { basePath?: `/${string}` };
+    prefix?: string;
+  },
 ) => {
   const server = fastify();
 
@@ -32,10 +35,15 @@ const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
     responseMeta: handler.responseMeta ?? responseMetaMock,
     onError: handler.onError ?? onErrorMock,
     maxBodySize: handler.maxBodySize,
-    basePath: serverOpts?.basePath,
+    basePath: opts?.serverOpts?.basePath,
   };
 
-  await server.register(fastifyTRPCOpenApiPlugin, openApiFastifyPluginOptions);
+  await server.register(
+    async (server) => {
+      await server.register(fastifyTRPCOpenApiPlugin, openApiFastifyPluginOptions);
+    },
+    { prefix: opts?.prefix ?? '' },
+  );
 
   const port = 0;
   const url = await server.listen({ port });
@@ -127,10 +135,42 @@ describe('fastify adapter', () => {
 
     const { url, close } = await createFastifyServerWithRouter(
       { router: appRouter },
-      { basePath: '/open-api' },
+      { serverOpts: { basePath: '/open-api' } },
     );
 
     const res = await fetch(`${url}/open-api/echo?payload=jlalmes`, { method: 'GET' });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({
+      payload: 'jlalmes',
+    });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+    await close();
+  });
+
+  test('with prefix', async () => {
+    const appRouter = t.router({
+      echo: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/echo' } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string(), context: z.undefined() }))
+        .query(({ input }) => ({ payload: input.payload })),
+    });
+
+    const { url, close } = await createFastifyServerWithRouter(
+      { router: appRouter },
+      {
+        prefix: '/api-prefix',
+      },
+    );
+
+    const res = await fetch(`${url}/api-prefix/echo?payload=jlalmes`, {
+      method: 'GET',
+    });
     const body = await res.json();
 
     expect(res.status).toBe(200);

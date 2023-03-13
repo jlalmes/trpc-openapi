@@ -107,8 +107,17 @@ export const createOpenApiNodeHttpHandler = <
 
       // input should stay undefined if z.void()
       if (!instanceofZodTypeLikeVoid(unwrappedSchema)) {
+        const extraParams = useBody ? await getBody(req, maxBodySize) : getQuery(req, url)
+        for (const key in pathInput) {
+          if (extraParams[key] !== undefined && pathInput[key] !== extraParams[key]) {
+            throw new TRPCError({
+              message: `Cannot provide different values for ${key} via URL and request ${useBody ? "body" : "query parameters"}`,
+              code: "BAD_REQUEST",
+            })
+          }
+        }
         input = {
-          ...(useBody ? await getBody(req, maxBodySize) : getQuery(req, url)),
+          ...extraParams,
           ...pathInput,
         };
       }

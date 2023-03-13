@@ -772,11 +772,14 @@ describe('standalone adapter', () => {
       });
       const body = await res.json();
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(res.status).toBe(400);
+      expect(body).toEqual({
+        message: 'Cannot provide different values for name via URL and request body',
+        code: 'BAD_REQUEST',
+      });
+      expect(createContextMock).toHaveBeenCalledTimes(0);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(onErrorMock).toHaveBeenCalledTimes(1);
 
       clearMocks();
     }
@@ -786,11 +789,30 @@ describe('standalone adapter', () => {
       });
       const body = await res.json();
 
+      expect(res.status).toBe(400);
+      expect(body).toEqual({
+        message: 'Cannot provide different values for first via URL and request query parameters',
+        code: 'BAD_REQUEST',
+      });
+      expect(createContextMock).toHaveBeenCalledTimes(0);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(1);
+
+      clearMocks();
+    }
+    {
+      const res = await fetch(`${url}/say-hello/James/Berry?greeting=Hello&first=James`, {
+        method: 'GET',
+      });
+      const body = await res.json();
+
       expect(res.status).toBe(200);
       expect(body).toEqual({ greeting: 'Hello James Berry!' });
       expect(createContextMock).toHaveBeenCalledTimes(1);
       expect(responseMetaMock).toHaveBeenCalledTimes(1);
       expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
     }
 
     close();

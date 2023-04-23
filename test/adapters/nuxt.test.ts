@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { initTRPC } from '@trpc/server';
-import { H3Event, NodeIncomingMessage, NodeServerResponse, defineEventHandler } from 'h3';
+import { H3Event } from 'h3';
 import httpMocks, { RequestMethod } from 'node-mocks-http';
 import { z } from 'zod';
 

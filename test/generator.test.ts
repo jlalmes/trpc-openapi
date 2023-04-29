@@ -587,7 +587,7 @@ describe('generator', () => {
                   },
                   "description": "Successful response",
                 },
-                "default": Object {
+                "error": Object {
                   "$ref": "#/components/responses/error",
                 },
               },
@@ -642,7 +642,7 @@ describe('generator', () => {
                   },
                   "description": "Successful response",
                 },
-                "default": Object {
+                "error": Object {
                   "$ref": "#/components/responses/error",
                 },
               },
@@ -676,7 +676,7 @@ describe('generator', () => {
                   },
                   "description": "Successful response",
                 },
-                "default": Object {
+                "error": Object {
                   "$ref": "#/components/responses/error",
                 },
               },
@@ -723,7 +723,7 @@ describe('generator', () => {
                   },
                   "description": "Successful response",
                 },
-                "default": Object {
+                "error": Object {
                   "$ref": "#/components/responses/error",
                 },
               },
@@ -785,7 +785,7 @@ describe('generator', () => {
                   },
                   "description": "Successful response",
                 },
-                "default": Object {
+                "error": Object {
                   "$ref": "#/components/responses/error",
                 },
               },
@@ -962,7 +962,7 @@ describe('generator', () => {
             },
             "description": "Successful response",
           },
-          "default": Object {
+          "error": Object {
             "$ref": "#/components/responses/error",
           },
         },
@@ -1016,7 +1016,7 @@ describe('generator', () => {
             },
             "description": "Successful response",
           },
-          "default": Object {
+          "error": Object {
             "$ref": "#/components/responses/error",
           },
         },
@@ -2329,7 +2329,7 @@ describe('generator', () => {
                 },
                 "description": "Successful response",
               },
-              "default": Object {
+              "error": Object {
                 "$ref": "#/components/responses/error",
               },
             },
@@ -2374,7 +2374,7 @@ describe('generator', () => {
                 },
                 "description": "Successful response",
               },
-              "default": Object {
+              "error": Object {
                 "$ref": "#/components/responses/error",
               },
             },
@@ -2419,7 +2419,7 @@ describe('generator', () => {
                 },
                 "description": "Successful response",
               },
-              "default": Object {
+              "error": Object {
                 "$ref": "#/components/responses/error",
               },
             },

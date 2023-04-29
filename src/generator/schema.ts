@@ -192,7 +192,7 @@ export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject =
 
   return {
     200: successResponseObject,
-    default: {
+    error: {
       $ref: '#/components/responses/error',
     },
   };

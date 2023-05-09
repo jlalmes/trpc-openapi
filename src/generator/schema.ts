@@ -26,10 +26,7 @@ export const getParameterObjects = (
   inType: 'all' | 'path' | 'query',
 ): OpenAPIV3.ParameterObject[] | undefined => {
   if (!instanceofZodType(schema)) {
-    throw new TRPCError({
-      message: 'Input parser expects a Zod validator',
-      code: 'INTERNAL_SERVER_ERROR',
-    });
+    schema = z.void();
   }
 
   const isRequired = !schema.isOptional();
@@ -117,10 +114,7 @@ export const getRequestBodyObject = (
   contentTypes: OpenApiContentType[],
 ): OpenAPIV3.RequestBodyObject | undefined => {
   if (!instanceofZodType(schema)) {
-    throw new TRPCError({
-      message: 'Input parser expects a Zod validator',
-      code: 'INTERNAL_SERVER_ERROR',
-    });
+    schema = z.void();
   }
 
   const isRequired = !schema.isOptional();
@@ -175,10 +169,7 @@ export const errorResponseObject = {
 
 export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
   if (!instanceofZodType(schema)) {
-    throw new TRPCError({
-      message: 'Output parser expects a Zod validator',
-      code: 'INTERNAL_SERVER_ERROR',
-    });
+    schema = z.any();
   }
 
   const successResponseObject = {

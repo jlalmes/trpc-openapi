@@ -13,12 +13,24 @@ export type GenerateOpenApiDocumentOptions = {
   baseUrl: string;
   docsUrl?: string;
   tags?: string[];
+  securitySchemes?: {
+    [key: string]: OpenAPIV3.ReferenceObject | OpenAPIV3.SecuritySchemeObject;
+  };
 };
 
 export const generateOpenApiDocument = (
   appRouter: OpenApiRouter,
   opts: GenerateOpenApiDocumentOptions,
 ): OpenAPIV3.Document => {
+  const {
+    securitySchemes = {
+      Authorization: {
+        type: 'http',
+        scheme: 'bearer',
+      },
+    },
+  } = opts;
+
   return {
     openapi: openApiVersion,
     info: {
@@ -33,12 +45,7 @@ export const generateOpenApiDocument = (
     ],
     paths: getOpenApiPathsObject(appRouter, {}),
     components: {
-      securitySchemes: {
-        Authorization: {
-          type: 'http',
-          scheme: 'bearer',
-        },
-      },
+      securitySchemes,
       responses: {
         error: errorResponseObject,
       },

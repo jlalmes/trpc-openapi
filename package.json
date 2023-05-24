@@ -21,7 +21,8 @@
     "examples/with-express",
     "examples/with-interop",
     "examples/with-serverless",
-    "examples/with-fastify"
+    "examples/with-fastify",
+    "examples/with-nuxtjs"
   ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",

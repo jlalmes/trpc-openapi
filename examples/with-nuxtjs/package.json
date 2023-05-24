@@ -9,11 +9,11 @@
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {
-    "@types/node": "^18",
-    "nuxt": "^3.4.2"
+    "@types/node": "^20.2.3",
+    "nuxt": "^3.5.1"
   },
   "dependencies": {
-    "@trpc/server": "^10.9.0",
-    "trpc-nuxt": "^0.9.0"
+    "@trpc/server": "^10.27.1",
+    "trpc-nuxt": "^0.10.3"
   }
 }

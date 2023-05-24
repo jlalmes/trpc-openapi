@@ -15,7 +15,7 @@ export const getOpenApiPathsObject = (
   const procedures = appRouter._def.procedures as OpenApiProcedureRecord;
 
   forEachOpenApiProcedure(procedures, ({ path: procedurePath, type, procedure, openapi }) => {
-    const operationId = `${type}.${procedurePath}`;
+    const procedureName = `${type}.${procedurePath}`;
 
     try {
       if (type === 'subscription') {
@@ -59,7 +59,7 @@ export const getOpenApiPathsObject = (
       pathsObject[path] = {
         ...pathsObject[path],
         [httpMethod]: {
-          operationId,
+          operationId: procedurePath.replace(/\./g, '-'),
           summary,
           description,
           tags: tags,
@@ -85,7 +85,7 @@ export const getOpenApiPathsObject = (
       };
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      error.message = `[${operationId}] - ${error.message}`;
+      error.message = `[${procedureName}] - ${error.message}`;
       throw error;
     }
   });

@@ -313,6 +313,7 @@ Please see [full typings here](src/types.ts).
 | `tags`         | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                               | `false`  | `undefined`            |
 | `headers`      | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                 | `false`  | `undefined`            |
 | `contentTypes` | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                        | `false`  | `['application/json']` |
+| `deprecated`   | `boolean`           | Whether or not to mark an endpoint as deprecated                                                             | `false`  | `false`                |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

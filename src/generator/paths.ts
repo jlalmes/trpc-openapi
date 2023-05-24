@@ -79,6 +79,7 @@ export const getOpenApiPathsObject = (
                 ],
               }),
           responses: getResponsesObject(outputParser),
+          ...(openapi.deprecated ? { deprecated: openapi.deprecated } : {}),
         },
       };
     } catch (error: any) {

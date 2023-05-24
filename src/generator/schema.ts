@@ -151,6 +151,11 @@ export const getRequestBodyObject = (
   });
   const dedupedSchema = unwrappedSchema.omit(mask);
 
+  // if all keys are path parameters
+  if (pathParameters.length > 0 && Object.keys(dedupedSchema.shape).length === 0) {
+    return undefined;
+  }
+
   const openApiSchemaObject = zodSchemaToOpenApiSchemaObject(dedupedSchema);
   const content: OpenAPIV3.RequestBodyObject['content'] = {};
   for (const contentType of contentTypes) {

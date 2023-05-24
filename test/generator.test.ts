@@ -2593,7 +2593,13 @@ describe('generator', () => {
   });
 
   test('with security schemes', () => {
-    const appRouter = t.router({});
+    const appRouter = t.router({
+      protected: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/protected', protect: true } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .mutation(({ input }) => ({ payload: input.payload })),
+    });
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
       title: 'tRPC OpenAPI',
@@ -2616,5 +2622,6 @@ describe('generator', () => {
         name: 'X-API-Key',
       },
     });
+    expect(openApiDocument.paths['/protected']!.post!.security).toEqual([{ ApiKey: [] }]);
   });
 });

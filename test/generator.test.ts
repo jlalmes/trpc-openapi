@@ -133,11 +133,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[mutation.noInput] - Input parser expects a Zod validator');
     }
   });
@@ -152,11 +148,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.noOutput] - Output parser expects a Zod validator');
     }
     {
@@ -168,11 +160,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[mutation.noOutput] - Output parser expects a Zod validator');
     }
   });
@@ -188,11 +176,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.badInput] - Input parser expects a Zod validator');
     }
     {
@@ -205,11 +189,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.badInput] - Output parser expects a Zod validator');
     }
   });
@@ -225,11 +205,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.badInput] - Input parser must be a ZodObject');
     }
     {
@@ -242,11 +218,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[mutation.badInput] - Input parser must be a ZodObject');
     }
   });
@@ -268,11 +240,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.badInput] - Input parser key: "age" must be ZodString');
     }
     {
@@ -284,11 +252,7 @@ describe('generator', () => {
           .mutation(() => ({ name: 'jlalmes' })),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/ok-input']!.post!.requestBody).toMatchInlineSnapshot(`
@@ -333,11 +297,7 @@ describe('generator', () => {
     });
 
     expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      generateOpenApiDocument(appRouter, defaultDocOpts);
     }).toThrowError('[query.badMethod] - Method must be GET, POST, PATCH, PUT or DELETE');
   });
 
@@ -357,11 +317,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
     }
     {
@@ -379,11 +335,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
     }
   });
@@ -402,11 +354,7 @@ describe('generator', () => {
     });
 
     expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      generateOpenApiDocument(appRouter, defaultDocOpts);
     }).toThrowError('[subscription.currentName] - Subscriptions are not supported by OpenAPI v3');
   });
 
@@ -420,11 +368,7 @@ describe('generator', () => {
     });
 
     expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      generateOpenApiDocument(appRouter, defaultDocOpts);
     }).toThrowError('[query.pathParameters] - Input parser must be a ZodObject');
   });
 
@@ -438,11 +382,7 @@ describe('generator', () => {
     });
 
     expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      generateOpenApiDocument(appRouter, defaultDocOpts);
     }).toThrowError('[query.pathParameters] - Path parameter: "name" must not be optional');
   });
 
@@ -456,12 +396,44 @@ describe('generator', () => {
     });
 
     expect(() => {
-      generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      generateOpenApiDocument(appRouter, defaultDocOpts);
     }).toThrowError('[query.pathParameters] - Input parser expects key from path: "name"');
+  });
+
+  // test for https://github.com/jlalmes/trpc-openapi/issues/296
+  test('with post & only path paramters', () => {
+    const appRouter = t.router({
+      noBody: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/no-body/{name}' } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ name: z.string() }))
+        .mutation(({ input }) => ({ name: input.name })),
+      emptyBody: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/empty-body' } })
+        .input(z.object({}))
+        .output(z.object({ name: z.string() }))
+        .mutation(() => ({ name: 'James' })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/no-body/{name}']!.post!.requestBody).toBe(undefined);
+    expect(openApiDocument.paths['/empty-body']!.post!.requestBody).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "example": undefined,
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {},
+              "type": "object",
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
   });
 
   test('with valid procedures', () => {
@@ -1051,11 +1023,7 @@ describe('generator', () => {
           .query(() => undefined),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/void']!.get!.parameters).toEqual([]);
@@ -1080,11 +1048,7 @@ describe('generator', () => {
           .mutation(() => undefined),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
@@ -1495,11 +1459,7 @@ describe('generator', () => {
           .mutation(() => null),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
@@ -1534,11 +1494,7 @@ describe('generator', () => {
           .mutation(() => null),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
@@ -1581,11 +1537,7 @@ describe('generator', () => {
           .mutation(() => null),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
@@ -1623,11 +1575,7 @@ describe('generator', () => {
           .mutation(() => null),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
@@ -1789,11 +1737,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.union] - Input parser key: "payload" must be ZodString');
     }
     {
@@ -1805,11 +1749,7 @@ describe('generator', () => {
           .query(() => null),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/union']!.get!.parameters).toMatchInlineSnapshot(`
@@ -2014,11 +1954,7 @@ describe('generator', () => {
       });
 
       expect(() => {
-        generateOpenApiDocument(appRouter, {
-          title: 'tRPC OpenAPI',
-          version: '1.0.0',
-          baseUrl: 'http://localhost:3000/api',
-        });
+        generateOpenApiDocument(appRouter, defaultDocOpts);
       }).toThrowError('[query.nativeEnum] - Input parser key: "name" must be ZodString');
     }
     {
@@ -2035,11 +1971,7 @@ describe('generator', () => {
           .query(() => null),
       });
 
-      const openApiDocument = generateOpenApiDocument(appRouter, {
-        title: 'tRPC OpenAPI',
-        version: '1.0.0',
-        baseUrl: 'http://localhost:3000/api',
-      });
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/nativeEnum']!.get!.parameters).toMatchInlineSnapshot(`
@@ -2665,9 +2597,7 @@ describe('generator', () => {
     });
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
+      ...defaultDocOpts,
       securitySchemes: {
         ApiKey: {
           type: 'apiKey',
@@ -2724,11 +2654,7 @@ describe('generator', () => {
         })),
     });
 
-    const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      baseUrl: 'http://localhost:3000/api',
-    });
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
     expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`

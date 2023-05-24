@@ -9,25 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@trpc/server": "^10.9.0",
+    "@trpc/server": "^10.27.1",
     "jsonwebtoken": "^9.0.0",
-    "next": "^13.1.5",
+    "next": "^13.4.3",
     "nextjs-cors": "^2.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "swagger-ui-react": "^4.15.5",
+    "swagger-ui-react": "^4.18.3",
     "uuid": "^9.0.0",
-    "zod": "^3.20.2"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.1",
-    "@types/node": "^18.11.18",
-    "@types/react": "^18.0.27",
-    "@types/react-dom": "^18.0.10",
-    "@types/swagger-ui-react": "^4.11.0",
-    "@types/uuid": "^9.0.0",
-    "eslint": "^8.32.0",
-    "eslint-config-next": "^13.1.5",
-    "typescript": "^4.9.4"
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.2.3",
+    "@types/react": "^18.2.6",
+    "@types/react-dom": "^18.2.4",
+    "@types/swagger-ui-react": "^4.18.0",
+    "@types/uuid": "^9.0.1",
+    "eslint": "^8.41.0",
+    "eslint-config-next": "^13.4.3",
+    "typescript": "^5.0.4"
   }
 }

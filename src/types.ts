@@ -1,5 +1,6 @@
 import { Procedure, ProcedureParams, Router } from '@trpc/server';
 import type { RootConfig } from '@trpc/server/dist/core/internals/config';
+import type { RouterDef } from '@trpc/server/dist/core/router';
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
 import { RouterDef } from '@trpc/server/src/core/router';
 import { OpenAPIV3 } from 'openapi-types';
@@ -22,6 +23,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
     tags?: string[];
     headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
     contentTypes?: OpenApiContentType[];
+    deprecated?: boolean;
   };
 };
 

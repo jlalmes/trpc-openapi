@@ -2568,12 +2568,38 @@ describe('generator', () => {
         (openApiDocument.paths['/with-all']!.post!.requestBody as any).content['application/json'],
       ).toEqual(
         (openApiDocument.paths['/with-all']!.post!.requestBody as any).content[
-          'application/x-www-form-urlencoded'
+        'application/x-www-form-urlencoded'
         ],
       );
       expect(
         Object.keys((openApiDocument.paths['/with-default']!.post!.requestBody as any).content),
       ).toEqual(['application/json']);
     }
+  });
+
+  test('with security schemes', () => {
+    const appRouter = t.router({});
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+      securitySchemes: {
+        ApiKey: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'X-API-Key',
+        },
+      },
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.components!.securitySchemes).toEqual({
+      ApiKey: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'X-API-Key',
+      },
+    });
   });
 });

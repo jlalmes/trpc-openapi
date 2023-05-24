@@ -9,7 +9,11 @@ export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
 type TRPCMeta = Record<string, unknown>;
 
-export type OpenApiContentType = 'application/json' | 'application/x-www-form-urlencoded';
+export type OpenApiContentType =
+  | 'application/json'
+  | 'application/x-www-form-urlencoded'
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  | (string & {});
 
 export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
   openapi?: {

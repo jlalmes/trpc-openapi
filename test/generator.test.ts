@@ -1,7 +1,6 @@
 import { initTRPC } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import openAPISchemaValidator from 'openapi-schema-validator';
-import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 
 import {
@@ -296,6 +295,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -564,6 +564,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
+                      "example": undefined,
                       "schema": Object {
                         "items": Object {
                           "additionalProperties": false,
@@ -602,6 +603,7 @@ describe('generator', () => {
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
+                    "example": undefined,
                     "schema": Object {
                       "additionalProperties": false,
                       "properties": Object {
@@ -622,6 +624,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
+                      "example": undefined,
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
@@ -658,6 +661,7 @@ describe('generator', () => {
               "parameters": Array [
                 Object {
                   "description": undefined,
+                  "example": undefined,
                   "in": "path",
                   "name": "id",
                   "required": true,
@@ -671,6 +675,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
+                      "example": undefined,
                       "schema": Object {},
                     },
                   },
@@ -690,6 +695,7 @@ describe('generator', () => {
               "parameters": Array [
                 Object {
                   "description": undefined,
+                  "example": undefined,
                   "in": "path",
                   "name": "id",
                   "required": true,
@@ -703,6 +709,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
+                      "example": undefined,
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
@@ -737,6 +744,7 @@ describe('generator', () => {
               "parameters": Array [
                 Object {
                   "description": undefined,
+                  "example": undefined,
                   "in": "path",
                   "name": "id",
                   "required": true,
@@ -748,6 +756,7 @@ describe('generator', () => {
               "requestBody": Object {
                 "content": Object {
                   "application/json": Object {
+                    "example": undefined,
                     "schema": Object {
                       "additionalProperties": false,
                       "properties": Object {
@@ -765,6 +774,7 @@ describe('generator', () => {
                 "200": Object {
                   "content": Object {
                     "application/json": Object {
+                      "example": undefined,
                       "schema": Object {
                         "additionalProperties": false,
                         "properties": Object {
@@ -910,6 +920,7 @@ describe('generator', () => {
         "requestBody": Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {
                 "additionalProperties": false,
                 "description": "Request body input",
@@ -938,6 +949,7 @@ describe('generator', () => {
           "200": Object {
             "content": Object {
               "application/json": Object {
+                "example": undefined,
                 "schema": Object {
                   "additionalProperties": false,
                   "description": "User data",
@@ -978,6 +990,7 @@ describe('generator', () => {
         "parameters": Array [
           Object {
             "description": "User ID",
+            "example": undefined,
             "in": "query",
             "name": "id",
             "required": true,
@@ -992,6 +1005,7 @@ describe('generator', () => {
           "200": Object {
             "content": Object {
               "application/json": Object {
+                "example": undefined,
                 "schema": Object {
                   "additionalProperties": false,
                   "description": "User data",
@@ -1049,6 +1063,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {},
             },
           },
@@ -1077,6 +1092,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {},
           },
         },
@@ -1102,6 +1118,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "enum": Array [
                 "null",
@@ -1134,6 +1151,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "not": Object {},
             },
@@ -1160,6 +1178,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "anyOf": Array [
                 Object {
@@ -1196,6 +1215,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "not": Object {},
             },
@@ -1227,6 +1247,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "one",
           "required": false,
@@ -1236,6 +1257,7 @@ describe('generator', () => {
         },
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "two",
           "required": true,
@@ -1249,6 +1271,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "anyOf": Array [
                 Object {
@@ -1268,6 +1291,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "one",
           "required": false,
@@ -1277,6 +1301,7 @@ describe('generator', () => {
         },
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "two",
           "required": false,
@@ -1290,6 +1315,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "anyOf": Array [
                 Object {
@@ -1328,6 +1354,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -1352,6 +1379,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "anyOf": Array [
                 Object {
@@ -1371,6 +1399,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -1395,6 +1424,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "anyOf": Array [
                 Object {
@@ -1428,6 +1458,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": false,
@@ -1442,6 +1473,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "default": "James",
               "type": "string",
@@ -1474,6 +1506,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -1512,6 +1545,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -1558,6 +1592,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -1599,6 +1634,7 @@ describe('generator', () => {
         Object {
           "content": Object {
             "application/json": Object {
+              "example": undefined,
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -1639,6 +1675,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "age",
           "required": true,
@@ -1675,6 +1712,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": true,
@@ -1688,6 +1726,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "type": "number",
             },
@@ -1714,6 +1753,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": true,
@@ -1727,6 +1767,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "type": "number",
             },
@@ -1775,6 +1816,7 @@ describe('generator', () => {
         Array [
           Object {
             "description": undefined,
+            "example": undefined,
             "in": "query",
             "name": "payload",
             "required": true,
@@ -1820,6 +1862,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": true,
@@ -1880,6 +1923,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": true,
@@ -1907,6 +1951,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": true,
@@ -1937,6 +1982,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "name",
           "required": true,
@@ -2000,6 +2046,7 @@ describe('generator', () => {
         Array [
           Object {
             "description": undefined,
+            "example": undefined,
             "in": "query",
             "name": "name",
             "required": true,
@@ -2034,6 +2081,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -2067,6 +2115,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -2132,6 +2181,7 @@ describe('generator', () => {
         },
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "id",
           "required": true,
@@ -2162,6 +2212,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "id",
           "required": true,
@@ -2189,6 +2240,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -2232,6 +2284,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "id",
           "required": true,
@@ -2246,6 +2299,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -2300,6 +2354,7 @@ describe('generator', () => {
             "parameters": Array [
               Object {
                 "description": undefined,
+                "example": undefined,
                 "in": "query",
                 "name": "payload",
                 "required": true,
@@ -2313,6 +2368,7 @@ describe('generator', () => {
               "200": Object {
                 "content": Object {
                   "application/json": Object {
+                    "example": undefined,
                     "schema": Object {
                       "additionalProperties": false,
                       "properties": Object {
@@ -2345,6 +2401,7 @@ describe('generator', () => {
             "parameters": Array [
               Object {
                 "description": undefined,
+                "example": undefined,
                 "in": "query",
                 "name": "payload",
                 "required": true,
@@ -2358,6 +2415,7 @@ describe('generator', () => {
               "200": Object {
                 "content": Object {
                   "application/json": Object {
+                    "example": undefined,
                     "schema": Object {
                       "additionalProperties": false,
                       "properties": Object {
@@ -2390,6 +2448,7 @@ describe('generator', () => {
             "parameters": Array [
               Object {
                 "description": undefined,
+                "example": undefined,
                 "in": "query",
                 "name": "payload",
                 "required": true,
@@ -2403,6 +2462,7 @@ describe('generator', () => {
               "200": Object {
                 "content": Object {
                   "application/json": Object {
+                    "example": undefined,
                     "schema": Object {
                       "additionalProperties": false,
                       "properties": Object {
@@ -2455,6 +2515,7 @@ describe('generator', () => {
       Array [
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "id",
           "required": true,
@@ -2464,6 +2525,7 @@ describe('generator', () => {
         },
         Object {
           "description": undefined,
+          "example": undefined,
           "in": "query",
           "name": "payload",
           "required": true,
@@ -2477,6 +2539,7 @@ describe('generator', () => {
       Object {
         "content": Object {
           "application/json": Object {
+            "example": undefined,
             "schema": Object {
               "additionalProperties": false,
               "properties": Object {
@@ -2623,5 +2686,164 @@ describe('generator', () => {
       },
     });
     expect(openApiDocument.paths['/protected']!.post!.security).toEqual([{ ApiKey: [] }]);
+  });
+
+  test('with examples', () => {
+    const appRouter = t.router({
+      queryExample: t.procedure
+        .meta({
+          openapi: {
+            method: 'GET',
+            path: '/query-example/{name}',
+            example: {
+              request: { name: 'James', greeting: 'Hello' },
+              response: { output: 'Hello James' },
+            },
+          },
+        })
+        .input(z.object({ name: z.string(), greeting: z.string() }))
+        .output(z.object({ output: z.string() }))
+        .query(({ input }) => ({
+          output: `${input.greeting} ${input.name}`,
+        })),
+      mutationExample: t.procedure
+        .meta({
+          openapi: {
+            method: 'POST',
+            path: '/mutation-example/{name}',
+            example: {
+              request: { name: 'James', greeting: 'Hello' },
+              response: { output: 'Hello James' },
+            },
+          },
+        })
+        .input(z.object({ name: z.string(), greeting: z.string() }))
+        .output(z.object({ output: z.string() }))
+        .mutation(({ input }) => ({
+          output: `${input.greeting} ${input.name}`,
+        })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "example": "James",
+          "in": "path",
+          "name": "name",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+        Object {
+          "description": undefined,
+          "example": "Hello",
+          "in": "query",
+          "name": "greeting",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/query-example/{name}']!.get!.responses[200])
+      .toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "example": Object {
+              "output": "Hello James",
+            },
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "output": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "output",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
+    expect(openApiDocument.paths['/mutation-example/{name}']!.post!.parameters)
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "example": "James",
+          "in": "path",
+          "name": "name",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/mutation-example/{name}']!.post!.requestBody)
+      .toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "example": Object {
+              "greeting": "Hello",
+            },
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "greeting": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "greeting",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "required": true,
+      }
+    `);
+    expect(openApiDocument.paths['/mutation-example/{name}']!.post!.responses[200])
+      .toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "example": Object {
+              "output": "Hello James",
+            },
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "output": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "output",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+      }
+    `);
   });
 });

@@ -24,6 +24,7 @@ export const getParameterObjects = (
   schema: unknown,
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
+  example: Record<string, any> | undefined,
 ): OpenAPIV3.ParameterObject[] | undefined => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({
@@ -107,6 +108,7 @@ export const getParameterObjects = (
         required: isPathParameter || (isRequired && isShapeRequired),
         schema: openApiSchemaObject,
         description: description,
+        example: example?.[shapeKey],
       };
     });
 };
@@ -115,6 +117,7 @@ export const getRequestBodyObject = (
   schema: unknown,
   pathParameters: string[],
   contentTypes: OpenApiContentType[],
+  example: Record<string, any> | undefined,
 ): OpenAPIV3.RequestBodyObject | undefined => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({
@@ -139,8 +142,12 @@ export const getRequestBodyObject = (
 
   // remove path parameters
   const mask: Record<string, true> = {};
+  const dedupedExample = example && { ...example };
   pathParameters.forEach((pathParameter) => {
     mask[pathParameter] = true;
+    if (dedupedExample) {
+      delete dedupedExample[pathParameter];
+    }
   });
   const dedupedSchema = unwrappedSchema.omit(mask);
 
@@ -149,6 +156,7 @@ export const getRequestBodyObject = (
   for (const contentType of contentTypes) {
     content[contentType] = {
       schema: openApiSchemaObject,
+      example: dedupedExample,
     };
   }
 
@@ -158,7 +166,7 @@ export const getRequestBodyObject = (
   };
 };
 
-export const errorResponseObject = {
+export const errorResponseObject: OpenAPIV3.ResponseObject = {
   description: 'Error response',
   content: {
     'application/json': {
@@ -173,7 +181,10 @@ export const errorResponseObject = {
   },
 };
 
-export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject => {
+export const getResponsesObject = (
+  schema: unknown,
+  example: Record<string, any> | undefined,
+): OpenAPIV3.ResponsesObject => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({
       message: 'Output parser expects a Zod validator',
@@ -181,11 +192,12 @@ export const getResponsesObject = (schema: unknown): OpenAPIV3.ResponsesObject =
     });
   }
 
-  const successResponseObject = {
+  const successResponseObject: OpenAPIV3.ResponseObject = {
     description: 'Successful response',
     content: {
       'application/json': {
         schema: zodSchemaToOpenApiSchemaObject(schema),
+        example,
       },
     },
   };

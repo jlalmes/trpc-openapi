@@ -66,20 +66,35 @@ export const getOpenApiPathsObject = (
           security: protect ? securitySchemeNames.map((name) => ({ [name]: [] })) : undefined,
           ...(acceptsRequestBody(method)
             ? {
-                requestBody: getRequestBodyObject(inputParser, pathParameters, contentTypes),
+                requestBody: getRequestBodyObject(
+                  inputParser,
+                  pathParameters,
+                  contentTypes,
+                  openapi.example?.request,
+                ),
                 parameters: [
                   ...headerParameters,
-                  ...(getParameterObjects(inputParser, pathParameters, 'path') || []),
+                  ...(getParameterObjects(
+                    inputParser,
+                    pathParameters,
+                    'path',
+                    openapi.example?.request,
+                  ) || []),
                 ],
               }
             : {
                 requestBody: undefined,
                 parameters: [
                   ...headerParameters,
-                  ...(getParameterObjects(inputParser, pathParameters, 'all') || []),
+                  ...(getParameterObjects(
+                    inputParser,
+                    pathParameters,
+                    'all',
+                    openapi.example?.request,
+                  ) || []),
                 ],
               }),
-          responses: getResponsesObject(outputParser),
+          responses: getResponsesObject(outputParser, openapi.example?.response),
           ...(openapi.deprecated ? { deprecated: openapi.deprecated } : {}),
         },
       };

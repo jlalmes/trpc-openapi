@@ -66,9 +66,9 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
 
 **5. Add an `trpc-openapi` handler to your app.**
 
-We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
+We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
 
-[`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/), [`Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
+[`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Cloudflare Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
 
 ```typescript
 import http from 'http';
@@ -179,7 +179,7 @@ Please see [error status codes here](src/adapters/node-http/errors.ts).
 
 ## Authorization
 
-To create protected endpoints, add `protect: true` to the `meta.openapi` object of each tRPC procedure. You can then authenticate each request with the `createContext` function using the `Authorization` header with the `Bearer` scheme.
+To create protected endpoints, add `protect: true` to the `meta.openapi` object of each tRPC procedure. By default, you can then authenticate each request with the `createContext` function using the `Authorization` header with the `Bearer` scheme. If you wish to authenticate requests using a different/additional methods (such as custom headers, or cookies) this can be overwritten by specifying `securitySchemes` object.
 
 Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 

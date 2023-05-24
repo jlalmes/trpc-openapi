@@ -2568,13 +2568,28 @@ describe('generator', () => {
         (openApiDocument.paths['/with-all']!.post!.requestBody as any).content['application/json'],
       ).toEqual(
         (openApiDocument.paths['/with-all']!.post!.requestBody as any).content[
-        'application/x-www-form-urlencoded'
+          'application/x-www-form-urlencoded'
         ],
       );
       expect(
         Object.keys((openApiDocument.paths['/with-default']!.post!.requestBody as any).content),
       ).toEqual(['application/json']);
     }
+  });
+
+  test('with deprecated', () => {
+    const appRouter = t.router({
+      deprecated: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/deprecated', deprecated: true } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .mutation(({ input }) => ({ payload: input.payload })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/deprecated']!.post!.deprecated).toEqual(true);
   });
 
   test('with security schemes', () => {

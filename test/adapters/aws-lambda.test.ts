@@ -95,7 +95,7 @@ describe('v1', () => {
           name: 'Aphex',
         }),
         headers: {
-          'content-type': 'application/json',
+          'Content-Type': 'application/json',
         },
         method: 'POST',
         path: 'hello',

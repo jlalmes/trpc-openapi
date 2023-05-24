@@ -3,45 +3,50 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
+import { OpenApiContentType } from '../types';
 import {
   instanceofZodType,
+  instanceofZodTypeCoercible,
   instanceofZodTypeLikeString,
   instanceofZodTypeLikeVoid,
   instanceofZodTypeObject,
   instanceofZodTypeOptional,
   unwrapZodType,
+  zodSupportsCoerce,
 } from '../utils/zod';
 
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
-  return zodToJsonSchema(zodSchema, { target: 'openApi3', $refStrategy: 'none' });
+  // FIXME: https://github.com/StefanTerdell/zod-to-json-schema/issues/35
+  return zodToJsonSchema(zodSchema, { target: 'openApi3', $refStrategy: 'none' }) as any;
 };
 
 export const getParameterObjects = (
-  _schema: unknown,
+  schema: unknown,
   pathParameters: string[],
   inType: 'all' | 'path' | 'query',
 ): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!instanceofZodType(_schema)) {
+  if (!instanceofZodType(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  const schema = unwrapZodType(_schema, true);
+  const isRequired = !schema.isOptional();
+  const unwrappedSchema = unwrapZodType(schema, true);
 
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
     return undefined;
   }
 
-  if (!instanceofZodTypeObject(schema)) {
+  if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw new TRPCError({
       message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  const shape = schema.shape;
+  const shape = unwrappedSchema.shape;
   const shapeKeys = Object.keys(shape);
 
   for (const pathParameter of pathParameters) {
@@ -65,14 +70,23 @@ export const getParameterObjects = (
     })
     .map((shapeKey) => {
       let shapeSchema = shape[shapeKey]!;
-      const isRequired = !shapeSchema.isOptional();
+      const isShapeRequired = !shapeSchema.isOptional();
       const isPathParameter = pathParameters.includes(shapeKey);
 
       if (!instanceofZodTypeLikeString(shapeSchema)) {
-        throw new TRPCError({
-          message: `Input parser key: "${shapeKey}" must be ZodString`,
-          code: 'INTERNAL_SERVER_ERROR',
-        });
+        if (zodSupportsCoerce) {
+          if (!instanceofZodTypeCoercible(shapeSchema)) {
+            throw new TRPCError({
+              message: `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`,
+              code: 'INTERNAL_SERVER_ERROR',
+            });
+          }
+        } else {
+          throw new TRPCError({
+            message: `Input parser key: "${shapeKey}" must be ZodString`,
+            code: 'INTERNAL_SERVER_ERROR',
+          });
+        }
       }
 
       if (instanceofZodTypeOptional(shapeSchema)) {
@@ -85,36 +99,38 @@ export const getParameterObjects = (
         shapeSchema = shapeSchema.unwrap();
       }
 
-      const { description, ...schema } = zodSchemaToOpenApiSchemaObject(shapeSchema);
+      const { description, ...openApiSchemaObject } = zodSchemaToOpenApiSchemaObject(shapeSchema);
 
       return {
         name: shapeKey,
         in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || isRequired,
-        schema: schema,
+        required: isPathParameter || (isRequired && isShapeRequired),
+        schema: openApiSchemaObject,
         description: description,
       };
     });
 };
 
 export const getRequestBodyObject = (
-  _schema: unknown,
+  schema: unknown,
   pathParameters: string[],
+  contentTypes: OpenApiContentType[],
 ): OpenAPIV3.RequestBodyObject | undefined => {
-  if (!instanceofZodType(_schema)) {
+  if (!instanceofZodType(schema)) {
     throw new TRPCError({
       message: 'Input parser expects a Zod validator',
       code: 'INTERNAL_SERVER_ERROR',
     });
   }
 
-  const schema = unwrapZodType(_schema, true);
+  const isRequired = !schema.isOptional();
+  const unwrappedSchema = unwrapZodType(schema, true);
 
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(schema)) {
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
     return undefined;
   }
 
-  if (!instanceofZodTypeObject(schema)) {
+  if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw new TRPCError({
       message: 'Input parser must be a ZodObject',
       code: 'INTERNAL_SERVER_ERROR',
@@ -126,15 +142,19 @@ export const getRequestBodyObject = (
   pathParameters.forEach((pathParameter) => {
     mask[pathParameter] = true;
   });
-  const dedupedSchema = schema.omit(mask);
+  const dedupedSchema = unwrappedSchema.omit(mask);
+
+  const openApiSchemaObject = zodSchemaToOpenApiSchemaObject(dedupedSchema);
+  const content: OpenAPIV3.RequestBodyObject['content'] = {};
+  for (const contentType of contentTypes) {
+    content[contentType] = {
+      schema: openApiSchemaObject,
+    };
+  }
 
   return {
-    required: !schema.isOptional(),
-    content: {
-      'application/json': {
-        schema: zodSchemaToOpenApiSchemaObject(dedupedSchema),
-      },
-    },
+    required: isRequired,
+    content,
   };
 };
 

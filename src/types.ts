@@ -8,6 +8,8 @@ export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
 type TRPCMeta = Record<string, unknown>;
 
+export type OpenApiContentType = 'application/json' | 'application/x-www-form-urlencoded';
+
 export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
   openapi?: {
     enabled?: boolean;
@@ -18,6 +20,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
     protect?: boolean;
     tags?: string[];
     headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
+    contentTypes?: OpenApiContentType[];
   };
 };
 

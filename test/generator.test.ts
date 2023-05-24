@@ -1166,10 +1166,10 @@ describe('generator', () => {
                   "not": Object {},
                 },
                 Object {
+                  "nullable": true,
                   "type": "string",
                 },
               ],
-              "nullable": true,
             },
           },
         },

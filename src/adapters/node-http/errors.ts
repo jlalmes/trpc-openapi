@@ -14,6 +14,7 @@ export const TRPC_ERROR_CODE_HTTP_STATUS: Record<TRPCError['code'], number> = {
   PAYLOAD_TOO_LARGE: 413,
   METHOD_NOT_SUPPORTED: 405,
   TOO_MANY_REQUESTS: 429,
+  UNPROCESSABLE_CONTENT: 422,
 };
 
 export function getErrorFromUnknown(cause: unknown): TRPCError {

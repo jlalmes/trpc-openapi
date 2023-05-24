@@ -1,7 +1,7 @@
 import { Procedure, ProcedureParams, Router } from '@trpc/server';
 import type { RootConfig } from '@trpc/server/dist/core/internals/config';
-import type { RouterDef } from '@trpc/server/dist/core/router';
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
+import type { RouterDef } from '@trpc/server/src/core/router';
 import { OpenAPIV3 } from 'openapi-types';
 import { ZodIssue } from 'zod';
 

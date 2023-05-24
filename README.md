@@ -312,30 +312,32 @@ main();
 
 Please see [full typings here](src/generator/index.ts).
 
-| Property      | Type       | Description                          | Required |
-| ------------- | ---------- | ------------------------------------ | -------- |
-| `title`       | `string`   | The title of the API.                | `true`   |
-| `description` | `string`   | A short description of the API.      | `false`  |
-| `version`     | `string`   | The version of the OpenAPI document. | `true`   |
-| `baseUrl`     | `string`   | The base URL of the target server.   | `true`   |
-| `docsUrl`     | `string`   | A URL to any external documentation. | `false`  |
-| `tags`        | `string[]` | A list for ordering endpoint groups. | `false`  |
+| Property          | Type                                   | Description                                             | Required |
+| ----------------- | -------------------------------------- | ------------------------------------------------------- | -------- |
+| `title`           | `string`                               | The title of the API.                                   | `true`   |
+| `description`     | `string`                               | A short description of the API.                         | `false`  |
+| `version`         | `string`                               | The version of the OpenAPI document.                    | `true`   |
+| `baseUrl`         | `string`                               | The base URL of the target server.                      | `true`   |
+| `docsUrl`         | `string`                               | A URL to any external documentation.                    | `false`  |
+| `tags`            | `string[]`                             | A list for ordering endpoint groups.                    | `false`  |
+| `securitySchemes` | `Record<string, SecuritySchemeObject>` | Defaults to `Authorization` header with `Bearer` scheme | `false`  |
 
 #### OpenApiMeta
 
 Please see [full typings here](src/types.ts).
 
-| Property       | Type                | Description                                                                                                  | Required | Default                |
-| -------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
-| `enabled`      | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                               | `false`  | `true`                 |
-| `method`       | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.             | `true`   | `undefined`            |
-| `path`         | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.         | `true`   | `undefined`            |
-| `protect`      | `boolean`           | Requires this endpoint to use an `Authorization` header credential with `Bearer` scheme on OpenAPI document. | `false`  | `false`                |
-| `summary`      | `string`            | A short summary of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined`            |
-| `description`  | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                      | `false`  | `undefined`            |
-| `tags`         | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                               | `false`  | `undefined`            |
-| `headers`      | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                 | `false`  | `undefined`            |
-| `contentTypes` | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                        | `false`  | `['application/json']` |
+| Property       | Type                | Description                                                                                          | Required | Default                |
+| -------------- | ------------------- | ---------------------------------------------------------------------------------------------------- | -------- | ---------------------- |
+| `enabled`      | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                       | `false`  | `true`                 |
+| `method`       | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.     | `true`   | `undefined`            |
+| `path`         | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`. | `true`   | `undefined`            |
+| `protect`      | `boolean`           | Requires this endpoint to use a security scheme.                                                     | `false`  | `false`                |
+| `summary`      | `string`            | A short summary of the endpoint included in the OpenAPI document.                                    | `false`  | `undefined`            |
+| `description`  | `string`            | A verbose description of the endpoint included in the OpenAPI document.                              | `false`  | `undefined`            |
+| `tags`         | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                       | `false`  | `undefined`            |
+| `headers`      | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                         | `false`  | `undefined`            |
+| `contentTypes` | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                | `false`  | `['application/json']` |
+| `deprecated`   | `boolean`           | Whether or not to mark an endpoint as deprecated                                                     | `false`  | `false`                |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

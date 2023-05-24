@@ -2576,4 +2576,52 @@ describe('generator', () => {
       ).toEqual(['application/json']);
     }
   });
+
+  test('with deprecated', () => {
+    const appRouter = t.router({
+      deprecated: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/deprecated', deprecated: true } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .mutation(({ input }) => ({ payload: input.payload })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/deprecated']!.post!.deprecated).toEqual(true);
+  });
+
+  test('with security schemes', () => {
+    const appRouter = t.router({
+      protected: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/protected', protect: true } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .mutation(({ input }) => ({ payload: input.payload })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      baseUrl: 'http://localhost:3000/api',
+      securitySchemes: {
+        ApiKey: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'X-API-Key',
+        },
+      },
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.components!.securitySchemes).toEqual({
+      ApiKey: {
+        type: 'apiKey',
+        in: 'header',
+        name: 'X-API-Key',
+      },
+    });
+    expect(openApiDocument.paths['/protected']!.post!.security).toEqual([{ ApiKey: [] }]);
+  });
 });

@@ -48,7 +48,7 @@ const getRequestBody = async (req: Request) => {
 
     return {
       isValid: true,
-      data: await req.text(),
+      data: req.body,
     };
   } catch (err) {
     return {

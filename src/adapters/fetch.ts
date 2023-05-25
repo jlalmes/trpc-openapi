@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server';
 import { FetchHandlerOptions } from '@trpc/server/adapters/fetch';
 import { IncomingMessage, ServerResponse } from 'http';
 
@@ -17,15 +18,32 @@ export type CreateOpenApiFetchHandlerOptions<TRouter extends OpenApiRouter> = Om
 
 // co-body does not parse Request body correctly
 const getRequestBody = async (req: Request) => {
-  if (req.headers.get('content-type')?.includes('application/json')) {
-    return req.json();
-  }
+  try {
+    if (req.headers.get('content-type')?.includes('application/json')) {
+      return {
+        isValid: true,
+        // use JSON.parse instead of req.json() because req.json() does not throw on invalid JSON
+        data: JSON.parse(await req.text()),
+      };
+    }
 
-  if (req.headers.get('content-type')?.includes('application/x-www-form-urlencoded')) {
-    return req.formData();
-  }
+    if (req.headers.get('content-type')?.includes('application/x-www-form-urlencoded')) {
+      return {
+        isValid: true,
+        data: await req.formData(),
+      };
+    }
 
-  return req.text();
+    return {
+      isValid: true,
+      data: await req.text(),
+    };
+  } catch (err) {
+    return {
+      isValid: false,
+      cause: err,
+    };
+  }
 };
 
 const createRequestProxy = async (req: Request, url?: string) => {
@@ -46,7 +64,15 @@ const createRequestProxy = async (req: Request, url?: string) => {
       }
 
       if (prop === 'body') {
-        return body;
+        if (!body.isValid) {
+          throw new TRPCError({
+            code: 'PARSE_ERROR',
+            message: 'Failed to parse request body',
+            cause: body.cause,
+          });
+        }
+
+        return body.data;
       }
 
       return target[prop as keyof typeof target];
@@ -59,8 +85,7 @@ export const createOpenApiFetchHandler = async <TRouter extends OpenApiRouter>(
 ): Promise<Response> => {
   const resHeaders = new Headers();
   const url = new URL(opts.req.url.replace(opts.endpoint, ''));
-
-  const req = await createRequestProxy(opts.req, url.toString());
+  const req: Request = await createRequestProxy(opts.req, url.toString());
 
   const createContext = () => {
     if (opts.createContext) {

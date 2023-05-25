@@ -16,6 +16,18 @@ export type CreateOpenApiFetchHandlerOptions<TRouter extends OpenApiRouter> = Om
   endpoint: `/${string}`;
 };
 
+const getUrlEncodedBody = async (req: Request) => {
+  const params = new URLSearchParams(await req.text());
+
+  const data: Record<string, unknown> = {};
+
+  for (const key of params.keys()) {
+    data[key] = params.getAll(key);
+  }
+
+  return data;
+};
+
 // co-body does not parse Request body correctly
 const getRequestBody = async (req: Request) => {
   try {
@@ -30,7 +42,7 @@ const getRequestBody = async (req: Request) => {
     if (req.headers.get('content-type')?.includes('application/x-www-form-urlencoded')) {
       return {
         isValid: true,
-        data: await req.formData(),
+        data: await getUrlEncodedBody(req),
       };
     }
 

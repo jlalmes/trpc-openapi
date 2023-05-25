@@ -825,489 +825,493 @@ describe('fetch adapter', () => {
     expect(onErrorMock).toHaveBeenCalledTimes(1);
   });
 
-  // test('with void and trpc client', async () => {
-  //   // ensure monkey patch doesnt break router
-  //   const appRouter = t.router({
-  //     withVoidQuery: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/with-void' } })
-  //       .input(z.void())
-  //       .output(z.object({ payload: z.any() }))
-  //       .query(({ input }) => ({ payload: input })),
-  //     withVoidMutation: t.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/with-void' } })
-  //       .input(z.void())
-  //       .output(z.object({ payload: z.any() }))
-  //       .mutation(({ input }) => ({ payload: input })),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   type AppRouter = typeof appRouter;
-  //   const client = createTRPCProxyClient<AppRouter>({
-  //     links: [httpBatchLink({ url: `${url}/trpc` })],
-  //   });
-
-  //   {
-  //     const res = await client.withVoidQuery.query();
-
-  //     expect(res).toEqual({});
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-
-  //     clearMocks();
-
-  //     await expect(() => {
-  //       // @ts-expect-error - send monkey patched input type
-  //       return client.withVoidQuery.query({});
-  //     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-  //     "[
-  //       {
-  //         \\"code\\": \\"invalid_type\\",
-  //         \\"expected\\": \\"void\\",
-  //         \\"received\\": \\"object\\",
-  //         \\"path\\": [],
-  //         \\"message\\": \\"Expected void, received object\\"
-  //       }
-  //     ]"
-  //     `);
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(1);
-
-  //     clearMocks();
-  //   }
-  //   {
-  //     const res = await client.withVoidMutation.mutate();
-
-  //     expect(res).toEqual({});
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-
-  //     clearMocks();
-
-  //     await expect(() => {
-  //       // @ts-expect-error - send monkey patched input type
-  //       return client.withVoidMutation.mutate({});
-  //     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-  //       "[
-  //         {
-  //           \\"code\\": \\"invalid_type\\",
-  //           \\"expected\\": \\"void\\",
-  //           \\"received\\": \\"object\\",
-  //           \\"path\\": [],
-  //           \\"message\\": \\"Expected void, received object\\"
-  //         }
-  //       ]"
-  //     `);
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(1);
-  //   }
-  // });
-
-  // test('with DELETE mutation', async () => {
-  //   const appRouter = t.router({
-  //     echoDelete: t.procedure
-  //       .meta({ openapi: { method: 'DELETE', path: '/echo-delete' } })
-  //       .input(z.object({ payload: z.string() }))
-  //       .output(z.object({ payload: z.string() }))
-  //       .mutation(({ input }) => input),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   const res = await fetch(`${url}/echo-delete?payload=jlalmes`, { method: 'DELETE' });
-  //   const body = await res.json();
-
-  //   expect(res.status).toBe(200);
-  //   expect(body).toEqual({ payload: 'jlalmes' });
-  //   expect(createContextMock).toHaveBeenCalledTimes(1);
-  //   expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //   expect(onErrorMock).toHaveBeenCalledTimes(0);
-  // });
-
-  // test('with POST query', async () => {
-  //   const appRouter = t.router({
-  //     echoPost: t.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/echo-post' } })
-  //       .input(z.object({ payload: z.string() }))
-  //       .output(z.object({ payload: z.string() }))
-  //       .query(({ input }) => input),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   const res = await fetch(`${url}/echo-post`, {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({ payload: 'jlalmes' }),
-  //   });
-  //   const body = await res.json();
-
-  //   expect(res.status).toBe(200);
-  //   expect(body).toEqual({ payload: 'jlalmes' });
-  //   expect(createContextMock).toHaveBeenCalledTimes(1);
-  //   expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //   expect(onErrorMock).toHaveBeenCalledTimes(0);
-  // });
-
-  // test('with thrown error', async () => {
-  //   const appRouter = t.router({
-  //     customError: t.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/custom-error' } })
-  //       .input(z.void())
-  //       .output(z.void())
-  //       .mutation(() => {
-  //         throw new Error('Custom error message');
-  //       }),
-  //     customTRPCError: t.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/custom-trpc-error' } })
-  //       .input(z.void())
-  //       .output(z.void())
-  //       .mutation(() => {
-  //         throw new TRPCError({
-  //           message: 'Custom TRPCError message',
-  //           code: 'CLIENT_CLOSED_REQUEST',
-  //         });
-  //       }),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   {
-  //     const res = await fetch(`${url}/custom-error`, { method: 'POST' });
-  //     const body = (await res.json()) as OpenApiErrorResponse;
-
-  //     expect(res.status).toBe(500);
-  //     expect(body).toEqual({
-  //       message: 'Custom error message',
-  //       code: 'INTERNAL_SERVER_ERROR',
-  //     });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(1);
-
-  //     clearMocks();
-  //   }
-  //   {
-  //     const res = await fetch(`${url}/custom-trpc-error`, { method: 'POST' });
-  //     const body = (await res.json()) as OpenApiErrorResponse;
-
-  //     expect(res.status).toBe(499);
-  //     expect(body).toEqual({
-  //       message: 'Custom TRPCError message',
-  //       code: 'CLIENT_CLOSED_REQUEST',
-  //     });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(1);
-  //   }
-  // });
-
-  // test('with error formatter', async () => {
-  //   const errorFormatterMock = jest.fn();
-
-  //   const t2 = initTRPC
-  //     .meta<OpenApiMeta>()
-  //     .context<any>()
-  //     .create({
-  //       errorFormatter: ({ error, shape }) => {
-  //         errorFormatterMock();
-  //         if (error.code === 'INTERNAL_SERVER_ERROR') {
-  //           return { ...shape, message: 'Custom formatted error message' };
-  //         }
-  //         return shape;
-  //       },
-  //     });
-
-  //   const appRouter = t2.router({
-  //     customFormattedError: t2.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/custom-formatted-error' } })
-  //       .input(z.void())
-  //       .output(z.void())
-  //       .mutation(() => {
-  //         throw new Error('Custom error message');
-  //       }),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   const res = await fetch(`${url}/custom-formatted-error`, { method: 'POST' });
-  //   const body = (await res.json()) as OpenApiErrorResponse;
-
-  //   expect(res.status).toBe(500);
-  //   expect(body).toEqual({
-  //     message: 'Custom formatted error message',
-  //     code: 'INTERNAL_SERVER_ERROR',
-  //   });
-  //   expect(errorFormatterMock).toHaveBeenCalledTimes(1);
-  //   expect(createContextMock).toHaveBeenCalledTimes(1);
-  //   expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //   expect(onErrorMock).toHaveBeenCalledTimes(1);
-  // });
-
-  // test('with nested routers', async () => {
-  //   const appRouter = t.router({
-  //     procedure: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/procedure' } })
-  //       .input(z.object({ payload: z.string() }))
-  //       .output(z.object({ payload: z.string() }))
-  //       .query(({ input }) => ({ payload: input.payload })),
-  //     router: t.router({
-  //       procedure: t.procedure
-  //         .meta({ openapi: { method: 'GET', path: '/router/procedure' } })
-  //         .input(z.object({ payload: z.string() }))
-  //         .output(z.object({ payload: z.string() }))
-  //         .query(({ input }) => ({ payload: input.payload })),
-  //       router: t.router({
-  //         procedure: t.procedure
-  //           .meta({ openapi: { method: 'GET', path: '/router/router/procedure' } })
-  //           .input(z.object({ payload: z.string() }))
-  //           .output(z.object({ payload: z.string() }))
-  //           .query(({ input }) => ({ payload: input.payload })),
-  //       }),
-  //     }),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   {
-  //     const res = await fetch(`${url}/procedure?payload=one`, { method: 'GET' });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ payload: 'one' });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-
-  //     clearMocks();
-  //   }
-  //   {
-  //     const res = await fetch(`${url}/router/procedure?payload=two`, { method: 'GET' });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ payload: 'two' });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-
-  //     clearMocks();
-  //   }
-  //   {
-  //     const res = await fetch(`${url}/router/router/procedure?payload=three`, { method: 'GET' });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ payload: 'three' });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-  //   }
-  // });
-
-  // test('with multiple inputs', async () => {
-  //   const appRouter = t.router({
-  //     multiInput: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/multi-input' } })
-  //       .input(z.object({ firstName: z.string() }))
-  //       .input(z.object({ lastName: z.string() }))
-  //       .output(z.object({ fullName: z.string() }))
-  //       .query(({ input }) => ({ fullName: `${input.firstName} ${input.lastName}` })),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   const res = await fetch(`${url}/multi-input?firstName=James&lastName=Berry`, { method: 'GET' });
-  //   const body = await res.json();
-
-  //   expect(res.status).toBe(200);
-  //   expect(body).toEqual({ fullName: 'James Berry' });
-  //   expect(createContextMock).toHaveBeenCalledTimes(1);
-  //   expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //   expect(onErrorMock).toHaveBeenCalledTimes(0);
-  // });
-
-  // test('with preprocess', async () => {
-  //   const appRouter = t.router({
-  //     preprocess: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/preprocess' } })
-  //       .input(
-  //         z.object({
-  //           value: z.preprocess((arg) => [arg, arg], z.array(z.string())),
-  //         }),
-  //       )
-  //       .output(z.object({ result: z.string() }))
-  //       .query(({ input }) => ({ result: input.value.join('XXX') })),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   const res = await fetch(`${url}/preprocess?value=lol`, { method: 'GET' });
-  //   const body = await res.json();
-
-  //   expect(res.status).toBe(200);
-  //   expect(body).toEqual({ result: 'lolXXXlol' });
-  //   expect(createContextMock).toHaveBeenCalledTimes(1);
-  //   expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //   expect(onErrorMock).toHaveBeenCalledTimes(0);
-  // });
-
-  // test('with non-coerce preprocess', async () => {
-  //   // only applies when zod does not support (below version v3.20.0)
-
-  //   // @ts-expect-error - hack to disable zodSupportsCoerce
-  //   // eslint-disable-next-line import/namespace
-  //   zodUtils.zodSupportsCoerce = false;
-  //   {
-  //     const appRouter = t.router({
-  //       plusOne: t.procedure
-  //         .meta({ openapi: { method: 'GET', path: '/plus-one' } })
-  //         .input(
-  //           z.object({
-  //             number: z.preprocess(
-  //               (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
-  //               z.number(),
-  //             ),
-  //           }),
-  //         )
-  //         .output(z.object({ result: z.number() }))
-  //         .query(({ input }) => ({ result: input.number + 1 })),
-  //     });
-
-  //     const { url, close } = createFetchServerWithRouter({
-  //       router: appRouter,
-  //     });
-
-  //     const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ result: 10 });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-  //   }
-  //   // @ts-expect-error - hack to re-enable zodSupportsCoerce
-  //   // eslint-disable-next-line import/namespace
-  //   zodUtils.zodSupportsCoerce = true;
-  // });
-
-  // test('with coerce', async () => {
-  //   const appRouter = t.router({
-  //     getPlusOne: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/plus-one' } })
-  //       .input(z.object({ number: z.number() }))
-  //       .output(z.object({ result: z.number() }))
-  //       .query(({ input }) => ({ result: input.number + 1 })),
-  //     postPlusOne: t.procedure
-  //       .meta({ openapi: { method: 'POST', path: '/plus-one' } })
-  //       .input(z.object({ date: z.date() }))
-  //       .output(z.object({ result: z.number() }))
-  //       .mutation(({ input }) => ({ result: input.date.getTime() + 1 })),
-  //     pathPlusOne: t.procedure
-  //       .meta({ openapi: { method: 'GET', path: '/plus-one/{number}' } })
-  //       .input(z.object({ number: z.number() }))
-  //       .output(z.object({ result: z.number() }))
-  //       .query(({ input }) => ({ result: input.number + 1 })),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   {
-  //     const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ result: 10 });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-
-  //     clearMocks();
-  //   }
-  //   {
-  //     const date = new Date();
-
-  //     const res = await fetch(`${url}/plus-one`, {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ date }),
-  //     });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ result: date.getTime() + 1 });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-
-  //     clearMocks();
-  //   }
-
-  //   {
-  //     const res = await fetch(`${url}/plus-one/9`, { method: 'GET' });
-  //     const body = await res.json();
-
-  //     expect(res.status).toBe(200);
-  //     expect(body).toEqual({ result: 10 });
-  //     expect(createContextMock).toHaveBeenCalledTimes(1);
-  //     expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //     expect(onErrorMock).toHaveBeenCalledTimes(0);
-  //   }
-  // });
-
-  // test('with x-www-form-urlencoded', async () => {
-  //   const appRouter = t.router({
-  //     echo: t.procedure
-  //       .meta({
-  //         openapi: {
-  //           method: 'POST',
-  //           path: '/echo',
-  //           contentTypes: ['application/x-www-form-urlencoded'],
-  //         },
-  //       })
-  //       .input(z.object({ payload: z.array(z.string()) }))
-  //       .output(z.object({ result: z.string() }))
-  //       .query(({ input }) => ({ result: input.payload.join(' ') })),
-  //   });
-
-  //   const { url, close } = createFetchServerWithRouter({
-  //     router: appRouter,
-  //   });
-
-  //   const res = await fetch(`${url}/echo`, {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  //     body: 'payload=Hello&payload=World',
-  //   });
-  //   const body = await res.json();
-
-  //   expect(res.status).toBe(200);
-  //   expect(body).toEqual({ result: 'Hello World' });
-  //   expect(createContextMock).toHaveBeenCalledTimes(1);
-  //   expect(responseMetaMock).toHaveBeenCalledTimes(1);
-  //   expect(onErrorMock).toHaveBeenCalledTimes(0);
-  // });
+  test('with DELETE mutation', async () => {
+    const appRouter = t.router({
+      echoDelete: t.procedure
+        .meta({ openapi: { method: 'DELETE', path: '/echo-delete' } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .mutation(({ input }) => input),
+    });
+
+    const req = new Request('https://localhost:3000/echo-delete?payload=jlalmes', {
+      method: 'DELETE',
+    });
+
+    const res = await createFetchHandlerCaller({
+      router: appRouter,
+      endpoint: '/',
+      req,
+    });
+
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ payload: 'jlalmes' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+  });
+
+  test('with POST query', async () => {
+    const appRouter = t.router({
+      echoPost: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/echo-post' } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .query(({ input }) => input),
+    });
+
+    const req = new Request('https://localhost:3000/echo-post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload: 'jlalmes' }),
+    });
+
+    const res = await createFetchHandlerCaller({
+      router: appRouter,
+      endpoint: '/',
+      req,
+    });
+
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ payload: 'jlalmes' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+  });
+
+  test('with thrown error', async () => {
+    const appRouter = t.router({
+      customError: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/custom-error' } })
+        .input(z.void())
+        .output(z.void())
+        .mutation(() => {
+          throw new Error('Custom error message');
+        }),
+      customTRPCError: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/custom-trpc-error' } })
+        .input(z.void())
+        .output(z.void())
+        .mutation(() => {
+          throw new TRPCError({
+            message: 'Custom TRPCError message',
+            code: 'CLIENT_CLOSED_REQUEST',
+          });
+        }),
+    });
+
+    {
+      const req = new Request('https://localhost:3000/custom-error', {
+        method: 'POST',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+
+      const body = (await res.json()) as OpenApiErrorResponse;
+
+      expect(res.status).toBe(500);
+      expect(body).toEqual({
+        message: 'Custom error message',
+        code: 'INTERNAL_SERVER_ERROR',
+      });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(1);
+
+      clearMocks();
+    }
+    {
+      const req = new Request('https://localhost:3000/custom-trpc-error', {
+        method: 'POST',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+      const body = (await res.json()) as OpenApiErrorResponse;
+
+      expect(res.status).toBe(499);
+      expect(body).toEqual({
+        message: 'Custom TRPCError message',
+        code: 'CLIENT_CLOSED_REQUEST',
+      });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  test('with error formatter', async () => {
+    const errorFormatterMock = jest.fn();
+
+    const t2 = initTRPC
+      .meta<OpenApiMeta>()
+      .context<any>()
+      .create({
+        errorFormatter: ({ error, shape }) => {
+          errorFormatterMock();
+          if (error.code === 'INTERNAL_SERVER_ERROR') {
+            return { ...shape, message: 'Custom formatted error message' };
+          }
+          return shape;
+        },
+      });
+
+    const appRouter = t2.router({
+      customFormattedError: t2.procedure
+        .meta({ openapi: { method: 'POST', path: '/custom-formatted-error' } })
+        .input(z.void())
+        .output(z.void())
+        .mutation(() => {
+          throw new Error('Custom error message');
+        }),
+    });
+
+    const req = new Request('https://localhost:3000/custom-formatted-error', {
+      method: 'POST',
+    });
+
+    const res = await createFetchHandlerCaller({
+      router: appRouter,
+      endpoint: '/',
+      req,
+    });
+
+    const body = (await res.json()) as OpenApiErrorResponse;
+
+    expect(res.status).toBe(500);
+    expect(body).toEqual({
+      message: 'Custom formatted error message',
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+    expect(errorFormatterMock).toHaveBeenCalledTimes(1);
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('with nested routers', async () => {
+    const appRouter = t.router({
+      procedure: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/procedure' } })
+        .input(z.object({ payload: z.string() }))
+        .output(z.object({ payload: z.string() }))
+        .query(({ input }) => ({ payload: input.payload })),
+      router: t.router({
+        procedure: t.procedure
+          .meta({ openapi: { method: 'GET', path: '/router/procedure' } })
+          .input(z.object({ payload: z.string() }))
+          .output(z.object({ payload: z.string() }))
+          .query(({ input }) => ({ payload: input.payload })),
+        router: t.router({
+          procedure: t.procedure
+            .meta({ openapi: { method: 'GET', path: '/router/router/procedure' } })
+            .input(z.object({ payload: z.string() }))
+            .output(z.object({ payload: z.string() }))
+            .query(({ input }) => ({ payload: input.payload })),
+        }),
+      }),
+    });
+
+    {
+      const req = new Request('https://localhost:3000/procedure?payload=one', {
+        method: 'GET',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ payload: 'one' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+    {
+      const req = new Request('https://localhost:3000/router/procedure?payload=two', {
+        method: 'GET',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ payload: 'two' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+    {
+      const req = new Request('https://localhost:3000/router/router/procedure?payload=three', {
+        method: 'GET',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ payload: 'three' });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+    }
+  });
+
+  test('with multiple inputs', async () => {
+    const appRouter = t.router({
+      multiInput: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/multi-input' } })
+        .input(z.object({ firstName: z.string() }))
+        .input(z.object({ lastName: z.string() }))
+        .output(z.object({ fullName: z.string() }))
+        .query(({ input }) => ({ fullName: `${input.firstName} ${input.lastName}` })),
+    });
+
+    const req = new Request('https://localhost:3000/multi-input?firstName=James&lastName=Berry', {
+      method: 'GET',
+    });
+
+    const res = await createFetchHandlerCaller({
+      router: appRouter,
+      endpoint: '/',
+      req,
+    });
+
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ fullName: 'James Berry' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+  });
+
+  test('with preprocess', async () => {
+    const appRouter = t.router({
+      preprocess: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/preprocess' } })
+        .input(
+          z.object({
+            value: z.preprocess((arg) => [arg, arg], z.array(z.string())),
+          }),
+        )
+        .output(z.object({ result: z.string() }))
+        .query(({ input }) => ({ result: input.value.join('XXX') })),
+    });
+
+    const req = new Request('https://localhost:3000/preprocess?value=lol', {
+      method: 'GET',
+    });
+
+    const res = await createFetchHandlerCaller({
+      router: appRouter,
+      endpoint: '/',
+      req,
+    });
+
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ result: 'lolXXXlol' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+  });
+
+  test('with non-coerce preprocess', async () => {
+    // only applies when zod does not support (below version v3.20.0)
+
+    // @ts-expect-error - hack to disable zodSupportsCoerce
+    // eslint-disable-next-line import/namespace
+    zodUtils.zodSupportsCoerce = false;
+    {
+      const appRouter = t.router({
+        plusOne: t.procedure
+          .meta({ openapi: { method: 'GET', path: '/plus-one' } })
+          .input(
+            z.object({
+              number: z.preprocess(
+                (arg) => (typeof arg === 'string' ? parseInt(arg) : arg),
+                z.number(),
+              ),
+            }),
+          )
+          .output(z.object({ result: z.number() }))
+          .query(({ input }) => ({ result: input.number + 1 })),
+      });
+
+      const req = new Request('https://localhost:3000/plus-one?number=9', {
+        method: 'GET',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: 10 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+    }
+    // @ts-expect-error - hack to re-enable zodSupportsCoerce
+    // eslint-disable-next-line import/namespace
+    zodUtils.zodSupportsCoerce = true;
+  });
+
+  test('with coerce', async () => {
+    const appRouter = t.router({
+      getPlusOne: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/plus-one' } })
+        .input(z.object({ number: z.number() }))
+        .output(z.object({ result: z.number() }))
+        .query(({ input }) => ({ result: input.number + 1 })),
+      postPlusOne: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/plus-one' } })
+        .input(z.object({ date: z.date() }))
+        .output(z.object({ result: z.number() }))
+        .mutation(({ input }) => ({ result: input.date.getTime() + 1 })),
+      pathPlusOne: t.procedure
+        .meta({ openapi: { method: 'GET', path: '/plus-one/{number}' } })
+        .input(z.object({ number: z.number() }))
+        .output(z.object({ result: z.number() }))
+        .query(({ input }) => ({ result: input.number + 1 })),
+    });
+
+    {
+      const req = new Request('https://localhost:3000/plus-one?number=9', {
+        method: 'GET',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: 10 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+    {
+      const date = new Date();
+      const req = new Request('https://localhost:3000/plus-one', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: date.getTime() + 1 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+
+      clearMocks();
+    }
+
+    {
+      const req = new Request('https://localhost:3000/plus-one/9', {
+        method: 'GET',
+      });
+
+      const res = await createFetchHandlerCaller({
+        router: appRouter,
+        endpoint: '/',
+        req,
+      });
+      const body = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(body).toEqual({ result: 10 });
+      expect(createContextMock).toHaveBeenCalledTimes(1);
+      expect(responseMetaMock).toHaveBeenCalledTimes(1);
+      expect(onErrorMock).toHaveBeenCalledTimes(0);
+    }
+  });
+
+  test('with x-www-form-urlencoded', async () => {
+    const appRouter = t.router({
+      echo: t.procedure
+        .meta({
+          openapi: {
+            method: 'POST',
+            path: '/echo',
+            contentTypes: ['application/x-www-form-urlencoded'],
+          },
+        })
+        .input(z.object({ payload: z.array(z.string()) }))
+        .output(z.object({ result: z.string() }))
+        .query(({ input }) => ({ result: input.payload.join(' ') })),
+    });
+
+    const data = new URLSearchParams();
+
+    data.append('payload', 'Hello');
+    data.append('payload', 'World');
+
+    const req = new Request('https://localhost:3000/echo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: data.toString(),
+    });
+
+    const res = await createFetchHandlerCaller({
+      router: appRouter,
+      endpoint: '/',
+      req,
+    });
+
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body).toEqual({ result: 'Hello World' });
+    expect(createContextMock).toHaveBeenCalledTimes(1);
+    expect(responseMetaMock).toHaveBeenCalledTimes(1);
+    expect(onErrorMock).toHaveBeenCalledTimes(0);
+  });
 });

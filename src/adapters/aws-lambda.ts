@@ -64,7 +64,6 @@ const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHT
     try {
       if (event.body) {
         const bodyParams = new URLSearchParams(event.body);
-        console.log({ bodyParams });
         body = {} as Record<string, unknown>;
         for (const [key, value] of bodyParams.entries()) {
           body[key] = value;

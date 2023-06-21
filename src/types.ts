@@ -26,7 +26,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
     tags?: string[];
     headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
     contentTypes?: OpenApiContentType[];
-    extraResponse?: OpenAPIV3.ResponsesObject;
+    extraResponses?: OpenAPIV3.ResponsesObject;
     deprecated?: boolean;
     example?: {
       request?: Record<string, any>;

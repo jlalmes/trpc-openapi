@@ -97,7 +97,7 @@ export const getOpenApiPathsObject = (
           responses: getResponsesObject(
             outputParser,
             openapi.example?.response,
-            openapi.extraResponse,
+            openapi.extraResponses,
           ),
           ...(openapi.deprecated ? { deprecated: openapi.deprecated } : {}),
         },

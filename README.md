@@ -350,19 +350,19 @@ Please see [full typings here](src/generator/index.ts).
 
 Please see [full typings here](src/types.ts).
 
-| Property        | Type                | Description                                                                                                        | Required | Default                |
-| --------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
-| `enabled`       | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `false`  | `true`                 |
-| `method`        | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.                   | `true`   | `undefined`            |
-| `path`          | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined`            |
-| `protect`       | `boolean`           | Requires this endpoint to use a security scheme.                                                                   | `false`  | `false`                |
-| `summary`       | `string`            | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined`            |
-| `description`   | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined`            |
-| `tags`          | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined`            |
-| `headers`       | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                       | `false`  | `undefined`            |
-| `contentTypes`  | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                              | `false`  | `['application/json']` |
-| `extraResponse` | `ResponsesObject`   | An array of custom responses to add for this endpoint in the OpenAPI document in addition to the default response. | `false`  | `undefined`            |
-| `deprecated`    | `boolean`           | Whether or not to mark an endpoint as deprecated                                                                   | `false`  | `false`                |
+| Property         | Type                | Description                                                                                                        | Required | Default                |
+| ---------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
+| `enabled`        | `boolean`           | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `false`  | `true`                 |
+| `method`         | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.                   | `true`   | `undefined`            |
+| `path`           | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined`            |
+| `protect`        | `boolean`           | Requires this endpoint to use a security scheme.                                                                   | `false`  | `false`                |
+| `summary`        | `string`            | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined`            |
+| `description`    | `string`            | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined`            |
+| `tags`           | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined`            |
+| `headers`        | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                                       | `false`  | `undefined`            |
+| `contentTypes`   | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                              | `false`  | `['application/json']` |
+| `extraResponses` | `ResponsesObject`   | An array of custom responses to add for this endpoint in the OpenAPI document in addition to the default response. | `false`  | `undefined`            |
+| `deprecated`     | `boolean`           | Whether or not to mark an endpoint as deprecated                                                                   | `false`  | `false`                |
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

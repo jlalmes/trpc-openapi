@@ -2133,7 +2133,7 @@ describe('generator', () => {
           openapi: {
             method: 'GET',
             path: '/echo',
-            extraResponse: {
+            extraResponses: {
               400: {
                 ...errorResponseObject,
                 description: 'Bad request',

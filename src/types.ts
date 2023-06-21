@@ -3,9 +3,12 @@ import type { RootConfig } from '@trpc/server/dist/core/internals/config';
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
 import type { RouterDef } from '@trpc/server/src/core/router';
 import { OpenAPIV3 } from 'openapi-types';
-import { ZodIssue } from 'zod';
+import { ZodIssue, ZodType } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+export type ExtraResponse = Omit<OpenAPIV3.ResponseObject, 'content'> & {
+  content: ZodType;
+};
 
 type TRPCMeta = Record<string, unknown>;
 
@@ -26,7 +29,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
     tags?: string[];
     headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
     contentTypes?: OpenApiContentType[];
-    extraResponses?: OpenAPIV3.ResponsesObject;
+    extraResponses?: Record<string, ExtraResponse>;
     deprecated?: boolean;
     example?: {
       request?: Record<string, any>;

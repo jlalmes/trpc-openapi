@@ -2135,8 +2135,8 @@ describe('generator', () => {
             path: '/echo',
             extraResponses: {
               400: {
-                ...errorResponseObject,
                 description: 'Bad request',
+                content: z.object({ reason: z.string() }),
               },
             },
           },
@@ -2149,69 +2149,25 @@ describe('generator', () => {
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/echo']!.get!.responses).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths['/echo']!.get!.responses['400']).toMatchInlineSnapshot(`
       Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "example": undefined,
-              "schema": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "id": Object {
-                    "type": "string",
-                  },
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "reason": Object {
+                  "type": "string",
                 },
-                "required": Array [
-                  "id",
-                ],
-                "type": "object",
               },
+              "required": Array [
+                "reason",
+              ],
+              "type": "object",
             },
           },
-          "description": "Successful response",
         },
-        "400": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "code": Object {
-                    "type": "string",
-                  },
-                  "issues": Object {
-                    "items": Object {
-                      "additionalProperties": false,
-                      "properties": Object {
-                        "message": Object {
-                          "type": "string",
-                        },
-                      },
-                      "required": Array [
-                        "message",
-                      ],
-                      "type": "object",
-                    },
-                    "type": "array",
-                  },
-                  "message": Object {
-                    "type": "string",
-                  },
-                },
-                "required": Array [
-                  "message",
-                  "code",
-                ],
-                "type": "object",
-              },
-            },
-          },
-          "description": "Bad request",
-        },
-        "default": Object {
-          "$ref": "#/components/responses/error",
-        },
+        "description": "Bad request",
       }
     `);
   });

@@ -26,7 +26,6 @@ import {
   OpenApiSuccessResponse,
 } from './types';
 import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
-import { errorResponseObject as DefaultErrorResponse } from './generator/schema';
 
 export {
   CreateOpenApiAwsLambdaHandlerOptions,
@@ -52,5 +51,4 @@ export {
   OpenApiErrorResponse,
   ZodTypeLikeString,
   ZodTypeLikeVoid,
-  DefaultErrorResponse,
 };

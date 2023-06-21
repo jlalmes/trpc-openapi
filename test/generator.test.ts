@@ -10,6 +10,7 @@ import {
   openApiVersion,
 } from '../src';
 import * as zodUtils from '../src/utils/zod';
+import { errorResponseObject } from '../src/generator/schema';
 
 // TODO: test for duplicate paths (using getPathRegExp)
 
@@ -1053,16 +1054,16 @@ describe('generator', () => {
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
       expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
       expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "example": undefined,
-            "schema": Object {},
-          },
-        },
-        "description": "Successful response",
-      }
-    `);
+              Object {
+                "content": Object {
+                  "application/json": Object {
+                    "example": undefined,
+                    "schema": Object {},
+                  },
+                },
+                "description": "Successful response",
+              }
+          `);
     }
   });
 
@@ -2122,6 +2123,52 @@ describe('generator', () => {
           },
         },
       ]
+    `);
+  });
+
+  test('with extra response object', () => {
+    const appRouter = t.router({
+      echo: t.procedure
+        .meta({
+          openapi: {
+            method: 'GET',
+            path: '/echo',
+            extraResponses: {
+              400: {
+                description: 'Bad request',
+                content: z.object({ reason: z.string() }),
+              },
+            },
+          },
+        })
+        .input(z.object({ id: z.string() }))
+        .output(z.object({ id: z.string() }))
+        .query(({ input }) => ({ id: input.id })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/echo']!.get!.responses['400']).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "reason": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "reason",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Bad request",
+      }
     `);
   });
 

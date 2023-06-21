@@ -3,7 +3,7 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import { OpenApiContentType } from '../types';
+import { OpenApiContentType, ExtraResponse } from '../types';
 import {
   instanceofZodType,
   instanceofZodTypeCoercible,
@@ -189,6 +189,7 @@ export const errorResponseObject: OpenAPIV3.ResponseObject = {
 export const getResponsesObject = (
   schema: unknown,
   example: Record<string, any> | undefined,
+  extraResponses?: Record<string, ExtraResponse>,
 ): OpenAPIV3.ResponsesObject => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({
@@ -206,11 +207,27 @@ export const getResponsesObject = (
       },
     },
   };
+  const extraResponseObjects = Object.entries(
+    extraResponses || {},
+  ).reduce<OpenAPIV3.ResponsesObject>((responseObjects, entry) => {
+    return {
+      ...responseObjects,
+      [entry[0]]: {
+        ...entry[1],
+        content: {
+          'application/json': {
+            schema: zodSchemaToOpenApiSchemaObject(entry[1].content),
+          },
+        },
+      },
+    };
+  }, {});
 
   return {
     200: successResponseObject,
     default: {
       $ref: '#/components/responses/error',
     },
+    ...extraResponseObjects,
   };
 };

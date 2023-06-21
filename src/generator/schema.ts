@@ -189,6 +189,7 @@ export const errorResponseObject: OpenAPIV3.ResponseObject = {
 export const getResponsesObject = (
   schema: unknown,
   example: Record<string, any> | undefined,
+  extraResponses?: OpenAPIV3.ResponsesObject,
 ): OpenAPIV3.ResponsesObject => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({
@@ -212,5 +213,6 @@ export const getResponsesObject = (
     default: {
       $ref: '#/components/responses/error',
     },
+    ...extraResponses,
   };
 };

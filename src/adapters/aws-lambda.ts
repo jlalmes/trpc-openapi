@@ -60,6 +60,24 @@ const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHT
       });
     }
   }
+  if (contentType === 'application/x-www-form-urlencoded') {
+    try {
+      if (event.body) {
+        const bodyParams = new URLSearchParams(event.body);
+        console.log({ bodyParams });
+        body = {} as Record<string, unknown>;
+        for (const [key, value] of bodyParams.entries()) {
+          body[key] = value;
+        }
+      }
+    } catch (cause) {
+      throw new TRPCError({
+        message: 'Failed to parse request body',
+        code: 'PARSE_ERROR',
+        cause,
+      });
+    }
+  }
 
   return createRequest({
     url,

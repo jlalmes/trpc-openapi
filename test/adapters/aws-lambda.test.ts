@@ -84,7 +84,7 @@ describe('v1', () => {
     });
   });
 
-  test('with body input', async () => {
+  test('with JSON body input', async () => {
     const {
       statusCode,
       headers,
@@ -96,6 +96,35 @@ describe('v1', () => {
         }),
         headers: {
           'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        path: 'hello',
+        queryStringParameters: {},
+        resource: '/hello',
+      }),
+      ctx,
+    );
+    const body = JSON.parse(rawBody);
+
+    expect(statusCode).toBe(200);
+    expect(headers).toEqual({
+      'content-type': 'application/json',
+    });
+    expect(body).toEqual({
+      greeting: 'Hello Aphex',
+    });
+  });
+
+  test('with url encoded body input', async () => {
+    const {
+      statusCode,
+      headers,
+      body: rawBody,
+    } = await handler(
+      mockAPIGatewayProxyEventV1({
+        body: 'name=Aphex',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
         },
         method: 'POST',
         path: 'hello',
@@ -275,7 +304,7 @@ describe('v2', () => {
     });
   });
 
-  test('with body input', async () => {
+  test('with JSON body input', async () => {
     const {
       statusCode,
       headers,
@@ -287,6 +316,35 @@ describe('v2', () => {
         }),
         headers: {
           'content-type': 'application/json',
+        },
+        method: 'POST',
+        path: 'hello',
+        queryStringParameters: {},
+        routeKey: '$default',
+      }),
+      ctx,
+    );
+    const body = JSON.parse(rawBody);
+
+    expect(statusCode).toBe(200);
+    expect(headers).toEqual({
+      'content-type': 'application/json',
+    });
+    expect(body).toEqual({
+      greeting: 'Hello Aphex',
+    });
+  });
+
+  test('with url encoded body input', async () => {
+    const {
+      statusCode,
+      headers,
+      body: rawBody,
+    } = await handler(
+      mockAPIGatewayProxyEventV2({
+        body: 'name=Aphex',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
         },
         method: 'POST',
         path: 'hello',

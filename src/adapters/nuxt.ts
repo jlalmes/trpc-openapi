@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import type { NodeIncomingMessage, NodeServerResponse } from 'h3';
-import { defineEventHandler } from 'h3';
+import { defineEventHandler, getQuery } from 'h3';
+import { IncomingMessage } from 'http';
 
 import { OpenApiErrorResponse, OpenApiRouter } from '../types';
 import { normalizePath } from '../utils/path';
@@ -13,6 +14,10 @@ export type CreateOpenApiNuxtHandlerOptions<TRouter extends OpenApiRouter> = Omi
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NodeIncomingMessage, NodeServerResponse>,
   'maxBodySize'
 >;
+
+type NuxtRequest = IncomingMessage & {
+  query?: ReturnType<typeof getQuery>;
+};
 
 export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
   opts: CreateOpenApiNuxtHandlerOptions<TRouter>,
@@ -57,6 +62,7 @@ export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
       return;
     }
 
+    (event.node.req as NuxtRequest).query = getQuery(event);
     event.node.req.url = normalizePath(pathname);
     await openApiHttpHandler(event.node.req, event.node.res);
   });

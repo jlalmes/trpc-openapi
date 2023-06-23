@@ -63,9 +63,12 @@ const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHT
   if (contentType === 'application/x-www-form-urlencoded') {
     try {
       if (event.body) {
-        const bodyParams = new URLSearchParams(event.body);
+        const searchParamsString = event.isBase64Encoded
+          ? Buffer.from(event.body, 'base64').toString('utf-8')
+          : event.body;
+        const searchParams = new URLSearchParams(searchParamsString);
         body = {} as Record<string, unknown>;
-        for (const [key, value] of bodyParams.entries()) {
+        for (const [key, value] of searchParams.entries()) {
           body[key] = value;
         }
       }

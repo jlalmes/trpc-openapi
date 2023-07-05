@@ -66,9 +66,9 @@ const createMockNodeHTTPRequest = async (srcReq: Request, url: URL): Promise<Nod
     }
   }
 
-  const headers: Record<string, string[]> = {};
+  const headers: Record<string, string> = {};
   for (const [key, value] of srcReq.headers.entries()) {
-    headers[key] = [value];
+    headers[key] = value;
   }
 
   return createRequest({

@@ -3,7 +3,7 @@ import { NodeHTTPRequest } from '@trpc/server/dist/adapters/node-http';
 import { ResponseMetaFn } from '@trpc/server/dist/http/internals/types';
 import { OnErrorFunction } from '@trpc/server/dist/internals/types';
 import EventEmitter from 'events';
-// Unfortunately the index of node-mocks-http imports its express mocks which
+// Unfortunately the index of node-mocks-http imports its express mocks, which
 // use the `depd` package to mark a function as deprecated, which internally
 // uses eval(), which @edge-runtime/jest-environment (rightly) forbids.
 // So we have to import it directly. Typing it requires the `fetch.d.ts` hack.

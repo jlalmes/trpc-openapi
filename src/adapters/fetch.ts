@@ -20,7 +20,7 @@ export type CreateFetchContextFn<TRouter extends OpenApiRouter> = (params: {
   resHeaders: Headers;
 }) => inferRouterContext<TRouter>;
 
-export interface CreateFetchRequestHandlerOpts<TRouter extends OpenApiRouter> {
+export interface CreateOpenApiFetchHandlerOpts<TRouter extends OpenApiRouter> {
   router: TRouter;
   endpoint: string;
   createContext?: CreateFetchContextFn<TRouter>;
@@ -81,8 +81,8 @@ const createMockNodeHTTPRequest = async (srcReq: Request, url: URL): Promise<Nod
   });
 };
 
-export function createFetchRequestHandler<TRouter extends OpenApiRouter>(
-  opts: CreateFetchRequestHandlerOpts<TRouter>,
+export function createOpenApiFetchHandler<TRouter extends OpenApiRouter>(
+  opts: CreateOpenApiFetchHandlerOpts<TRouter>,
 ) {
   // Validate router
   if (process.env.NODE_ENV !== 'production') {

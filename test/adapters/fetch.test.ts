@@ -5,7 +5,7 @@ import { inferAsyncReturnType, initTRPC } from '@trpc/server';
 import z from 'zod';
 
 import { OpenApiMeta } from '../../src';
-import { CreateFetchContextFn, createFetchRequestHandler } from '../../src/adapters/fetch';
+import { CreateFetchContextFn, createOpenApiFetchHandler } from '../../src/adapters/fetch';
 
 const createRouter = () => {
   const t = initTRPC.context<{ user?: string }>().meta<OpenApiMeta>().create();
@@ -33,7 +33,7 @@ describe('fetch adapter', () => {
   const createContext: CreateFetchContextFn<typeof router> = ({ req }) => ({
     user: req.headers.get('X-USER') as string | undefined,
   });
-  const handler = createFetchRequestHandler({
+  const handler = createOpenApiFetchHandler({
     endpoint: '/trpc',
     router,
     createContext,

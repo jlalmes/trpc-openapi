@@ -9,6 +9,10 @@
   <hr />
 </div>
 
+#### `trpc-openapi` is maintained by ProsePilot - simple, fast and free online [writing tools](https://www.prosepilot.com/tools).
+
+---
+
 ## **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
 
 - Easy REST endpoints for your tRPC procedures.

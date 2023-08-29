@@ -49,7 +49,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input }) => {
       return { greeting: `Hello ${input.name}!` };
-    });
+    })
 });
 ```
 

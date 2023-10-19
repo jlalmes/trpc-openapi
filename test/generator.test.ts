@@ -23,6 +23,75 @@ const defaultDocOpts: GenerateOpenApiDocumentOptions = {
   baseUrl: 'http://localhost:3000/api',
 };
 
+const emptyRouterDocument = `
+Object {
+  "components": Object {
+    "responses": Object {
+      "error": Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "code": Object {
+                  "type": "string",
+                },
+                "issues": Object {
+                  "items": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "message": Object {
+                        "type": "string",
+                      },
+                    },
+                    "required": Array [
+                      "message",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+                "message": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "message",
+                "code",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Error response",
+      },
+    },
+    "securitySchemes": Object {
+      "Authorization": Object {
+        "scheme": "bearer",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": Object {
+    "url": "http://localhost:3000/docs",
+  },
+  "info": Object {
+    "description": "API documentation",
+    "title": "tRPC OpenAPI",
+    "version": "1.0.0",
+  },
+  "openapi": "3.0.3",
+  "paths": Object {},
+  "servers": Array [
+    Object {
+      "url": "http://localhost:3000/api",
+    },
+  ],
+  "tags": Array [],
+}
+`;
+
 describe('generator', () => {
   test('open api version', () => {
     expect(openApiVersion).toBe('3.0.3');
@@ -41,74 +110,7 @@ describe('generator', () => {
     });
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument).toMatchInlineSnapshot(`
-      Object {
-        "components": Object {
-          "responses": Object {
-            "error": Object {
-              "content": Object {
-                "application/json": Object {
-                  "schema": Object {
-                    "additionalProperties": false,
-                    "properties": Object {
-                      "code": Object {
-                        "type": "string",
-                      },
-                      "issues": Object {
-                        "items": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "message": Object {
-                              "type": "string",
-                            },
-                          },
-                          "required": Array [
-                            "message",
-                          ],
-                          "type": "object",
-                        },
-                        "type": "array",
-                      },
-                      "message": Object {
-                        "type": "string",
-                      },
-                    },
-                    "required": Array [
-                      "message",
-                      "code",
-                    ],
-                    "type": "object",
-                  },
-                },
-              },
-              "description": "Error response",
-            },
-          },
-          "securitySchemes": Object {
-            "Authorization": Object {
-              "scheme": "bearer",
-              "type": "http",
-            },
-          },
-        },
-        "externalDocs": Object {
-          "url": "http://localhost:3000/docs",
-        },
-        "info": Object {
-          "description": "API documentation",
-          "title": "tRPC OpenAPI",
-          "version": "1.0.0",
-        },
-        "openapi": "3.0.3",
-        "paths": Object {},
-        "servers": Array [
-          Object {
-            "url": "http://localhost:3000/api",
-          },
-        ],
-        "tags": Array [],
-      }
-    `);
+    expect(openApiDocument).toMatchInlineSnapshot(emptyRouterDocument);
   });
 
   test('with missing input', () => {
@@ -434,6 +436,28 @@ describe('generator', () => {
         "required": true,
       }
     `);
+  });
+
+  test('with procedure excluded from spec file', () => {
+    const appRouter = t.router({
+      createUser: t.procedure
+        .meta({ openapi: { method: 'POST', path: '/users', excludeFromSpecFile: true } })
+        .input(z.object({ name: z.string() }))
+        .output(z.object({ id: z.string(), name: z.string() }))
+        .mutation(({ input }) => ({ id: 'user-id', name: input.name })),
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, {
+      title: 'tRPC OpenAPI',
+      version: '1.0.0',
+      description: 'API documentation',
+      baseUrl: 'http://localhost:3000/api',
+      docsUrl: 'http://localhost:3000/docs',
+      tags: [],
+    });
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument).toMatchInlineSnapshot(emptyRouterDocument);
   });
 
   test('with valid procedures', () => {
@@ -2807,26 +2831,26 @@ describe('generator', () => {
             method: 'GET',
             path: '/query-example/{name}',
             responseHeaders: {
-              "X-RateLimit-Limit": {
-                description: "Request limit per hour.",
+              'X-RateLimit-Limit': {
+                description: 'Request limit per hour.',
                 schema: {
-                  type: "integer"
-                }
+                  type: 'integer',
+                },
               },
-              "X-RateLimit-Remaining": {
-                description: "The number of requests left for the time window.",
+              'X-RateLimit-Remaining': {
+                description: 'The number of requests left for the time window.',
                 schema: {
-                  type: "integer"
-                }
-              }
-            }
+                  type: 'integer',
+                },
+              },
+            },
           },
         })
         .input(z.object({ name: z.string(), greeting: z.string() }))
         .output(z.object({ output: z.string() }))
         .query(({ input }) => ({
           output: `${input.greeting} ${input.name}`,
-        }))
+        })),
     });
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);

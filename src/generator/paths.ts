@@ -15,6 +15,8 @@ export const getOpenApiPathsObject = (
   const procedures = appRouter._def.procedures as OpenApiProcedureRecord;
 
   forEachOpenApiProcedure(procedures, ({ path: procedurePath, type, procedure, openapi }) => {
+    if (openapi.excludeFromSpecFile === true) return;
+
     const procedureName = `${type}.${procedurePath}`;
 
     try {

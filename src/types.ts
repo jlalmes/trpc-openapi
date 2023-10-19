@@ -32,6 +32,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
       response?: Record<string, any>;
     };
     responseHeaders?: Record<string, OpenAPIV3.HeaderObject | OpenAPIV3.ReferenceObject>;
+    excludeFromSpecFile?: boolean;
   };
 };
 

@@ -3,12 +3,7 @@ import { z } from 'zod';
 
 import { zodSchemaToOpenApiSchemaObject } from '../generator/schema';
 
-type ZodComponentProcessor = {
-  getComponentRefId: (schema: z.ZodType) => string | undefined;
-  generateSchemas?: () => { [key: string]: any };
-};
-
-export let zodComponentProcessor: ZodComponentProcessor | undefined = undefined;
+export let zodComponentSchemaGenerator: (() => { [key: string]: any }) | undefined;
 
 export let zodComponentDefinitions: Record<string, z.ZodType> | undefined;
 
@@ -16,8 +11,8 @@ export const setZodComponentDefinitions = (definitions: Record<string, z.ZodType
   zodComponentDefinitions = definitions;
 };
 
-export const setZodComponentProcessor = (processor: ZodComponentProcessor) => {
-  zodComponentProcessor = processor;
+export const setZodComponentSchemaGenerator = (generator: typeof zodComponentSchemaGenerator) => {
+  zodComponentSchemaGenerator = generator;
 };
 
 // Does not support references (breaks in weird ways if references are used)

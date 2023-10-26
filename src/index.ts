@@ -28,7 +28,7 @@ import {
 import {
   experimentalZodSchemaGenerator,
   setZodComponentDefinitions,
-  setZodComponentProcessor,
+  setZodComponentSchemaGenerator,
 } from './utils/components';
 import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
 
@@ -57,6 +57,6 @@ export {
   ZodTypeLikeString,
   ZodTypeLikeVoid,
   setZodComponentDefinitions,
-  setZodComponentProcessor,
+  setZodComponentSchemaGenerator,
   experimentalZodSchemaGenerator,
 };

@@ -1,7 +1,7 @@
 import { OpenAPIV3 } from 'openapi-types';
 
 import { OpenApiRouter } from '../types';
-import { zodComponentProcessor } from '../utils/components';
+import { zodComponentSchemaGenerator } from '../utils/components';
 import { getOpenApiPathsObject } from './paths';
 import { errorResponseObject } from './schema';
 
@@ -42,7 +42,7 @@ export const generateOpenApiDocument = (
     paths: getOpenApiPathsObject(appRouter, Object.keys(securitySchemes)),
     components: {
       securitySchemes,
-      schemas: zodComponentProcessor?.generateSchemas?.(),
+      schemas: zodComponentSchemaGenerator?.(),
       responses: {
         error: errorResponseObject,
       },

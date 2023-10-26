@@ -26,10 +26,10 @@ import {
   OpenApiSuccessResponse,
 } from './types';
 import {
+  experimentalZodSchemaGenerator,
   setZodComponentDefinitions,
-  setZodComponentGenerator,
-  setZodComponentRegistry,
-} from './utils/registry';
+  setZodComponentProcessor,
+} from './utils/components';
 import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
 
 export {
@@ -57,6 +57,6 @@ export {
   ZodTypeLikeString,
   ZodTypeLikeVoid,
   setZodComponentDefinitions,
-  setZodComponentRegistry,
-  setZodComponentGenerator,
+  setZodComponentProcessor,
+  experimentalZodSchemaGenerator,
 };

@@ -3,8 +3,8 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import { OpenApiContentType, ZodToOpenApiSchema } from '../types';
-import { zodComponentDefinitions } from '../utils/registry';
+import { OpenApiContentType } from '../types';
+import { zodComponentDefinitions } from '../utils/components';
 import {
   instanceofZodType,
   instanceofZodTypeCoercible,
@@ -18,26 +18,20 @@ import {
 
 export const zodSchemaToOpenApiSchemaObject = (
   zodSchema: z.ZodType,
-  skipCurrentObjectRef = false,
+  suppressObjectReferences = false,
 ): OpenAPIV3.SchemaObject => {
   // FIXME: https://github.com/StefanTerdell/zod-to-json-schema/issues/35
-  const casted = zodSchema as ZodToOpenApiSchema;
-  const refId = casted._def.openapi?._internal?.refId;
-
-  let processedDefinitions = zodComponentDefinitions;
-  if (refId && skipCurrentObjectRef && zodComponentDefinitions) {
-    const { [refId]: _, ...definitionsWithoutCurr } = zodComponentDefinitions;
-    processedDefinitions = definitionsWithoutCurr;
-  }
-
   const result = zodToJsonSchema(zodSchema, {
     target: 'openApi3',
-    definitions: processedDefinitions || {},
+    definitions:
+      zodComponentDefinitions && !suppressObjectReferences ? zodComponentDefinitions : {},
     definitionPath: 'components/schemas',
-  });
+  }) as OpenAPIV3.SchemaObject & {
+    'components/schemas': unknown;
+  };
 
-  delete (result as any)['components/schemas'];
-  return result as any;
+  delete result['components/schemas'];
+  return result;
 };
 
 export const getParameterObjects = (

@@ -77,24 +77,3 @@ export type OpenApiErrorResponse = {
 };
 
 export type OpenApiResponse<D = any> = OpenApiSuccessResponse<D> | OpenApiErrorResponse;
-
-export type ZodToOpenApiRegistry = {
-  definitions: ZodToOpenApiRegistryDefinition[];
-};
-
-export type ZodToOpenApiRegistryDefinition = {
-  type: string;
-  schema?: ZodToOpenApiSchema;
-};
-
-export type ZodToOpenApiSchema = z.ZodType<
-  any,
-  z.ZodTypeDef & {
-    openapi?: {
-      _internal?: {
-        refId?: string;
-      };
-    };
-  },
-  any
->;

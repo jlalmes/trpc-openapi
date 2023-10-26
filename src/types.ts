@@ -3,7 +3,7 @@ import type { RootConfig } from '@trpc/server/dist/core/internals/config';
 import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
 import type { RouterDef } from '@trpc/server/src/core/router';
 import { OpenAPIV3 } from 'openapi-types';
-import { ZodIssue } from 'zod';
+import { ZodIssue, z } from 'zod';
 
 export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
@@ -77,3 +77,22 @@ export type OpenApiErrorResponse = {
 };
 
 export type OpenApiResponse<D = any> = OpenApiSuccessResponse<D> | OpenApiErrorResponse;
+
+export type ZodToOpenApiRegistry = {
+  definitions: ZodToOpenApiRegistryDefinition[];
+};
+
+export type ZodToOpenApiRegistryDefinition = {
+  type: string;
+  schema?: z.ZodType<
+    any,
+    z.ZodTypeDef & {
+      openapi?: {
+        _internal?: {
+          refId?: string;
+        };
+      };
+    },
+    any
+  >;
+};

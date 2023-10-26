@@ -3,7 +3,7 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import { OpenApiContentType } from '../types';
+import { OpenApiContentType, ZodToOpenApiRegistry } from '../types';
 import {
   instanceofZodType,
   instanceofZodTypeCoercible,
@@ -15,9 +15,33 @@ import {
   zodSupportsCoerce,
 } from '../utils/zod';
 
+let zodComponentDefinitions: Record<string, z.ZodType> = {};
+
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
   // FIXME: https://github.com/StefanTerdell/zod-to-json-schema/issues/35
-  return zodToJsonSchema(zodSchema, { target: 'openApi3', $refStrategy: 'none' }) as any;
+  const result = zodToJsonSchema(zodSchema, {
+    target: 'openApi3',
+    definitions: zodComponentDefinitions,
+    definitionPath: 'components/schemas',
+  }) as any;
+  delete result['components/schemas'];
+  return result;
+};
+
+export const setZodComponentDefinitions = (definitions: Record<string, z.ZodType>) => {
+  zodComponentDefinitions = definitions;
+};
+
+export const setZodComponentRegistry = (registry: ZodToOpenApiRegistry) => {
+  const mapped = registry.definitions.reduce((acc, d) => {
+    const refId = d.schema?._def.openapi?._internal?.refId;
+    if (d.type === 'schema' && refId && d.schema) {
+      acc[refId] = d.schema;
+    }
+    return acc;
+  }, {} as { [key: string]: z.ZodType });
+
+  setZodComponentDefinitions(mapped);
 };
 
 export const getParameterObjects = (
@@ -156,7 +180,7 @@ export const getRequestBodyObject = (
     return undefined;
   }
 
-  const openApiSchemaObject = zodSchemaToOpenApiSchemaObject(dedupedSchema);
+  const openApiSchemaObject = zodSchemaToOpenApiSchemaObject(unwrappedSchema);
   const content: OpenAPIV3.RequestBodyObject['content'] = {};
   for (const contentType of contentTypes) {
     content[contentType] = {
@@ -189,7 +213,7 @@ export const errorResponseObject: OpenAPIV3.ResponseObject = {
 export const getResponsesObject = (
   schema: unknown,
   example: Record<string, any> | undefined,
-  headers: Record<string, OpenAPIV3.HeaderObject | OpenAPIV3.ReferenceObject> | undefined
+  headers: Record<string, OpenAPIV3.HeaderObject | OpenAPIV3.ReferenceObject> | undefined,
 ): OpenAPIV3.ResponsesObject => {
   if (!instanceofZodType(schema)) {
     throw new TRPCError({

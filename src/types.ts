@@ -84,15 +84,17 @@ export type ZodToOpenApiRegistry = {
 
 export type ZodToOpenApiRegistryDefinition = {
   type: string;
-  schema?: z.ZodType<
-    any,
-    z.ZodTypeDef & {
-      openapi?: {
-        _internal?: {
-          refId?: string;
-        };
-      };
-    },
-    any
-  >;
+  schema?: ZodToOpenApiSchema;
 };
+
+export type ZodToOpenApiSchema = z.ZodType<
+  any,
+  z.ZodTypeDef & {
+    openapi?: {
+      _internal?: {
+        refId?: string;
+      };
+    };
+  },
+  any
+>;

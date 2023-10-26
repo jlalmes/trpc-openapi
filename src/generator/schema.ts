@@ -3,7 +3,8 @@ import { OpenAPIV3 } from 'openapi-types';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
-import { OpenApiContentType, ZodToOpenApiRegistry } from '../types';
+import { OpenApiContentType, ZodToOpenApiSchema } from '../types';
+import { zodComponentDefinitions } from '../utils/registry';
 import {
   instanceofZodType,
   instanceofZodTypeCoercible,
@@ -15,33 +16,28 @@ import {
   zodSupportsCoerce,
 } from '../utils/zod';
 
-let zodComponentDefinitions: Record<string, z.ZodType> = {};
-
-const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
+export const zodSchemaToOpenApiSchemaObject = (
+  zodSchema: z.ZodType,
+  skipCurrentObjectRef = false,
+): OpenAPIV3.SchemaObject => {
   // FIXME: https://github.com/StefanTerdell/zod-to-json-schema/issues/35
+  const casted = zodSchema as ZodToOpenApiSchema;
+  const refId = casted._def.openapi?._internal?.refId;
+
+  let processedDefinitions = zodComponentDefinitions;
+  if (refId && skipCurrentObjectRef && zodComponentDefinitions) {
+    const { [refId]: _, ...definitionsWithoutCurr } = zodComponentDefinitions;
+    processedDefinitions = definitionsWithoutCurr;
+  }
+
   const result = zodToJsonSchema(zodSchema, {
     target: 'openApi3',
-    definitions: zodComponentDefinitions,
+    definitions: processedDefinitions || {},
     definitionPath: 'components/schemas',
-  }) as any;
-  delete result['components/schemas'];
-  return result;
-};
+  });
 
-export const setZodComponentDefinitions = (definitions: Record<string, z.ZodType>) => {
-  zodComponentDefinitions = definitions;
-};
-
-export const setZodComponentRegistry = (registry: ZodToOpenApiRegistry) => {
-  const mapped = registry.definitions.reduce((acc, d) => {
-    const refId = d.schema?._def.openapi?._internal?.refId;
-    if (d.type === 'schema' && refId && d.schema) {
-      acc[refId] = d.schema;
-    }
-    return acc;
-  }, {} as { [key: string]: z.ZodType });
-
-  setZodComponentDefinitions(mapped);
+  delete (result as any)['components/schemas'];
+  return result as any;
 };
 
 export const getParameterObjects = (

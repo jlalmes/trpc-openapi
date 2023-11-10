@@ -559,6 +559,7 @@ describe('generator', () => {
                     },
                   },
                   "description": "Successful response",
+                  "headers": undefined,
                 },
                 "default": Object {
                   "$ref": "#/components/responses/error",
@@ -616,6 +617,7 @@ describe('generator', () => {
                     },
                   },
                   "description": "Successful response",
+                  "headers": undefined,
                 },
                 "default": Object {
                   "$ref": "#/components/responses/error",
@@ -652,6 +654,7 @@ describe('generator', () => {
                     },
                   },
                   "description": "Successful response",
+                  "headers": undefined,
                 },
                 "default": Object {
                   "$ref": "#/components/responses/error",
@@ -701,6 +704,7 @@ describe('generator', () => {
                     },
                   },
                   "description": "Successful response",
+                  "headers": undefined,
                 },
                 "default": Object {
                   "$ref": "#/components/responses/error",
@@ -766,6 +770,7 @@ describe('generator', () => {
                     },
                   },
                   "description": "Successful response",
+                  "headers": undefined,
                 },
                 "default": Object {
                   "$ref": "#/components/responses/error",
@@ -945,6 +950,7 @@ describe('generator', () => {
               },
             },
             "description": "Successful response",
+            "headers": undefined,
           },
           "default": Object {
             "$ref": "#/components/responses/error",
@@ -1001,6 +1007,7 @@ describe('generator', () => {
               },
             },
             "description": "Successful response",
+            "headers": undefined,
           },
           "default": Object {
             "$ref": "#/components/responses/error",
@@ -1036,6 +1043,7 @@ describe('generator', () => {
             },
           },
           "description": "Successful response",
+          "headers": undefined,
         }
       `);
     }
@@ -1061,6 +1069,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
     }
@@ -1092,6 +1101,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1122,6 +1132,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1157,6 +1168,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1186,6 +1198,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1249,6 +1262,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
     expect(openApiDocument.paths['/optional-object']!.get!.parameters).toMatchInlineSnapshot(`
@@ -1293,6 +1307,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1357,6 +1372,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
     expect(openApiDocument.paths['/optional-object']!.post!.requestBody).toMatchInlineSnapshot(`
@@ -1402,6 +1418,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1445,6 +1462,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1681,6 +1699,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -1722,6 +1741,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -2075,6 +2095,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
   });
@@ -2316,6 +2337,7 @@ describe('generator', () => {
                   },
                 },
                 "description": "Successful response",
+                "headers": undefined,
               },
               "default": Object {
                 "$ref": "#/components/responses/error",
@@ -2363,6 +2385,7 @@ describe('generator', () => {
                   },
                 },
                 "description": "Successful response",
+                "headers": undefined,
               },
               "default": Object {
                 "$ref": "#/components/responses/error",
@@ -2410,6 +2433,7 @@ describe('generator', () => {
                   },
                 },
                 "description": "Successful response",
+                "headers": undefined,
               },
               "default": Object {
                 "$ref": "#/components/responses/error",
@@ -2704,6 +2728,7 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
       }
     `);
     expect(openApiDocument.paths['/mutation-example/{name}']!.post!.parameters)
@@ -2769,6 +2794,103 @@ describe('generator', () => {
           },
         },
         "description": "Successful response",
+        "headers": undefined,
+      }
+    `);
+  });
+
+  test('with response headers', () => {
+    const appRouter = t.router({
+      queryExample: t.procedure
+        .meta({
+          openapi: {
+            method: 'GET',
+            path: '/query-example/{name}',
+            responseHeaders: {
+              "X-RateLimit-Limit": {
+                description: "Request limit per hour.",
+                schema: {
+                  type: "integer"
+                }
+              },
+              "X-RateLimit-Remaining": {
+                description: "The number of requests left for the time window.",
+                schema: {
+                  type: "integer"
+                }
+              }
+            }
+          },
+        })
+        .input(z.object({ name: z.string(), greeting: z.string() }))
+        .output(z.object({ output: z.string() }))
+        .query(({ input }) => ({
+          output: `${input.greeting} ${input.name}`,
+        }))
+    });
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": undefined,
+          "example": undefined,
+          "in": "path",
+          "name": "name",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+        Object {
+          "description": undefined,
+          "example": undefined,
+          "in": "query",
+          "name": "greeting",
+          "required": true,
+          "schema": Object {
+            "type": "string",
+          },
+        },
+      ]
+    `);
+    expect(openApiDocument.paths['/query-example/{name}']!.get!.responses[200])
+      .toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "example": undefined,
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "output": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "output",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Successful response",
+        "headers": Object {
+          "X-RateLimit-Limit": Object {
+            "description": "Request limit per hour.",
+            "schema": Object {
+              "type": "integer",
+            },
+          },
+          "X-RateLimit-Remaining": Object {
+            "description": "The number of requests left for the time window.",
+            "schema": Object {
+              "type": "integer",
+            },
+          },
+        },
       }
     `);
   });

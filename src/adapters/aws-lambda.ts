@@ -60,6 +60,26 @@ const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHT
       });
     }
   }
+  if (contentType === 'application/x-www-form-urlencoded') {
+    try {
+      if (event.body) {
+        const searchParamsString = event.isBase64Encoded
+          ? Buffer.from(event.body, 'base64').toString('utf-8')
+          : event.body;
+        const searchParams = new URLSearchParams(searchParamsString);
+        body = {} as Record<string, unknown>;
+        for (const [key, value] of searchParams.entries()) {
+          body[key] = value;
+        }
+      }
+    } catch (cause) {
+      throw new TRPCError({
+        message: 'Failed to parse request body',
+        code: 'PARSE_ERROR',
+        cause,
+      });
+    }
+  }
 
   return createRequest({
     url,

@@ -36,7 +36,7 @@ const createOpenApiNuxtHandlerCaller = <TRouter extends OpenApiRouter>(
   return (req: {
     method: RequestMethod;
     params: Record<string, string>;
-    query?: Record<string, string>;
+    url?: string;
     body?: any;
   }) =>
     new Promise<{
@@ -59,7 +59,7 @@ const createOpenApiNuxtHandlerCaller = <TRouter extends OpenApiRouter>(
       const mockReq = httpMocks.createRequest({
         body: req.body,
         method: req.method,
-        query: req.query,
+        url: req.url,
       });
       const mockRes = httpMocks.createResponse({
         req: mockReq,
@@ -115,7 +115,7 @@ describe('nuxt adapter', () => {
       const res = await openApiNuxtHandlerCaller({
         method: 'GET',
         params: { trpc: 'say-hello' },
-        query: { name: 'James' },
+        url: '/api/say-hello?name=James',
       });
 
       expect(res.statusCode).toBe(200);
@@ -145,7 +145,7 @@ describe('nuxt adapter', () => {
       const res = await openApiNuxtHandlerCaller({
         method: 'GET',
         params: { trpc: 'say/hello' },
-        query: { name: 'James' },
+        url: '/api/say/hello?name=James',
       });
 
       expect(res.statusCode).toBe(200);

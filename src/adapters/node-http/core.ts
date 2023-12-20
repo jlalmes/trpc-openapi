@@ -64,13 +64,40 @@ export const createOpenApiNodeHttpHandler = <
       body: OpenApiResponse | undefined,
     ) => {
       res.statusCode = statusCode;
-      res.setHeader('Content-Type', 'application/json');
-      for (const [key, value] of Object.entries(headers)) {
-        if (typeof value !== 'undefined') {
-          res.setHeader(key, value);
+
+      if (body instanceof ReadableStream) {
+        const reader = body.getReader();
+
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+
+        const processStream = async (reader: ReadableStreamDefaultReader, res: TResponse) => {
+          try {
+            let done, value;
+            do {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              ({ done, value } = await reader.read());
+              if (!done) res.write(value);
+            } while (!done);
+          } catch (error) {
+            console.error('Error while reading from stream', error);
+          } finally {
+            reader.releaseLock();
+            res.end();
+          }
+        };
+
+        void processStream(reader, res);
+      } else {
+        res.setHeader('Content-Type', 'application/json');
+        for (const [key, value] of Object.entries(headers)) {
+          if (typeof value !== 'undefined') {
+            res.setHeader(key, value);
+          }
         }
+        res.end(JSON.stringify(body));
       }
-      res.end(JSON.stringify(body));
     };
 
     const method = req.method! as OpenApiMethod & 'HEAD';

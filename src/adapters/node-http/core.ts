@@ -65,7 +65,8 @@ export const createOpenApiNodeHttpHandler = <
     ) => {
       res.statusCode = statusCode;
 
-      if (body instanceof ReadableStream) {
+      // Support sending SSE streams
+      if (body && typeof body.getReader === 'function') {
         const reader = body.getReader();
 
         res.setHeader('Connection', 'keep-alive');
@@ -78,7 +79,7 @@ export const createOpenApiNodeHttpHandler = <
             do {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               ({ done, value } = await reader.read());
-              if (!done) res.write(value);
+              if (!done) res.write(`data: ${Buffer.from(value.buffer).toString()}\n\n`);
             } while (!done);
           } catch (error) {
             console.error('Error while reading from stream', error);

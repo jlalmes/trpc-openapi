@@ -72,6 +72,7 @@ export const createOpenApiNodeHttpHandler = <
         res.setHeader('Connection', 'keep-alive');
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
+        res.flushHeaders();
 
         const processStream = async (reader: ReadableStreamDefaultReader, res: TResponse) => {
           try {
@@ -79,7 +80,11 @@ export const createOpenApiNodeHttpHandler = <
             do {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               ({ done, value } = await reader.read());
-              if (!done) res.write(`data: ${Buffer.from(value.buffer).toString()}\n\n`);
+              if (!done) {
+                res.write(`data: ${Buffer.from(value.buffer).toString()}\n\n`);
+                // @ts-expect-error flush is not in the types
+                res.flush();
+              }
             } while (!done);
           } catch (error) {
             console.error('Error while reading from stream', error);
